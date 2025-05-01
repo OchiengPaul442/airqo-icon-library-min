@@ -1,7 +1,10 @@
 import type { IconMeta } from './icon-manifest';
 
 // Lazy-import map for React components
-const iconComponents: Record<string, () => Promise<{ default: React.ComponentType<any> }>> = {};
+const iconComponents: Record<
+  string,
+  () => Promise<{ [key: string]: React.ComponentType<any> }>
+> = {};
 
 // Build iconComponents entries at runtime based on manifest
 import { icons } from './icon-manifest';
@@ -20,7 +23,7 @@ export async function getIcon(name: string) {
     throw new Error(`Icon not found: ${name}`);
   }
   const mod = await loader();
-  return mod.default;
+  return mod[name]; // Use named export instead of default
 }
 
 /**
@@ -28,5 +31,7 @@ export async function getIcon(name: string) {
  * @param category - category folder name
  */
 export function listIconsByCategory(category: string): string[] {
-  return icons.filter(icon => icon.category === category).map(icon => icon.name);
+  return icons
+    .filter((icon) => icon.category === category)
+    .map((icon) => icon.name);
 }

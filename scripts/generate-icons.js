@@ -86,12 +86,14 @@ function ensureWrite(filePath, content) {
           jsxRuntime: 'automatic',
           prettier: true,
           memo: true,
+          exportType: 'named',
+          namedExport: compName,
         },
         { componentName: compName },
       );
       ensureWrite(path.join(REACT_OUT, category, `${compName}.tsx`), reactTsx);
       reactExports.push(
-        `export { default as ${compName} } from './icons/${category}/${compName}';`,
+        `export { ${compName} } from './icons/${category}/${compName}';`,
       );
 
       // React Native
@@ -103,12 +105,14 @@ function ensureWrite(filePath, content) {
           expandProps: 'end',
           prettier: true,
           memo: true,
+          exportType: 'named',
+          namedExport: compName,
         },
         { componentName: compName },
       );
       ensureWrite(path.join(RN_OUT, category, `${compName}.tsx`), rnTsx);
       rnExports.push(
-        `export { default as ${compName} } from './icons/${category}/${compName}';`,
+        `export { ${compName} } from './icons/${category}/${compName}';`,
       );
 
       // Copy SVG assets

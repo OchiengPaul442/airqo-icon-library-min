@@ -1,1 +1,0 @@
-<svg fill="none" viewBox="0 0 24 24"><path d="M6 20V4m12 16v-4m-6 4V10" stroke="#1C1D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>

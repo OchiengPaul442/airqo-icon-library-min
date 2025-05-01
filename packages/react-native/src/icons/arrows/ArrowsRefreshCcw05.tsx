@@ -1,1 +1,0 @@
-<svg fill="none" viewBox="0 0 24 24"><path d="M8.545 19.769A8.5 8.5 0 0 0 19.36 7.752l-.25-.434M4.637 16.251A8.5 8.5 0 0 1 15.452 4.234M2.492 16.335l2.732.732.732-2.732m12.085-4.668.732-2.732 2.733.732" stroke="#1C1D20" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
