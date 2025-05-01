@@ -12,7 +12,7 @@ const { optimize } = require('svgo');
 const SVGS_DIR = path.resolve(__dirname, '../svgs');
 
 /**
- * Recursively traverse a directory and apply callback to each .svg file
+ * Recursively traverse a directory and apply a callback to each .svg file
  * @param {string} dir - directory path
  * @param {(filePath: string) => void} callback
  */
@@ -42,8 +42,8 @@ function optimizeFile(filePath) {
       { name: 'removeMetadata' },
       { name: 'removeTitle' },
       { name: 'removeDesc' },
-      { name: 'removeDimensions' }
-    ]
+      { name: 'removeDimensions' },
+    ],
   });
   fs.writeFileSync(filePath, result.data, 'utf8');
   console.log(`Optimized ${filePath}`);
@@ -53,15 +53,3 @@ function optimizeFile(filePath) {
 console.log('Starting SVG optimization in', SVGS_DIR);
 walkDir(SVGS_DIR, optimizeFile);
 console.log('SVG optimization complete');
-```js
-#!/usr/bin/env node
-// Script to optimize raw SVGs in ./svgs/ using SVGO
-const fs = require('fs');
-const path = require('path');
-const { optimize } = require('svgo');
-
-function optimizeSvgs(dir) {
-  // TODO: recursively optimize each .svg file in `dir`
-}
-
-optimizeSvgs(path.join(__dirname, '../svgs'));

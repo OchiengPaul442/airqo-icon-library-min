@@ -4,11 +4,17 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {},
-  "dependencies": {}
+  "peerDependencies": {
+    "react": "^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.20"
+  }
 }

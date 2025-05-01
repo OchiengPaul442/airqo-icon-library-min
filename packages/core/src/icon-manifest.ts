@@ -1,9 +1,672 @@
-export interface IconMeta {
-  name: string;
-  category: string;
-}
+export interface IconMeta { name: string; category: string; }
 
-// Populated at generate-time
 export const icons: IconMeta[] = [
-  // e.g. { name: 'Alerts-Warning', category: 'alerts' }
+  {
+    "name": "AlertsFeedbackAlertCircle",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAlertHexagon",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAlertOctagon",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAlertSquare",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAlertTriangle",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAnnouncement01",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAnnouncement02",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackAnnouncement03",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBell01",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBell02",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBell03",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBell04",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellMinus",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellOff01",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellOff02",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellOff03",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellPlus",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellRinging01",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellRinging02",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellRinging03",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackBellRinging04",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackMessageNotificationSquare",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackNotificationBox",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackNotificationText",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackThumbsDown",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "AlertsFeedbackThumbsUp",
+    "category": "alerts_feedback"
+  },
+  {
+    "name": "ArrowsArrowBlockDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowBlockLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowBlockRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowBlockUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleBrokenUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowCircleUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowNarrowUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowSquareUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowsDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowsLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowsRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowsTriangle",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsArrowsUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronDownDouble",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronLeftDouble",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronRightDouble",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronSelectorHorizontal",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronSelectorVertical",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronUpDouble",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsChevronUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerDownLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerDownRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerLeftDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerLeftUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerRightDown",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerRightUp",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerUpLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsCornerUpRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand01",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand02",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand03",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand04",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand05",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsExpand06",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsFlipBackward",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsFlipForward",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsInfinity",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCcw01",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCcw02",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCcw03",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCcw04",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCcw05",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCw01",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCw02",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCw03",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCw04",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsRefreshCw05",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsReverseLeft",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsReverseRight",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsSwitchHorizontal01",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsSwitchHorizontal02",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsSwitchVertical01",
+    "category": "arrows"
+  },
+  {
+    "name": "ArrowsSwitchVertical02",
+    "category": "arrows"
+  },
+  {
+    "name": "ChartsBarChart01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart04",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart05",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart06",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart07",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart08",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart09",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart10",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart11",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChart12",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartCircle01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartCircle02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartCircle03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquare01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquare02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquare03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquareDown",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquareMinus",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquarePlus",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarChartSquareUp",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsBarLineChart",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsChartBreakoutCircle",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsChartBreakoutSquare",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsHorizontalBarChart01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsHorizontalBarChart02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsHorizontalBarChart03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartDown01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartDown02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartDown03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartDown04",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartDown05",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartUp01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartUp02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartUp03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartUp04",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsLineChartUp05",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPieChart01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPieChart02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPieChart03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPieChart04",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPresentationChart01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPresentationChart02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsPresentationChart03",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsTrendDown01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsTrendDown02",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsTrendUp01",
+    "category": "charts"
+  },
+  {
+    "name": "ChartsTrendUp02",
+    "category": "charts"
+  }
 ];
