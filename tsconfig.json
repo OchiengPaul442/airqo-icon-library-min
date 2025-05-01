@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "composite": true,
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@airqo-icons/core": ["packages/core/src"],
+      "@airqo-icons/react": ["packages/react/src"]
+    }
+  },
+  "include": ["packages/*/src", "scripts"]
+}

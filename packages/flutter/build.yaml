@@ -1,0 +1,7 @@
+targets:
+  \$default:
+    builders:
+      svg_to_flutter:build:
+        options:
+          input_dir: assets
+          output: lib/src/icon_data.dart

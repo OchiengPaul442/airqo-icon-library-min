@@ -1,0 +1,32 @@
+{
+  "name": "airqo-icon-library",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate-icons.js",
+    "optimize": "node scripts/optimize-svgs.js",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "lint": "eslint . --ext .ts,.tsx",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "eslint": "^8.23.0",
+    "prettier": "^2.7.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0",
+    "@svgr/cli": "^6.5.1",
+    "svgo": "^2.8.0",
+    "tsup": "^6.3.0"
+  },
+  "lint-staged": {
+    "**/*.{ts,tsx,js,jsx,json,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  }
+}
