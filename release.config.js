@@ -9,6 +9,14 @@ module.exports = {
         changelogFile: 'CHANGELOG.md',
       },
     ],
+    [
+      '@semantic-release/github',
+      {
+        assets: [{ path: 'packages/*/dist/*.tgz', label: 'NPM distribution' }],
+        successComment: true,
+        failTitle: true,
+      },
+    ],
     // Core package publish
     [
       '@semantic-release/npm',
@@ -48,10 +56,11 @@ module.exports = {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md'],
+        assets: ['CHANGELOG.md', 'packages/*/package.json'],
         message:
           'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
       },
     ],
   ],
+  preset: 'angular',
 };
