@@ -24,7 +24,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 6 # ← match your v6 pnpm-lock.yaml
           run_install: false
 
       - name: Get pnpm store directory
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile --recursive
+          pnpm install --frozen-lockfile
           pnpm list -r
 
       - name: Optimize SVGs
@@ -77,7 +77,7 @@ jobs:
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 6
           run_install: false
 
       - name: Get pnpm store directory
@@ -95,7 +95,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile --recursive
+          pnpm install --frozen-lockfile
           pnpm list -r
 
       - name: Run Semantic Release
