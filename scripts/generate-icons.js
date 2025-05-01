@@ -7,322 +7,528 @@
 const fs = require('fs');
 const path = require('path');
 const { optimize } = require('svgo');
-const svgr = require('@svgr/core').transform;
+const { transform: svgrTransform } = require('@svgr/core');
+
+// --- Configuration ---
 
 // Paths
-const SVGS_DIR = path.resolve(__dirname, '../svgs');
-const REACT_OUT = path.resolve(__dirname, '../packages/react/src/icons');
-const RN_OUT = path.resolve(__dirname, '../packages/react-native/src/icons');
-const FLUTTER_ASSETS = path.resolve(__dirname, '../packages/flutter/assets');
-const VUE_ICONS = path.resolve(__dirname, '../packages/vue/src/icons');
-const MANIFEST_FILE = path.resolve(
-  __dirname,
-  '../packages/core/src/icon-manifest.ts',
-);
-const REACT_INDEX = path.resolve(__dirname, '../packages/react/src/index.ts');
-const RN_INDEX = path.resolve(
-  __dirname,
-  '../packages/react-native/src/index.ts',
-);
+const ROOT_DIR = path.resolve(__dirname, '..');
+const SVGS_DIR = path.join(ROOT_DIR, 'svgs');
+const REACT_PKG_DIR = path.join(ROOT_DIR, 'packages/react/src');
+const RN_PKG_DIR = path.join(ROOT_DIR, 'packages/react-native/src');
+const FLUTTER_PKG_DIR = path.join(ROOT_DIR, 'packages/flutter');
+const VUE_PKG_DIR = path.join(ROOT_DIR, 'packages/vue/src');
+const CORE_PKG_DIR = path.join(ROOT_DIR, 'packages/core/src');
 
-// Cleanup function
+const REACT_OUT_DIR = path.join(REACT_PKG_DIR, 'icons');
+const RN_OUT_DIR = path.join(RN_PKG_DIR, 'icons');
+const FLUTTER_ASSETS_DIR = path.join(FLUTTER_PKG_DIR, 'assets');
+const VUE_ICONS_DIR = path.join(VUE_PKG_DIR, 'icons');
+const MANIFEST_FILE = path.join(CORE_PKG_DIR, 'icon-manifest.ts');
+const REACT_INDEX_FILE = path.join(REACT_PKG_DIR, 'index.ts');
+const RN_INDEX_FILE = path.join(RN_PKG_DIR, 'index.ts');
+
+// --- SVGO Configuration ---
+// FIX: Use a properly formatted SVGO config that doesn't have cleanupIDs plugin
+const svgoConfig = {
+  multipass: true,
+  js2svg: {
+    indent: 2,
+    pretty: true,
+  },
+  plugins: [
+    {
+      name: 'preset-default',
+      params: {
+        overrides: {
+          removeViewBox: false,
+        },
+      },
+    },
+    'removeDimensions',
+    {
+      name: 'removeAttrs',
+      params: {
+        attrs: '(data-name|class)',
+      },
+    },
+    {
+      name: 'sortAttrs',
+    },
+    {
+      name: 'addAttributesToSVGElement',
+      params: {
+        attributes: [{ role: 'img' }],
+      },
+    },
+  ],
+};
+
+// SVGR configuration with the fixed SVGO config
+const getSvgrConfig = (isNative, componentName) => ({
+  plugins: ['@svgr/plugin-jsx'], // FIX: Remove '@svgr/plugin-svgo' to handle SVGO separately
+  typescript: true,
+  native: isNative,
+  icon: !isNative,
+  ref: !isNative,
+  titleProp: true,
+  svgProps: {
+    fill: 'currentColor',
+    ...(!isNative && { role: 'img' }),
+  },
+  // FIX: Don't pass svgoConfig to SVGR as we'll handle optimization separately
+  state: { componentName },
+});
+
+// --- Helper Functions ---
+
+/**
+ * Cleans up and recreates a directory.
+ */
 function cleanupDirectory(dir) {
+  console.log(`🧹 Cleaning directory: ${dir}`);
   if (fs.existsSync(dir)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }
   fs.mkdirSync(dir, { recursive: true });
 }
 
-// Enhanced SVG optimization
-async function optimizeSvg(svgContent) {
+/**
+ * Optimizes SVG content using SVGO directly.
+ */
+async function optimizeSvg(svgContent, iconName) {
   try {
-    const result = optimize(svgContent, {
-      multipass: true,
-      plugins: [
-        {
-          name: 'preset-default',
-          params: {
-            overrides: {
-              removeViewBox: false,
-            },
-          },
-        },
-        {
-          name: 'removeDimensions',
-        },
-        {
-          name: 'removeAttrs',
-          params: {
-            attrs: '(data-name|xmlns)',
-          },
-        },
-        {
-          name: 'removeEmptyAttrs',
-        },
-        {
-          name: 'removeUselessDefs',
-        },
-        {
-          name: 'mergePaths',
-        },
-        {
-          name: 'collapseGroups',
-        },
-      ],
-    });
+    if (
+      !svgContent ||
+      typeof svgContent !== 'string' ||
+      !svgContent.includes('<svg')
+    ) {
+      console.warn(
+        `⚠️ Invalid SVG content for ${iconName}. Skipping optimization.`,
+      );
+      return svgContent;
+    }
+
+    const result = optimize(svgContent, svgoConfig);
+
+    if (result.error) {
+      throw new Error(result.error);
+    }
+    if (!result.data || !result.data.includes('<svg')) {
+      console.warn(
+        `⚠️ SVGO produced invalid output for ${iconName}. Using original.`,
+      );
+      return svgContent;
+    }
     return result.data;
   } catch (error) {
-    console.error('Error optimizing SVG:', error);
-    // Return original content if optimization fails
+    console.error(`❌ Error optimizing SVG for ${iconName}:`, error.message);
     return svgContent;
   }
 }
 
-// PascalCase converter
+/**
+ * Converts a string to PascalCase.
+ */
 function pascalCase(input) {
   return input
-    .split(/[-_ ]+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join('');
+    .toLowerCase()
+    .replace(/[-_]+/g, ' ')
+    .replace(/[^\w\s]/g, '')
+    .replace(/ (.)/g, (m, w) => w.toUpperCase())
+    .replace(/^(.)/, (m, w) => w.toUpperCase())
+    .replace(/\s+/g, '');
 }
 
-// Ensure directory and write file
+/**
+ * Ensures directory exists and writes file content.
+ */
 function ensureWrite(filePath, content) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, content, 'utf8');
-}
-
-// Process component templates
-async function generateComponent(svg, options, componentName) {
   try {
-    const cleanedSvg = svg
-      .replace(/<!--.*?-->/g, '')
-      .replace(/\s+/g, ' ')
-      .replace(/xmlns:xlink/g, 'xmlnsXlink')
-      .replace(/xlink:href/g, 'xlinkHref')
-      .trim();
-
-    if (!cleanedSvg.startsWith('<svg') || !cleanedSvg.endsWith('</svg>')) {
-      throw new Error(`Invalid SVG format for ${componentName}`);
-    }
-
-    const template = (variables) => {
-      const { imports, interfaces, componentName, props, jsx } = variables;
-      return `${imports}
-${interfaces}
-
-const ${componentName} = (${props}) => ${jsx};
-
-${componentName}.displayName = '${componentName}';
-export default ${componentName};`;
-    };
-
-    const svgrConfig = {
-      ...options,
-      plugins: [
-        '@svgr/plugin-svgo',
-        '@svgr/plugin-jsx',
-        '@svgr/plugin-prettier',
-      ],
-      typescript: true,
-      template,
-      svgoConfig: {
-        plugins: [
-          {
-            name: 'preset-default',
-            params: {
-              overrides: {
-                removeViewBox: false,
-              },
-            },
-          },
-          'removeDimensions',
-          {
-            name: 'removeAttrs',
-            params: {
-              attrs: ['class', 'data-name', 'fill', 'stroke'],
-            },
-          },
-          'cleanupIds',
-          'removeUselessDefs',
-          'removeUnknownsAndDefaults',
-          'removeNonInheritableGroupAttrs',
-          'collapseGroups',
-          'mergePaths',
-        ],
-      },
-      svgProps: {
-        width: '24',
-        height: '24',
-        fill: 'currentColor',
-      },
-      prettier: {
-        parser: 'typescript',
-        singleQuote: true,
-        trailingComma: 'all',
-      },
-    };
-
-    // Add stricter SVG validation and cleanup
-    const cleanedSvg = cleanedSvg
-      .replace(/<!--.*?-->/gs, '') // Remove comments
-      .replace(/>\s+</g, '><')     // Remove whitespace between tags
-      .replace(/\s{2,}/g, ' ')     // Normalize spaces
-      .replace(/[\n\r\t]/g, '')    // Remove newlines and tabs
-      .replace(/xmlns:xlink/g, 'xmlnsXlink')
-      .replace(/xlink:href/g, 'xlinkHref')
-      .trim();
-
-    // Validate SVG structure
-    if (!cleanedSvg.match(/<svg[^>]*>.*<\/svg>/s)) {
-      throw new Error(`Invalid SVG structure for ${componentName}`);
-    }
-
-    try {
-      const result = await svgr(cleanedSvg, svgrConfig, { componentName });
-      return result;
-    } catch (error) {
-      console.error(`Error generating component for ${componentName}:`, error);
-      // Return a fallback component that displays an error indicator
-      return `import * as React from 'react';
-
-const ${componentName} = (props: React.SVGProps<SVGSVGElement>) => {
-  console.warn('Error loading icon component: ${componentName}');
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8zm0-13a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z"/>
-    </svg>
-  );
-};
-
-${componentName}.displayName = '${componentName}';
-export default ${componentName};`;
-    }
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, content, 'utf8');
   } catch (error) {
-    console.error(`Error generating component for ${componentName}:`, error);
-    return `import * as React from 'react';
-
-const ${componentName} = (props: React.SVGProps<SVGSVGElement>) => {
-  console.warn('Error loading icon component: ${componentName}');
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" {...props}>
-      <path d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8zm0-13a1 1 0 00-1 1v4a1 1 0 002 0V8a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z"/>
-    </svg>
-  );
-};
-
-${componentName}.displayName = '${componentName}';
-export default ${componentName};`;
+    console.error(`❌ Failed to write file: ${filePath}`, error);
+    throw error;
   }
 }
 
-(async () => {
+/**
+ * Generates a React or React Native component from SVG content using SVGR.
+ */
+async function generateComponent(svgContent, componentName, isNative) {
   try {
-    // Clean up existing generated files
-    cleanupDirectory(REACT_OUT);
-    cleanupDirectory(RN_OUT);
-    cleanupDirectory(FLUTTER_ASSETS);
-    cleanupDirectory(VUE_ICONS);
+    if (!svgContent || !svgContent.trim().startsWith('<svg')) {
+      throw new Error(`Invalid SVG structure provided for ${componentName}`);
+    }
 
-    const manifest = [];
-    const reactExports = [];
-    const rnExports = [];
-    const processedSvgs = new Set(); // Track processed SVGs to avoid duplicates
+    // FIX: Use our improved SVGR config
+    const svgrConfig = getSvgrConfig(isNative, componentName);
 
-    // Read categories
+    const transformPromise = svgrTransform(svgContent, svgrConfig, {
+      componentName,
+    });
+
+    const result = await Promise.race([
+      transformPromise,
+      new Promise((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(`SVGR transform timed out for ${componentName} (10s)`),
+            ),
+          10000,
+        ),
+      ),
+    ]);
+
+    if (
+      !result ||
+      typeof result !== 'string' ||
+      result.length < 50 ||
+      !result.includes(componentName)
+    ) {
+      throw new Error(
+        `SVGR generated empty or invalid output for ${componentName}`,
+      );
+    }
+
+    return result;
+  } catch (error) {
+    console.error(
+      `❌ Error in SVGR transformation for ${componentName} (${
+        isNative ? 'Native' : 'Web'
+      }):`,
+      error.message,
+    );
+    throw error;
+  }
+}
+
+/**
+ * Generates a basic fallback component string.
+ */
+function generateFallbackComponent(componentName, isNative) {
+  console.warn(
+    `⚠️ Generating fallback component for ${componentName} (${
+      isNative ? 'Native' : 'Web'
+    })`,
+  );
+  const propsType = isNative ? 'SvgProps' : 'React.SVGProps<SVGSVGElement>';
+  const SvgComponent = isNative ? 'Svg' : 'svg';
+  const PathComponent = isNative ? 'Path' : 'path';
+
+  const importStatement = isNative
+    ? `import * as React from 'react';\nimport Svg, { SvgProps, Path } from 'react-native-svg';`
+    : `import * as React from 'react';`;
+
+  return `
+${importStatement}
+
+// Fallback component due to generation error for ${componentName}
+const ${componentName} = (props: ${propsType}) => {
+  console.warn('Rendering fallback icon component: ${componentName}');
+  return (
+    <${SvgComponent} width={props.width ?? 24} height={props.height ?? 24} viewBox="0 0 24 24" fill="currentColor" {...props}>
+      {/* Error/Warning Icon Path */}
+      <${PathComponent} d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+    </${SvgComponent}>
+  );
+};
+
+${componentName}.displayName = '${componentName}Fallback';
+export default ${componentName};`;
+}
+
+/**
+ * Process a single SVG file
+ */
+async function processSvgFile(
+  categoryDir,
+  category,
+  file,
+  processedSvgs,
+  manifest,
+  reactExports,
+  rnExports,
+  allErrors,
+) {
+  const baseName = path.basename(file, '.svg');
+  const svgKey = `${category}-${baseName}`;
+
+  // Skip duplicates
+  if (processedSvgs.has(svgKey)) {
+    console.log(`    ⏩ Skipping duplicate key: ${svgKey}`);
+    return;
+  }
+
+  const rawSvgPath = path.join(categoryDir, file);
+  const componentName = pascalCase(svgKey);
+
+  try {
+    // Read Raw SVG
+    const rawSvg = fs.readFileSync(rawSvgPath, 'utf8');
+    if (!rawSvg) throw new Error(`File is empty.`);
+
+    // Optimize SVG - FIX: Use our improved optimization function
+    const optimizedSvg = await optimizeSvg(rawSvg, componentName);
+
+    // --- Generate React Component ---
+    let reactComponentCode;
+    try {
+      reactComponentCode = await generateComponent(
+        optimizedSvg,
+        componentName,
+        false,
+      );
+    } catch (reactGenError) {
+      allErrors.push(
+        `React component generation for ${componentName}: ${reactGenError.message}`,
+      );
+      reactComponentCode = generateFallbackComponent(componentName, false);
+    }
+    const reactFilePath = path.join(
+      REACT_OUT_DIR,
+      category,
+      `${componentName}.tsx`,
+    );
+    ensureWrite(reactFilePath, reactComponentCode);
+    reactExports.push(
+      `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
+    );
+
+    // --- Generate React Native Component ---
+    let rnComponentCode;
+    try {
+      rnComponentCode = await generateComponent(
+        optimizedSvg,
+        componentName,
+        true,
+      );
+    } catch (rnGenError) {
+      allErrors.push(
+        `React Native component generation for ${componentName}: ${rnGenError.message}`,
+      );
+      rnComponentCode = generateFallbackComponent(componentName, true);
+    }
+    const rnFilePath = path.join(RN_OUT_DIR, category, `${componentName}.tsx`);
+    ensureWrite(rnFilePath, rnComponentCode);
+    rnExports.push(
+      `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
+    );
+
+    // --- Copy Optimized SVG Assets ---
+    const assetDestinations = [
+      path.join(FLUTTER_ASSETS_DIR, category, file),
+      path.join(VUE_ICONS_DIR, category, file),
+    ];
+    for (const destPath of assetDestinations) {
+      ensureWrite(destPath, optimizedSvg);
+    }
+
+    // Add to manifest and mark svgKey as processed
+    manifest.push({ name: componentName, category });
+    processedSvgs.add(svgKey);
+    process.stdout.write(
+      `    ✅ Processed: ${componentName} (${category})          \r`,
+    );
+
+    return true;
+  } catch (error) {
+    console.error(`\n❌ Failed processing ${category}/${file}:`, error.message);
+    allErrors.push(`Processing ${category}/${file}: ${error.message}`);
+
+    // Generate fallbacks for failures
+    const fallbackComponentName = pascalCase(svgKey);
+    try {
+      const reactFallback = generateFallbackComponent(
+        fallbackComponentName,
+        false,
+      );
+      ensureWrite(
+        path.join(REACT_OUT_DIR, category, `${fallbackComponentName}.tsx`),
+        reactFallback,
+      );
+      reactExports.push(
+        `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
+      );
+    } catch (fbError) {
+      /* ignore fallback write error */
+    }
+    try {
+      const rnFallback = generateFallbackComponent(fallbackComponentName, true);
+      ensureWrite(
+        path.join(RN_OUT_DIR, category, `${fallbackComponentName}.tsx`),
+        rnFallback,
+      );
+      rnExports.push(
+        `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
+      );
+    } catch (fbError) {
+      /* ignore fallback write error */
+    }
+
+    return false;
+  }
+}
+
+/**
+ * Main execution function with proper error handling
+ */
+async function main() {
+  console.log('🚀 Starting icon generation process...');
+  const startTime = Date.now();
+
+  const allErrors = [];
+  const manifest = [];
+  const reactExports = [];
+  const rnExports = [];
+  const processedSvgs = new Set();
+  let totalProcessed = 0;
+
+  try {
+    // 1. Check Source Directory
+    if (!fs.existsSync(SVGS_DIR) || !fs.lstatSync(SVGS_DIR).isDirectory()) {
+      throw new Error(
+        `❌ Source SVGs directory not found or is not a directory: ${SVGS_DIR}`,
+      );
+    }
+
+    // 2. Clean Output Directories
+    cleanupDirectory(REACT_OUT_DIR);
+    cleanupDirectory(RN_OUT_DIR);
+    cleanupDirectory(FLUTTER_ASSETS_DIR);
+    cleanupDirectory(VUE_ICONS_DIR);
+
+    // 3. Read Categories and Process SVGs
     const categories = fs
       .readdirSync(SVGS_DIR, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => d.name);
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
 
+    console.log(`🔍 Found ${categories.length} icon categories.`);
+
+    // Process each category
     for (const category of categories) {
       const categoryDir = path.join(SVGS_DIR, category);
-      const svgFiles = fs
-        .readdirSync(categoryDir)
-        .filter((f) => f.endsWith('.svg'));
+      let categoryFiles;
 
-      for (const file of svgFiles) {
-        try {
-          const rawPath = path.join(categoryDir, file);
-          const baseName = path.basename(file, '.svg');
-          const svgKey = `${category}-${baseName}`;
-
-          // Skip if we've already processed this SVG
-          if (processedSvgs.has(svgKey)) {
-            console.log(`Skipping duplicate: ${svgKey}`);
-            continue;
-          }
-          processedSvgs.add(svgKey);
-
-          const compName = pascalCase(svgKey);
-          const rawSvg = fs.readFileSync(rawPath, 'utf8');
-          const optimized = await optimizeSvg(rawSvg);
-
-          // Generate React component
-          const reactTsx = await generateComponent(
-            optimized,
-            { icon: true },
-            compName,
-          );
-          ensureWrite(
-            path.join(REACT_OUT, category, `${compName}.tsx`),
-            reactTsx,
-          );
-          reactExports.push(
-            `export { default as ${compName} } from './icons/${category}/${compName}';`,
-          );
-
-          // Generate React Native component
-          const rnTsx = await generateComponent(
-            optimized,
-            { native: true },
-            compName,
-          );
-          ensureWrite(path.join(RN_OUT, category, `${compName}.tsx`), rnTsx);
-          rnExports.push(
-            `export { default as ${compName} } from './icons/${category}/${compName}';`,
-          );
-
-          // Copy optimized SVG assets
-          const frameworks = [FLUTTER_ASSETS, VUE_ICONS];
-          for (const base of frameworks) {
-            const destDir = path.join(base, category);
-            fs.mkdirSync(destDir, { recursive: true });
-            ensureWrite(path.join(destDir, file), optimized);
-          }
-
-          manifest.push({ name: compName, category });
-          console.log(`Processed ${compName}`);
-        } catch (error) {
-          console.error(`Error processing ${file} in ${category}:`, error);
-        }
+      try {
+        categoryFiles = fs
+          .readdirSync(categoryDir)
+          .filter((f) => f.toLowerCase().endsWith('.svg'));
+      } catch (readErr) {
+        console.warn(
+          `⚠️ Could not read directory: ${categoryDir}. Skipping. Error: ${readErr.message}`,
+        );
+        continue;
       }
+
+      console.log(
+        `\nProcessing category: ${category} (${categoryFiles.length} SVGs)`,
+      );
+
+      // Process files sequentially to avoid overwhelming system resources
+      let categorySuccessCount = 0;
+      for (const file of categoryFiles) {
+        const success = await processSvgFile(
+          categoryDir,
+          category,
+          file,
+          processedSvgs,
+          manifest,
+          reactExports,
+          rnExports,
+          allErrors,
+        );
+        if (success) categorySuccessCount++;
+      }
+
+      totalProcessed += categorySuccessCount;
+      console.log(
+        `    🏁 Finished category: ${category} - ${categorySuccessCount}/${categoryFiles.length} successful`,
+      );
     }
 
-    // Write manifest
-    const manifestTs = `export interface IconMeta { name: string; category: string; }\n\nexport const icons: IconMeta[] = ${JSON.stringify(
-      manifest,
+    // 4. Write Manifest
+    console.log('\n✍️ Writing icon manifest...');
+    const manifestTs = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}
+export interface IconMeta {
+  name: string; // PascalCase component name
+  category: string; // Original category folder name
+}
+
+export const icons: ReadonlyArray<IconMeta> = ${JSON.stringify(
+      manifest.sort((a, b) => a.name.localeCompare(b.name)),
       null,
       2,
-    )};\n`;
+    )} as const;
+`;
     ensureWrite(MANIFEST_FILE, manifestTs);
-    console.log('Manifest written');
+    console.log('    ✅ Manifest written successfully.');
 
-    // Write React index
-    const reactIndex = `// Auto-generated, do not edit\n${reactExports.join(
-      '\n',
-    )}\n`;
-    ensureWrite(REACT_INDEX, reactIndex);
-    console.log('React barrel index written');
+    // 5. Write Barrel Index Files
+    console.log('✍️ Writing barrel index files...');
+    // Filter unique exports before joining
+    const uniqueReactExports = [...new Set(reactExports)];
+    const uniqueRnExports = [...new Set(rnExports)];
 
-    // Write React Native index
-    const rnIndex = `// Auto-generated, do not edit\n${rnExports.join('\n')}\n`;
-    ensureWrite(RN_INDEX, rnIndex);
-    console.log('React Native barrel index written');
+    const reactIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueReactExports
+      .sort()
+      .join('\n')}\n`;
+    ensureWrite(REACT_INDEX_FILE, reactIndexContent);
+    console.log('    ✅ React index written successfully.');
 
-    console.log('Icon generation completed successfully!');
+    const rnIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueRnExports
+      .sort()
+      .join('\n')}\n`;
+    ensureWrite(RN_INDEX_FILE, rnIndexContent);
+    console.log('    ✅ React Native index written successfully.');
+
+    // 6. Final Report
+    const endTime = Date.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+    console.log('\n--- Generation Summary ---');
+    console.log(`⏱️ Total time: ${duration} seconds`);
+    console.log(`✔️ Icons processed attempted: ${processedSvgs.size}`);
+    console.log(`📦 Manifest entries created: ${manifest.length}`);
+    console.log(
+      `⚛️ React components generated (incl. fallbacks): ${uniqueReactExports.length}`,
+    );
+    console.log(
+      `📱 React Native components generated (incl. fallbacks): ${uniqueRnExports.length}`,
+    );
+
+    if (allErrors.length > 0) {
+      console.warn(
+        `\n⚠️ Generation completed with ${allErrors.length} errors:`,
+      );
+      // Only show first 10 unique errors to avoid overwhelming the console
+      const uniqueErrors = [...new Set(allErrors)];
+      uniqueErrors
+        .slice(0, 10)
+        .forEach((err, index) =>
+          console.warn(`   ${index + 1}. ${err.split('\n')[0]}`),
+        );
+      if (uniqueErrors.length > 10) {
+        console.warn(`   ... and ${uniqueErrors.length - 10} more errors`);
+      }
+      console.warn(
+        '\nCheck the logs above for details. Some components were replaced with fallbacks.',
+      );
+      process.exitCode = 1; // Indicate failure
+    } else {
+      console.log('\n🎉 Icon generation completed successfully!');
+    }
   } catch (error) {
-    console.error('Fatal error during icon generation:', error);
-    process.exit(1);
+    console.error('\n❌ Fatal error during icon generation process:', error);
+    process.exit(1); // Exit with error code
   }
-})();
+}
+
+// Run the main function
+main().catch((error) => {
+  console.error('\n❌ Unhandled error during script execution:', error);
+  process.exit(1);
+});

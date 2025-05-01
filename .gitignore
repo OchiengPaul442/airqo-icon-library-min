@@ -12,3 +12,9 @@ dist/
 
 # Env
 env.local
+
+# Generated icon directories
+packages/react/src/icons/
+packages/react-native/src/icons/
+packages/flutter/assets/
+packages/vue/src/icons/
