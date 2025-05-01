@@ -20,25 +20,24 @@ jobs:
           node-version: '18'
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: 7 # ← use v7 so it reads your lockfile
-          run_install: false
+          version: 7 # <-- must match your lockfileVersion in pnpm-lock.yaml
+          run_install: false # <-- we'll install manually below
 
-      - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Cache pnpm dependencies
+      - name: Cache pnpm store
         uses: actions/cache@v3
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - name: Get pnpm store directory
+        run: echo "PNPM_STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
 
       - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --lockfile-dir=.
           pnpm list -r
 
       - name: Optimize SVGs
@@ -57,8 +56,8 @@ jobs:
 
   release:
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -71,25 +70,24 @@ jobs:
           node-version: '18'
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
           version: 7
           run_install: false
 
-      - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Cache pnpm dependencies
+      - name: Cache pnpm store
         uses: actions/cache@v3
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - name: Get pnpm store directory
+        run: echo "PNPM_STORE_PATH=$(pnpm store path)" >> $GITHUB_ENV
 
       - name: Install Dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --frozen-lockfile --lockfile-dir=.
           pnpm list -r
 
       - name: Run Semantic Release
