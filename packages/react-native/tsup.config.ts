@@ -5,6 +5,13 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   tsconfig: 'tsconfig.json',
   dts: true,
-  external: ['react'],
+  external: ['react', 'react-native', 'react-native-svg'],
   clean: true,
+  treeshake: {
+    moduleSideEffects: false,
+    preset: 'smallest',
+  },
+  splitting: true,
+  sourcemap: true,
+  minify: true,
 });
