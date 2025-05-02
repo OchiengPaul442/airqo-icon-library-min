@@ -18,7 +18,7 @@
     "clean": "rimraf dist"
   },
   "peerDependencies": {
-    "@airqo-icons/core": "workspace:~",
+    "@airqo-icons/core": "^0.1.0",
     "react": "^17 || ^18"
   },
   "devDependencies": {
