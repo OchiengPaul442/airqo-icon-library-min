@@ -2,16 +2,14 @@
   "name": "@airqo-icons/react-native",
   "version": "0.1.0",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --external:react-native --external:react-native-svg --sourcemap",
-    "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --external:react-native --external:react-native-svg --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
-    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build": "npm run build:cjs && npm run build:types",
     "clean": "rimraf dist"
   },
   "peerDependencies": {
