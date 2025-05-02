@@ -16,9 +16,10 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@airqo-icons/core": ["packages/core/src"],
-      "@airqo-icons/react": ["packages/react/src"]
-    }
+      "@airqo-icons/*": ["packages/*/src"]
+    },
+    "allowJs": true,
+    "jsx": "preserve"
   },
   "references": [
     { "path": "./packages/core" },
@@ -26,6 +27,6 @@
     { "path": "./packages/react-native" },
     { "path": "./packages/vue" }
   ],
-  "include": ["packages/*/src", "scripts"],
-  "exclude": ["node_modules"]
+  "include": ["packages/*/src", "packages/*/src/icons/**/*", "scripts"],
+  "exclude": ["node_modules", "**/dist", "**/*.test.ts"]
 }

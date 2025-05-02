@@ -13,9 +13,18 @@
     "paths": {
       "@airqo-icons/core": ["../core/src"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true
   },
   "references": [{ "path": "../core" }],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/*.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/*.d.ts",
+    "src/icons/**/*"
+  ],
   "exclude": ["node_modules", "dist"]
 }
