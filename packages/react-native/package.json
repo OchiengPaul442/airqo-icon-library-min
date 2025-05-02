@@ -7,16 +7,20 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --external:react-native --external:react-native-svg --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
     "build": "npm run build:cjs && npm run build:types",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@airqo-icons/core": "0.1.0"
   },
   "peerDependencies": {
-    "@airqo-icons/core": "^0.1.0",
     "react": "^17 || ^18",
     "react-native": "*",
     "react-native-svg": "*"

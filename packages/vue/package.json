@@ -8,14 +8,18 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "vite build",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@airqo-icons/core": "0.1.0"
   },
   "peerDependencies": {
-    "@airqo-icons/core": "^0.1.0",
     "vue": "^2 || ^3"
   },
   "devDependencies": {

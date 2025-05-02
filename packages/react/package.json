@@ -8,17 +8,21 @@
     "dist"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@airqo-icons/core": "0.1.0"
   },
   "peerDependencies": {
-    "@airqo-icons/core": "^0.1.0",
     "react": "^17 || ^18"
   },
   "devDependencies": {
@@ -30,8 +34,5 @@
     "rimraf": "^5.0.10",
     "tsup": "^8.4.0",
     "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "build": "^0.1.4"
   }
 }
