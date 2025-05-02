@@ -61,10 +61,10 @@ importers:
         version: 19.1.0
       react-native:
         specifier: ^0.79.2
-        version: 0.79.2(@babel/core@7.27.1)(react@19.1.0)
+        version: 0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0)
       react-native-svg:
         specifier: ^15.11.2
-        version: 15.11.2(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0)
+        version: 15.11.2(react-native@0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0))(react@19.1.0)
       rimraf:
         specifier: ^5.0.10
         version: 5.0.10
@@ -83,13 +83,16 @@ importers:
 
   packages/core:
     dependencies:
+      csstype:
+        specifier: ^3.1.3
+        version: 3.1.3
       react:
-        specifier: ^17.0.0 || ^18.0.0
-        version: 18.3.1
+        specifier: ^17.0.0 || ^18.0.0 || ^19.0.0
+        version: 19.1.0
     devDependencies:
       '@types/react':
-        specifier: ^18.3.20
-        version: 18.3.20
+        specifier: ^19.0.0
+        version: 19.1.2
       typescript:
         specifier: ^4.9.5
         version: 4.9.5
@@ -1359,6 +1362,9 @@ packages:
 
   '@types/react@18.3.20':
     resolution: {integrity: sha512-IPaCZN7PShZK/3t6Q87pfTkRm6oLTd4vztyoj+cbHUF1g3FfVb2tFIL79uCRKEfv16AhqDMBywP2VW3KIZUvcg==}
+
+  '@types/react@19.1.2':
+    resolution: {integrity: sha512-oxLPMytKchWGbnQM9O7D67uPa9paTNxO7jVoNMXgkkErULBPhPARCfkKL9ytcIJJRGjbsVwW4ugJzyFFvm/Tiw==}
 
   '@types/stack-utils@2.0.3':
     resolution: {integrity: sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==}
@@ -5250,12 +5256,14 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.20
 
-  '@react-native/virtualized-lists@0.79.2(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0)':
+  '@react-native/virtualized-lists@0.79.2(@types/react@19.1.2)(react-native@0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0))(react@19.1.0)':
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 19.1.0
-      react-native: 0.79.2(@babel/core@7.27.1)(react@19.1.0)
+      react-native: 0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0)
+    optionalDependencies:
+      '@types/react': 19.1.2
 
   '@rollup/rollup-android-arm-eabi@4.40.1':
     optional: true
@@ -5680,6 +5688,10 @@ snapshots:
   '@types/react@18.3.20':
     dependencies:
       '@types/prop-types': 15.7.14
+      csstype: 3.1.3
+
+  '@types/react@19.1.2':
+    dependencies:
       csstype: 3.1.3
 
   '@types/stack-utils@2.0.3': {}
@@ -8262,12 +8274,12 @@ snapshots:
       react: 18.3.1
       react-native: 0.79.2(@babel/core@7.27.1)(@types/react@18.3.20)(react@18.3.1)
 
-  react-native-svg@15.11.2(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0):
+  react-native-svg@15.11.2(react-native@0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0))(react@19.1.0):
     dependencies:
       css-select: 5.1.0
       css-tree: 1.1.3
       react: 19.1.0
-      react-native: 0.79.2(@babel/core@7.27.1)(react@19.1.0)
+      react-native: 0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0)
       warn-once: 0.1.1
 
   react-native@0.79.2(@babel/core@7.27.1)(@types/react@18.3.20)(react@18.3.1):
@@ -8318,7 +8330,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0):
+  react-native@0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native/assets-registry': 0.79.2
@@ -8327,7 +8339,7 @@ snapshots:
       '@react-native/gradle-plugin': 0.79.2
       '@react-native/js-polyfills': 0.79.2
       '@react-native/normalize-colors': 0.79.2
-      '@react-native/virtualized-lists': 0.79.2(react-native@0.79.2(@babel/core@7.27.1)(react@19.1.0))(react@19.1.0)
+      '@react-native/virtualized-lists': 0.79.2(@types/react@19.1.2)(react-native@0.79.2(@babel/core@7.27.1)(@types/react@19.1.2)(react@19.1.0))(react@19.1.0)
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1
@@ -8357,6 +8369,8 @@ snapshots:
       whatwg-fetch: 3.6.20
       ws: 6.2.3
       yargs: 17.7.2
+    optionalDependencies:
+      '@types/react': 19.1.2
     transitivePeerDependencies:
       - '@babel/core'
       - '@react-native-community/cli'
