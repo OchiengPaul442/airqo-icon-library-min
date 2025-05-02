@@ -112,6 +112,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Setup NPM authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Run Semantic Release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
