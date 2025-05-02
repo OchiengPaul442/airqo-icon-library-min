@@ -112,6 +112,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Icons and Build
+        run: |
+          pnpm run optimize
+          pnpm run generate
+          pnpm run build
+
       - name: Setup NPM authentication
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc

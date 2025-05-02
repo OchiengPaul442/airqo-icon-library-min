@@ -18,3 +18,8 @@ packages/react/src/icons/
 packages/react-native/src/icons/
 packages/flutter/assets/
 packages/vue/src/icons/
+
+# Generated files
+packages/*/src/index.ts
+packages/*/tsconfig.tsbuildinfo
+packages/core/src/icon-manifest.ts
