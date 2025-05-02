@@ -86,11 +86,60 @@ const getSvgrConfig = (isNative, componentName) => ({
  * Recursively delete a directory and its contents
  */
 function cleanupDirectory(dir) {
-  if (!fs.existsSync(dir)) return;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    return;
+  }
 
   console.log(`🧹 Cleaning directory: ${dir}`);
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
+
+  // Try multiple times with increasing delays
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      // First try to remove files individually
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const filePath = path.join(dir, file);
+        try {
+          if (fs.lstatSync(filePath).isDirectory()) {
+            fs.rmSync(filePath, { recursive: true, force: true });
+          } else {
+            fs.unlinkSync(filePath);
+          }
+        } catch (e) {
+          console.warn(
+            `⚠️ Could not remove ${filePath} will try again: ${e.message}`,
+          );
+        }
+      }
+
+      // Then try to remove the directory itself if it's not empty
+      if (fs.readdirSync(dir).length > 0) {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+
+      // Recreate the directory
+      fs.mkdirSync(dir, { recursive: true });
+      return;
+    } catch (error) {
+      if (attempt === 3) {
+        console.warn(
+          `⚠️ Failed to clean directory ${dir} after ${attempt} attempts: ${error.message}`,
+        );
+        // Create directory anyway if it doesn't exist
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+        return;
+      }
+      // Wait before retrying
+      const delay = attempt * 1000;
+      console.log(`Retrying in ${delay}ms...`);
+      require('child_process').execSync(
+        `timeout /t ${Math.ceil(delay / 1000)} >nul`,
+      );
+    }
+  }
 }
 
 /**
