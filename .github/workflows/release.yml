@@ -49,62 +49,6 @@ jobs:
       - name: Generate Icons
         run: pnpm run generate
 
-      - name: Debug Project Structure
-        run: |
-          echo "=== Project Structure ==="
-          find packages -type f -name "*.ts" -o -name "*.tsx" | sort
-          echo "=== React Index File ==="
-          if [ -f "packages/react/src/index.ts" ]; then
-            head -50 packages/react/src/index.ts
-          fi
-          echo "=== React Native tsconfig.json ==="
-          if [ -f "packages/react-native/tsconfig.json" ]; then
-            cat packages/react-native/tsconfig.json
-          fi
-          echo "=== Sample Icon File ==="
-          if [ -f "packages/react/src/icons/alerts_feedback/AlertsFeedbackAlertCircle.tsx" ]; then
-            cat packages/react/src/icons/alerts_feedback/AlertsFeedbackAlertCircle.tsx
-          fi
-
-      - name: Fix TypeScript files
-        run: |
-          # Fix React package imports
-          if [ -f "packages/react/src/index.ts" ]; then
-            # Create a backup
-            cp packages/react/src/index.ts packages/react/src/index.ts.bak
-            
-            # Replace default imports with named imports
-            sed -i 's/import \([A-Za-z0-9]*\) from/import { \1 } from/g' packages/react/src/index.ts
-            
-            # Alternative fix if components use default exports
-            if grep -q "export default" packages/react/src/icons/alerts_feedback/AlertsFeedbackAlertCircle.tsx 2>/dev/null; then
-              # If components use default exports, restore original and fix export statements
-              cp packages/react/src/index.ts.bak packages/react/src/index.ts
-              echo "// Re-exporting all icons with proper export statements" > packages/react/src/index.ts.new
-              grep "import " packages/react/src/index.ts >> packages/react/src/index.ts.new
-              echo "" >> packages/react/src/index.ts.new
-              echo "export {" >> packages/react/src/index.ts.new
-              grep "import " packages/react/src/index.ts | sed 's/import \([A-Za-z0-9]*\) from.*/  \1,/g' >> packages/react/src/index.ts.new
-              echo "};" >> packages/react/src/index.ts.new
-              mv packages/react/src/index.ts.new packages/react/src/index.ts
-            fi
-          fi
-
-          # Fix React Native tsconfig.json
-          if [ -f "packages/react-native/tsconfig.json" ]; then
-            cat > packages/react-native/tsconfig.json << 'EOF'
-          {
-            "extends": "../../tsconfig.json",
-            "compilerOptions": {
-              "outDir": "dist",
-              "rootDir": "src",
-              "jsx": "react-native"
-            },
-            "include": ["src/**/*.ts", "src/**/*.tsx"]
-          }
-          EOF
-          fi
-
       - name: Build All Packages
         run: pnpm run build
 
@@ -114,7 +58,7 @@ jobs:
           echo "=== Build failed, showing diagnostic information ==="
           echo "=== Checking for error patterns ==="
           find packages -name "*.log" -exec cat {} \; 2>/dev/null || echo "No log files found"
-          echo "=== React index.ts after fixes ==="
+          echo "=== React index.ts ==="
           if [ -f "packages/react/src/index.ts" ]; then
             cat packages/react/src/index.ts
           fi
