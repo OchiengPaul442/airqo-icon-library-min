@@ -18,14 +18,19 @@
     "allowJs": true,
     "composite": true,
     "declarationMap": true,
-    "tsBuildInfoFile": "tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "tsconfig.tsbuildinfo",
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
+    "noEmit": false
   },
   "references": [{ "path": "../core" }],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/types/*.d.ts",
-    "src/icons/**/*"
+    "src/icons/**/*",
+    "src/icons"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

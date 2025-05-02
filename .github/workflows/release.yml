@@ -48,24 +48,37 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Optimize SVGs
-        run: pnpm run optimize
+      - name: Optimize SVGs and Generate Icons
+        run: |
+          echo "Running SVG optimization..."
+          pnpm run optimize
+          echo "Generating icons..."
+          pnpm run generate
+          echo "Verifying generated files..."
+          ls -la packages/react-native/src/icons || echo "Icons not generated in react-native"
+          ls -la packages/react/src/icons || echo "Icons not generated in react"
 
-      - name: Generate Icons
-        run: pnpm run generate
-
+      - name: Build Core Package
+        run: |
+          cd packages/core
+          pnpm run build
+          
       - name: Build All Packages
         run: pnpm run build
-
+        
       - name: Debug Build Failure (if occurs)
         if: failure()
         run: |
           echo "=== Build failed, showing diagnostic information ==="
+          echo "=== Directory structure ==="
+          ls -R packages/
+          echo "=== Package versions ==="
+          pnpm list
           echo "=== Checking for error patterns ==="
           find packages -name "*.log" -exec cat {} \; 2>/dev/null || echo "No log files found"
-          echo "=== React index.ts ==="
-          if [ -f "packages/react/src/index.ts" ]; then
-            cat packages/react/src/index.ts
+          echo "=== React Native index.ts ==="
+          if [ -f "packages/react-native/src/index.ts" ]; then
+            cat packages/react-native/src/index.ts
           fi
 
       - name: Setup Flutter SDK

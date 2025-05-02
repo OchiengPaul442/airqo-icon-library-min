@@ -20,6 +20,6 @@ packages/flutter/assets/
 packages/vue/src/icons/
 
 # Generated files
-# packages/*/src/index.ts
-# packages/*/tsconfig.tsbuildinfo
-# packages/core/src/icon-manifest.ts
+packages/*/src/index.ts
+packages/*/tsconfig.tsbuildinfo
+packages/core/src/icon-manifest.ts
