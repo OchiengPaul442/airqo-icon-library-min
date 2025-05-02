@@ -1,4 +1,4 @@
-import type { IconMeta } from './icon-manifest.ts';
+import type { IconMeta } from './icon-manifest';
 import { icons } from './icon-manifest';
 
 // Define interface for dynamic imports

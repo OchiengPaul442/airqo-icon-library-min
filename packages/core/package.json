@@ -13,7 +13,7 @@
   },
   "scripts": {
     "prebuild": "pnpm run generate-icons",
-    "build": "tsc -b",
+    "build": "tsc src/icon-manifest.ts --module esnext --target es6 && tsc -b",
     "clean": "rm -rf dist",
     "generate-icons": "cd ../.. && node scripts/generate-icons.js",
     "prepare": "pnpm run build"
