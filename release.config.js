@@ -17,16 +17,19 @@ module.exports = {
         failTitle: true,
       },
     ],
-    // Core package publish
+    // Core package publish (must be first since others depend on it)
     [
       '@semantic-release/npm',
       {
         pkgRoot: './packages/core',
         tarballDir: 'dist',
         npmPublish: true,
+        // Ensure core package is published before others
+        verifyConditions: ['@semantic-release/npm', { npmPublish: true }],
+        prepare: ['@semantic-release/npm', { npmPublish: true }],
       },
     ],
-    // React package publish
+    // Other packages that depend on core
     [
       '@semantic-release/npm',
       {
@@ -35,7 +38,6 @@ module.exports = {
         npmPublish: true,
       },
     ],
-    // React Native package publish
     [
       '@semantic-release/npm',
       {
@@ -44,7 +46,6 @@ module.exports = {
         npmPublish: true,
       },
     ],
-    // Vue package publish
     [
       '@semantic-release/npm',
       {
