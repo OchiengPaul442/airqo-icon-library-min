@@ -1,7 +1,18 @@
 {
   "compilerOptions": {
-    "declaration": true,
+    "target": "es6",
+    "module": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "composite": true,
+    "declaration": true,
+    "declarationMap": true,
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
@@ -9,5 +20,12 @@
       "@airqo-icons/react": ["packages/react/src"]
     }
   },
-  "include": ["packages/*/src", "scripts"]
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/react" },
+    { "path": "./packages/react-native" },
+    { "path": "./packages/vue" }
+  ],
+  "include": ["packages/*/src", "scripts"],
+  "exclude": ["node_modules"]
 }

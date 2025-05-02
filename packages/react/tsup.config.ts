@@ -2,9 +2,15 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  format: ['cjs', 'esm'],
-  tsconfig: 'tsconfig.json',
+  format: ['esm', 'cjs'],
   dts: true,
-  external: ['react'],
+  splitting: false,
+  sourcemap: true,
   clean: true,
+  external: ['react'],
+  esbuildOptions(options) {
+    options.loader = {
+      '.svg': 'text',
+    };
+  },
 });
