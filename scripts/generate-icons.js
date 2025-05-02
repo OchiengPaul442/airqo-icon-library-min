@@ -49,7 +49,7 @@ const svgoConfig = {
     {
       name: 'removeAttrs',
       params: {
-        attrs: '(data-name|class)',
+        attrs: ['data-name', 'class', 'xmlns'],
       },
     },
     {
