@@ -83,13 +83,13 @@ const getSvgrConfig = (isNative, componentName) => ({
 // --- Helper Functions ---
 
 /**
- * Cleans up and recreates a directory.
+ * Recursively delete a directory and its contents
  */
 function cleanupDirectory(dir) {
+  if (!fs.existsSync(dir)) return;
+
   console.log(`🧹 Cleaning directory: ${dir}`);
-  if (fs.existsSync(dir)) {
-    fs.rmSync(dir, { recursive: true, force: true });
-  }
+  fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
 }
 

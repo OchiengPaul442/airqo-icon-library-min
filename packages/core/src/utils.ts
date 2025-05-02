@@ -1,33 +1,33 @@
 import type { IconMeta } from './icon-manifest';
-import type { ComponentType } from 'react';
+import { icons } from './icon-manifest';
 
-// Define interface for the icon components map
-interface IconComponentMap {
-  [key: string]: () => Promise<{ [key: string]: ComponentType<any> }>;
+// Define interface for dynamic imports
+interface DynamicImport {
+  [key: string]: () => Promise<any>;
 }
 
-// Lazy-import map for React components
-const iconComponents: IconComponentMap = {};
-
-// Build iconComponents entries at runtime based on manifest
-import { icons } from './icon-manifest';
-icons.forEach((icon: IconMeta) => {
-  const { name, category } = icon;
-  iconComponents[name] = () =>
-    import(`../react/dist/icons/${category}/${name}.js`);
-});
+// Base map for dynamic imports - frameworks should extend this
+const iconImports: DynamicImport = {};
 
 /**
- * Dynamically load a React icon component by its name.
- * @param name - PascalCase icon component name
+ * Register a dynamic import function for an icon
+ * @param name - Icon name
+ * @param importFn - Function that returns a promise resolving to the icon
  */
-export async function getIcon(name: string): Promise<ComponentType<any>> {
-  const loader = iconComponents[name];
+export function registerIconImport(name: string, importFn: () => Promise<any>) {
+  iconImports[name] = importFn;
+}
+
+/**
+ * Dynamically load an icon by its name
+ * @param name - PascalCase icon name
+ */
+export async function getIcon(name: string): Promise<any> {
+  const loader = iconImports[name];
   if (!loader) {
     throw new Error(`Icon not found: ${name}`);
   }
-  const mod = await loader();
-  return mod[name]; // Use named export instead of default
+  return await loader();
 }
 
 /**
