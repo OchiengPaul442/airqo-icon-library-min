@@ -30,6 +30,7 @@ module.exports = {
       {
         pkgRoot: './packages/core',
         npmPublish: true,
+        // Remove any config that could interfere with version management
       },
     ],
     [
@@ -56,7 +57,7 @@ module.exports = {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', 'packages/*/package.json'],
+        assets: ['CHANGELOG.md', 'package.json', 'packages/*/package.json'],
         message:
           'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
       },
