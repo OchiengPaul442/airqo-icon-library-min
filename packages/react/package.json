@@ -17,8 +17,7 @@
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "clean": "rimraf dist",
-    "prepare": "npm run build"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "@airqo-icons/core": "0.1.0"
