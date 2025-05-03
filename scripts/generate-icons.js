@@ -277,7 +277,8 @@ async function processSvgFile(
   }
 
   const rawSvgPath = path.join(categoryDir, file);
-  const componentName = pascalCase(`${category}${pascalCase(baseName)}`);
+  // Generate PascalCase component name by combining category and baseName
+  const componentName = pascalCase(`${category}-${baseName}`);
 
   try {
     // Read Raw SVG
@@ -333,6 +334,7 @@ async function processSvgFile(
 
     if (ensureWrite(rnFilePath, rnComponentCode)) {
       rnExports.push(
+        // Ensure the path uses the PascalCase componentName for the file segment
         `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
       );
     }
@@ -391,6 +393,7 @@ async function processSvgFile(
         rnFallback,
       );
       rnExports.push(
+        // Ensure the path uses the PascalCase componentName for the fallback file segment
         `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
       );
     } catch (fbError) {

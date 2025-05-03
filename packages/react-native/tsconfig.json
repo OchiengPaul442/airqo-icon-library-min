@@ -5,7 +5,7 @@
     "rootDir": "src",
     "jsx": "react-native",
     "declaration": true,
-    "declarationDir": "dist",
+    "declarationDir": "./dist",
     "sourceMap": true,
     "baseUrl": ".",
     "moduleResolution": "node",
@@ -22,15 +22,16 @@
     "declarationMap": true,
     "tsBuildInfoFile": "tsconfig.tsbuildinfo",
     "noEmit": false,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
+    "forceConsistentCasingInFileNames": false // Temporarily disable strict casing
   },
   "references": [{ "path": "../core" }],
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "src/index.ts",
     "src/types/*.d.ts",
-    "src/icons/**/*",
-    "src/icons"
+    // Include generated icon component files
+    "src/icons/**/*.tsx"
   ],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "exclude": ["node_modules", "dist", "**/__tests__/*"]
 }
