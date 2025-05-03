@@ -165,6 +165,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUB_DEV_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ~/.npmrc
         run: |
           echo "Running semantic-release with debug logging"
           npx semantic-release --debug
