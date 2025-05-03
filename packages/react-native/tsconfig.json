@@ -8,6 +8,8 @@
     "declarationDir": "dist",
     "sourceMap": true,
     "baseUrl": ".",
+    "moduleResolution": "node",
+    "module": "commonjs",
     "paths": {
       "@airqo-icons/core": ["../core/src"]
     },
@@ -19,10 +21,8 @@
     "composite": true,
     "declarationMap": true,
     "tsBuildInfoFile": "tsconfig.tsbuildinfo",
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true,
-    "noEmit": false
+    "noEmit": false,
+    "allowImportingTsExtensions": true
   },
   "references": [{ "path": "../core" }],
   "include": [
