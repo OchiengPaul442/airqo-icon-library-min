@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
+    // Use React Native JSX setting to preserve JSX for Metro bundler and avoid TSJSX element type conflicts
     "jsx": "react-native",
     "declaration": true,
     "declarationDir": "./dist",

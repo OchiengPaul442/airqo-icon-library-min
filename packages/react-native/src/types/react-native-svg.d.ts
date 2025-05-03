@@ -42,3 +42,21 @@ declare module 'react-native-svg' {
   export class Defs extends Component<DefsProps> {}
   export class ClipPath extends Component<ClipPathProps> {}
 }
+
+declare module 'react-native-svg' {
+  interface Svg {
+    refs: any;
+  }
+  interface Path {
+    refs: any;
+  }
+  interface G<P = any> {
+    refs: any;
+  }
+  interface Defs {
+    refs: any;
+  }
+  interface ClipPath {
+    refs: any;
+  }
+}
