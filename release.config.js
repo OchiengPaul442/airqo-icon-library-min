@@ -14,6 +14,7 @@ module.exports = {
       {
         pkgRoot: './packages/core',
         npmPublish: true,
+        tarballDir: false,
       },
     ],
     [
@@ -21,6 +22,7 @@ module.exports = {
       {
         pkgRoot: './packages/react',
         npmPublish: true,
+        tarballDir: false,
       },
     ],
     [
@@ -28,6 +30,7 @@ module.exports = {
       {
         pkgRoot: './packages/react-native',
         npmPublish: true,
+        tarballDir: false,
       },
     ],
     [
@@ -35,6 +38,7 @@ module.exports = {
       {
         pkgRoot: './packages/vue',
         npmPublish: true,
+        tarballDir: false,
       },
     ],
     [
