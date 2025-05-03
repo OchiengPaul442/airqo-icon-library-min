@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons/core",
-  "version": "0.1.0",
+  "version": "0.0.0-development",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -18,9 +18,6 @@
     "clean": "rimraf dist",
     "generate-icons": "cd ../.. && node scripts/generate-icons.js",
     "prepare": "pnpm run build"
-  },
-  "peerDependencies": {
-    "react": "^17.0.0 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "csstype": "^3.1.3"

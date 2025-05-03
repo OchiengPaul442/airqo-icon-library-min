@@ -30,23 +30,21 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@airqo-icons'
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
+      - name: Configure NPM
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          echo "@airqo-icons:registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          npm whoami
 
       - name: Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create output directories
         run: |
@@ -123,21 +121,27 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@airqo-icons'
 
       - name: Configure Git User
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Setup NPM
+          
+      - name: Configure NPM
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "@airqo-icons:registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           npm config set access public
-          npm config set registry https://registry.npmjs.org/
           npm whoami
 
       - name: Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create output directories
         run: |
@@ -158,9 +162,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PUB_DEV_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
         run: |
-          echo "Running semantic-release with debug logging"
+          npm whoami
           npx semantic-release --debug
 
       - name: Debug Publishing (if failure)
