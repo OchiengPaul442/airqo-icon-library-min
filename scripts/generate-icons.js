@@ -29,7 +29,6 @@ const REACT_INDEX_FILE = path.join(REACT_PKG_DIR, 'index.ts');
 const RN_INDEX_FILE = path.join(RN_PKG_DIR, 'index.ts');
 
 // --- SVGO Configuration ---
-// FIX: Use a properly formatted SVGO config that doesn't have cleanupIDs plugin
 const svgoConfig = {
   multipass: true,
   js2svg: {
@@ -64,9 +63,9 @@ const svgoConfig = {
   ],
 };
 
-// SVGR configuration with the fixed SVGO config
+// SVGR configuration
 const getSvgrConfig = (isNative, componentName) => ({
-  plugins: ['@svgr/plugin-jsx'], // FIX: Remove '@svgr/plugin-svgo' to handle SVGO separately
+  plugins: ['@svgr/plugin-jsx'],
   typescript: true,
   native: isNative,
   icon: !isNative,
@@ -76,70 +75,36 @@ const getSvgrConfig = (isNative, componentName) => ({
     fill: 'currentColor',
     ...(!isNative && { role: 'img' }),
   },
-  // FIX: Don't pass svgoConfig to SVGR as we'll handle optimization separately
   state: { componentName },
 });
 
 // --- Helper Functions ---
 
 /**
- * Recursively delete a directory and its contents
+ * Recursively create a directory if it doesn't exist
  */
-function cleanupDirectory(dir) {
+function ensureDirectoryExists(dir) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    return;
   }
+}
 
-  console.log(`🧹 Cleaning directory: ${dir}`);
+/**
+ * Recursively delete a directory and recreate it
+ */
+function cleanupDirectory(dir) {
+  ensureDirectoryExists(path.dirname(dir));
 
-  // Try multiple times with increasing delays
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  if (fs.existsSync(dir)) {
     try {
-      // First try to remove files individually
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        const filePath = path.join(dir, file);
-        try {
-          if (fs.lstatSync(filePath).isDirectory()) {
-            fs.rmSync(filePath, { recursive: true, force: true });
-          } else {
-            fs.unlinkSync(filePath);
-          }
-        } catch (e) {
-          console.warn(
-            `⚠️ Could not remove ${filePath} will try again: ${e.message}`,
-          );
-        }
-      }
-
-      // Then try to remove the directory itself if it's not empty
-      if (fs.readdirSync(dir).length > 0) {
-        fs.rmSync(dir, { recursive: true, force: true });
-      }
-
-      // Recreate the directory
-      fs.mkdirSync(dir, { recursive: true });
-      return;
+      fs.rmSync(dir, { recursive: true, force: true });
     } catch (error) {
-      if (attempt === 3) {
-        console.warn(
-          `⚠️ Failed to clean directory ${dir} after ${attempt} attempts: ${error.message}`,
-        );
-        // Create directory anyway if it doesn't exist
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
-        return;
-      }
-      // Wait before retrying
-      const delay = attempt * 1000;
-      console.log(`Retrying in ${delay}ms...`);
-      require('child_process').execSync(
-        `timeout /t ${Math.ceil(delay / 1000)} >nul`,
-      );
+      console.warn(`⚠️ Could not remove ${dir}: ${error.message}`);
     }
   }
+
+  ensureDirectoryExists(dir);
+  console.log(`🧹 Cleaned directory: ${dir}`);
 }
 
 /**
@@ -194,11 +159,12 @@ function pascalCase(input) {
  */
 function ensureWrite(filePath, content) {
   try {
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    ensureDirectoryExists(path.dirname(filePath));
     fs.writeFileSync(filePath, content, 'utf8');
+    return true;
   } catch (error) {
     console.error(`❌ Failed to write file: ${filePath}`, error);
-    throw error;
+    return false;
   }
 }
 
@@ -211,7 +177,6 @@ async function generateComponent(svgContent, componentName, isNative) {
       throw new Error(`Invalid SVG structure provided for ${componentName}`);
     }
 
-    // FIX: Use our improved SVGR config
     const svgrConfig = getSvgrConfig(isNative, componentName);
 
     const transformPromise = svgrTransform(svgContent, svgrConfig, {
@@ -312,14 +277,14 @@ async function processSvgFile(
   }
 
   const rawSvgPath = path.join(categoryDir, file);
-  const componentName = pascalCase(svgKey);
+  const componentName = pascalCase(`${category}${pascalCase(baseName)}`);
 
   try {
     // Read Raw SVG
     const rawSvg = fs.readFileSync(rawSvgPath, 'utf8');
     if (!rawSvg) throw new Error(`File is empty.`);
 
-    // Optimize SVG - FIX: Use our improved optimization function
+    // Optimize SVG
     const optimizedSvg = await optimizeSvg(rawSvg, componentName);
 
     // --- Generate React Component ---
@@ -336,15 +301,16 @@ async function processSvgFile(
       );
       reactComponentCode = generateFallbackComponent(componentName, false);
     }
-    const reactFilePath = path.join(
-      REACT_OUT_DIR,
-      category,
-      `${componentName}.tsx`,
-    );
-    ensureWrite(reactFilePath, reactComponentCode);
-    reactExports.push(
-      `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
-    );
+
+    const reactOutDir = path.join(REACT_OUT_DIR, category);
+    ensureDirectoryExists(reactOutDir);
+    const reactFilePath = path.join(reactOutDir, `${componentName}.tsx`);
+
+    if (ensureWrite(reactFilePath, reactComponentCode)) {
+      reactExports.push(
+        `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
+      );
+    }
 
     // --- Generate React Native Component ---
     let rnComponentCode;
@@ -360,20 +326,26 @@ async function processSvgFile(
       );
       rnComponentCode = generateFallbackComponent(componentName, true);
     }
-    const rnFilePath = path.join(RN_OUT_DIR, category, `${componentName}.tsx`);
-    ensureWrite(rnFilePath, rnComponentCode);
-    rnExports.push(
-      `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
-    );
+
+    const rnOutDir = path.join(RN_OUT_DIR, category);
+    ensureDirectoryExists(rnOutDir);
+    const rnFilePath = path.join(rnOutDir, `${componentName}.tsx`);
+
+    if (ensureWrite(rnFilePath, rnComponentCode)) {
+      rnExports.push(
+        `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
+      );
+    }
 
     // --- Copy Optimized SVG Assets ---
-    const assetDestinations = [
-      path.join(FLUTTER_ASSETS_DIR, category, file),
-      path.join(VUE_ICONS_DIR, category, file),
-    ];
-    for (const destPath of assetDestinations) {
-      ensureWrite(destPath, optimizedSvg);
-    }
+    const flutterAssetDir = path.join(FLUTTER_ASSETS_DIR, category);
+    const vueIconDir = path.join(VUE_ICONS_DIR, category);
+
+    ensureDirectoryExists(flutterAssetDir);
+    ensureDirectoryExists(vueIconDir);
+
+    ensureWrite(path.join(flutterAssetDir, file), optimizedSvg);
+    ensureWrite(path.join(vueIconDir, file), optimizedSvg);
 
     // Add to manifest and mark svgKey as processed
     manifest.push({ name: componentName, category });
@@ -388,33 +360,44 @@ async function processSvgFile(
     allErrors.push(`Processing ${category}/${file}: ${error.message}`);
 
     // Generate fallbacks for failures
-    const fallbackComponentName = pascalCase(svgKey);
+    const fallbackComponentName = componentName;
     try {
       const reactFallback = generateFallbackComponent(
         fallbackComponentName,
         false,
       );
+      const reactOutDir = path.join(REACT_OUT_DIR, category);
+      ensureDirectoryExists(reactOutDir);
       ensureWrite(
-        path.join(REACT_OUT_DIR, category, `${fallbackComponentName}.tsx`),
+        path.join(reactOutDir, `${fallbackComponentName}.tsx`),
         reactFallback,
       );
       reactExports.push(
         `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
       );
     } catch (fbError) {
-      /* ignore fallback write error */
+      console.error(
+        `❌ Could not create React fallback for ${fallbackComponentName}:`,
+        fbError.message,
+      );
     }
+
     try {
       const rnFallback = generateFallbackComponent(fallbackComponentName, true);
+      const rnOutDir = path.join(RN_OUT_DIR, category);
+      ensureDirectoryExists(rnOutDir);
       ensureWrite(
-        path.join(RN_OUT_DIR, category, `${fallbackComponentName}.tsx`),
+        path.join(rnOutDir, `${fallbackComponentName}.tsx`),
         rnFallback,
       );
       rnExports.push(
         `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
       );
     } catch (fbError) {
-      /* ignore fallback write error */
+      console.error(
+        `❌ Could not create React Native fallback for ${fallbackComponentName}:`,
+        fbError.message,
+      );
     }
 
     return false;
@@ -443,11 +426,14 @@ async function main() {
       );
     }
 
-    // 2. Clean Output Directories
-    cleanupDirectory(REACT_OUT_DIR);
-    cleanupDirectory(RN_OUT_DIR);
-    cleanupDirectory(FLUTTER_ASSETS_DIR);
-    cleanupDirectory(VUE_ICONS_DIR);
+    // 2. Create Output Directories
+    console.log('Creating output directories...');
+    [REACT_OUT_DIR, RN_OUT_DIR, FLUTTER_ASSETS_DIR, VUE_ICONS_DIR].forEach(
+      (dir) => {
+        ensureDirectoryExists(dir);
+        console.log(`✅ Created directory: ${dir}`);
+      },
+    );
 
     // 3. Read Categories and Process SVGs
     const categories = fs
@@ -460,8 +446,12 @@ async function main() {
     // Process each category
     for (const category of categories) {
       const categoryDir = path.join(SVGS_DIR, category);
-      let categoryFiles;
+      ensureDirectoryExists(path.join(REACT_OUT_DIR, category));
+      ensureDirectoryExists(path.join(RN_OUT_DIR, category));
+      ensureDirectoryExists(path.join(FLUTTER_ASSETS_DIR, category));
+      ensureDirectoryExists(path.join(VUE_ICONS_DIR, category));
 
+      let categoryFiles;
       try {
         categoryFiles = fs
           .readdirSync(categoryDir)
@@ -518,13 +508,10 @@ export const icons: ReadonlyArray<IconMeta> = ${JSON.stringify(
 
     // 5. Write Barrel Index Files
     console.log('✍️ Writing barrel index files...');
-    // Filter unique exports and add .tsx extension
-    const uniqueReactExports = [...new Set(reactExports)].map((exp) => {
-      return exp.replace(/from '(.+)';/, "from '$1.tsx';");
-    });
-    const uniqueRnExports = [...new Set(rnExports)].map((exp) => {
-      return exp.replace(/from '(.+)';/, "from '$1.tsx';");
-    });
+
+    // Filter unique exports
+    const uniqueReactExports = [...new Set(reactExports)];
+    const uniqueRnExports = [...new Set(rnExports)];
 
     const reactIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueReactExports
       .sort()

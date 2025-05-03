@@ -48,12 +48,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Optimize SVGs and Generate Icons
+      - name: Create output directories
+        run: |
+          mkdir -p packages/react/src/icons
+          mkdir -p packages/react-native/src/icons
+          mkdir -p packages/flutter/assets
+          mkdir -p packages/vue/src/icons
+          mkdir -p packages/core/src
+
+      - name: Optimize SVGs
         run: |
           echo "Running SVG optimization..."
           pnpm run optimize
+
+      - name: Generate Icons
+        run: |
           echo "Generating icons..."
-          pnpm run generate
+          node scripts/generate-icons.js
           echo "Verifying generated files..."
           ls -la packages/react-native/src/icons || echo "Icons not generated in react-native"
           ls -la packages/react/src/icons || echo "Icons not generated in react"
@@ -62,10 +73,10 @@ jobs:
         run: |
           cd packages/core
           pnpm run build
-          
+
       - name: Build All Packages
         run: pnpm run build
-        
+
       - name: Debug Build Failure (if occurs)
         if: failure()
         run: |
@@ -79,6 +90,10 @@ jobs:
           echo "=== React Native index.ts ==="
           if [ -f "packages/react-native/src/index.ts" ]; then
             cat packages/react-native/src/index.ts
+          fi
+          echo "=== React index.ts ==="
+          if [ -f "packages/react/src/index.ts" ]; then
+            cat packages/react/src/index.ts
           fi
 
       - name: Setup Flutter SDK
@@ -125,10 +140,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Create output directories
+        run: |
+          mkdir -p packages/react/src/icons
+          mkdir -p packages/react-native/src/icons
+          mkdir -p packages/flutter/assets
+          mkdir -p packages/vue/src/icons
+          mkdir -p packages/core/src
+
       - name: Generate Icons and Build
         run: |
           pnpm run optimize
-          pnpm run generate
+          node scripts/generate-icons.js
           pnpm run build
 
       - name: Setup NPM authentication
