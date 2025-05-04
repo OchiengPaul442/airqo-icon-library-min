@@ -39,7 +39,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      # Create basic .npmrc with npm token for later use
+      # Create basic .npmrc with npm token
       - name: Setup NPM Authentication
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
@@ -52,6 +52,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Install semantic-release-exec plugin
+      - name: Install additional dependencies
+        run: pnpm add -D @semantic-release/exec
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -69,15 +75,15 @@ jobs:
           node scripts/generate-icons.js
           pnpm run build
 
-      # Only run release steps on main branch
-      - name: Run Semantic Release
-        if: github.ref == 'refs/heads/main'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Make the publish scripts executable
+      - name: Prepare scripts
         run: |
-          # Save NPM token to each package directory
+          chmod +x scripts/update-versions.js
+          chmod +x scripts/publish-packages.js
+
+      # Save NPM token to each package directory for publishing
+      - name: Setup package NPM Authentication
+        run: |
           for pkg in core react react-native vue; do
             echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "packages/$pkg/.npmrc"
             echo "registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
@@ -85,21 +91,27 @@ jobs:
             echo "access=public" >> "packages/$pkg/.npmrc"
             chmod 0600 "packages/$pkg/.npmrc"
           done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-          # Verify authentication works
-          npm whoami
+      # Only run release steps on main branch
+      - name: Run Semantic Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release --debug
 
-          # Run semantic-release
-          npx semantic-release --debug
-
-      - name: Manual Package Publishing
+      # Manual fallback if semantic-release fails
+      - name: Manual Package Publishing (Fallback)
         if: github.ref == 'refs/heads/main' && failure()
         run: |
           echo "Attempting manual package publishing..."
-          # Ensure npm auth is still set up
-          npm config list
+          # Verify auth
+          npm whoami || echo "Authentication failed, but continuing anyway"
 
-          # Publish each package individually
+          # Try to publish each package directly with npm
           for pkg in core react react-native vue; do
             cd "packages/$pkg"
             echo "Publishing @airqo-icons-min/$pkg..."

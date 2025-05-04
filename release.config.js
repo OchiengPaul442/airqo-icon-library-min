@@ -25,33 +25,12 @@ module.exports = {
         changelogFile: 'CHANGELOG.md',
       },
     ],
+    // Execute a custom script to manually update package versions instead of using @semantic-release/npm
     [
-      '@semantic-release/npm',
+      '@semantic-release/exec',
       {
-        pkgRoot: './packages/core',
-        npmPublish: true,
-        // Remove tarball option since it's not needed and can cause issues
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        pkgRoot: './packages/react',
-        npmPublish: true,
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        pkgRoot: './packages/react-native',
-        npmPublish: true,
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        pkgRoot: './packages/vue',
-        npmPublish: true,
+        prepareCmd: 'node scripts/update-versions.js ${nextRelease.version}',
+        publishCmd: 'node scripts/publish-packages.js',
       },
     ],
     [
