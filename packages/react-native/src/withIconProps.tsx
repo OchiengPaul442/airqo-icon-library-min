@@ -1,42 +1,47 @@
 import * as React from 'react';
-import { ComponentType } from 'react';
+import {
+  ComponentType,
+  ForwardedRef,
+  PropsWithoutRef,
+  RefAttributes,
+} from 'react';
 import { SvgProps } from 'react-native-svg';
+import { IconProps, IconComponent } from './types/icon';
 
 /**
- * Interface for components with size prop
- */
-export interface IconProps extends SvgProps {
-  size?: number;
-}
-
-/**
- * Higher order component that adds size prop support to SVG icons
- * Will automatically set width and height to the size prop value if provided
+ * Simplified HOC that adds size prop support to SVG icons
+ * Automatically sets width and height based on size prop if provided
  */
 export function withIconProps<P extends SvgProps>(
   WrappedComponent: ComponentType<P>,
-): ComponentType<P & IconProps> {
-  const WithIconProps = (props: P & IconProps) => {
-    // If size prop is provided, use it for both width and height unless they're explicitly set
+): IconComponent {
+  const WithIconProps = React.forwardRef<any, P & IconProps>((props, ref) => {
+    // Extract size and other props safely
     const { size, ...otherProps } = props;
 
-    const finalProps: P = {
+    // Prepare the props for the wrapped component
+    const componentProps = {
       ...otherProps,
-      // Only set width/height from size if they're not already explicitly provided
-      ...(size !== undefined && props.width === undefined
-        ? { width: size }
-        : {}),
-      ...(size !== undefined && props.height === undefined
-        ? { height: size }
-        : {}),
-    } as P;
+      width:
+        props.width !== undefined
+          ? props.width
+          : size !== undefined
+          ? size
+          : 24,
+      height:
+        props.height !== undefined
+          ? props.height
+          : size !== undefined
+          ? size
+          : 24,
+    } as unknown as P;
 
-    return <WrappedComponent {...finalProps} />;
-  };
+    return <WrappedComponent ref={ref} {...componentProps} />;
+  });
 
   WithIconProps.displayName = `WithIconProps(${
     WrappedComponent.displayName || WrappedComponent.name || 'Component'
   })`;
 
-  return WithIconProps;
+  return WithIconProps as IconComponent;
 }

@@ -137,10 +137,13 @@ import {
 function IconsDemo() {
   return (
     <View style={styles.container}>
-      <AlertTriangle width={24} height={24} fill="red" />
-      <Bell03 width={32} height={32} fill="#3366FF" />
+      {/* Use the size prop for equal width/height */}
+      <AlertTriangle size={24} fill="red" />
 
-      {/* With stroke customization */}
+      {/* Size prop takes precedence unless width/height are explicitly set */}
+      <Bell03 size={32} fill="#3366FF" />
+
+      {/* Explicit width/height overrides size */}
       <NotificationBox
         width={40}
         height={40}
@@ -151,8 +154,7 @@ function IconsDemo() {
 
       {/* Responding to touch events */}
       <AlertTriangle
-        width={30}
-        height={30}
+        size={30}
         fill="orange"
         onPress={() => console.log('Icon pressed')}
       />
@@ -291,15 +293,16 @@ Plus all standard SVG attributes like `className`, `style`, `onClick`, etc.
 
 ### React Native
 
-| Prop          | Type   | Default        | Description                  |
-| ------------- | ------ | -------------- | ---------------------------- |
-| `width`       | number | 24             | Width of icon                |
-| `height`      | number | 24             | Height of icon               |
-| `fill`        | string | 'currentColor' | Fill color                   |
-| `stroke`      | string | 'currentColor' | Stroke color (if applicable) |
-| `strokeWidth` | number | 2              | Stroke width (if applicable) |
+| Prop          | Type   | Default        | Description                                   |
+| ------------- | ------ | -------------- | --------------------------------------------- |
+| `size`        | number | 24             | Sets both width and height (convenience prop) |
+| `width`       | number | size or 24     | Width of icon (overrides size)                |
+| `height`      | number | size or 24     | Height of icon (overrides size)               |
+| `fill`        | string | 'currentColor' | Fill color                                    |
+| `stroke`      | string | 'currentColor' | Stroke color (if applicable)                  |
+| `strokeWidth` | number | 2              | Stroke width (if applicable)                  |
 
-Plus all props from `react-native-svg`.
+Plus all props from `react-native-svg` including touch event handlers.
 
 ### Flutter
 

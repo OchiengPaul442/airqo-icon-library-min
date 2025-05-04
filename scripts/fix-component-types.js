@@ -5,7 +5,7 @@
  * This script fixes TypeScript issues in the generated React components by:
  * 1. Adding proper imports for the IconProps type
  * 2. Updating the component props to use IconProps
- * 3. Adding proper size and color handling
+ * 3. Adding proper size and color handling with forwardRef
  */
 const fs = require('fs');
 const path = require('path');
@@ -22,37 +22,45 @@ const REACT_ICONS_DIR = path.join(REACT_PKG_DIR, 'icons');
  * @returns {string[]} Array of file paths
  */
 function findFilesWithExt(dir, ext) {
-  let results = [];
-  const list = fs.readdirSync(dir);
+  // Optimization: Use a set for faster lookups
+  const results = new Set();
 
-  list.forEach((file) => {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
+  function searchDir(currentDir) {
+    const list = fs.readdirSync(currentDir);
 
-    if (stat.isDirectory()) {
-      // Recursive case: search subdirectories
-      results = results.concat(findFilesWithExt(filePath, ext));
-    } else if (file.endsWith(ext)) {
-      // Base case: found a file with the right extension
-      results.push(filePath);
+    for (const file of list) {
+      const filePath = path.join(currentDir, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat.isDirectory()) {
+        // Recursive case: search subdirectories
+        searchDir(filePath);
+      } else if (file.endsWith(ext)) {
+        // Base case: found a file with the right extension
+        results.add(filePath);
+      }
     }
-  });
+  }
 
-  return results;
+  searchDir(dir);
+  return Array.from(results);
 }
 
 /**
  * Processes a single React component file
  * @param {string} filePath Path to the component file
+ * @returns {boolean} Whether the file was modified
  */
 function processReactComponent(filePath) {
   try {
-    console.log(`Processing: ${path.relative(ROOT_DIR, filePath)}`);
+    const relativePath = path.relative(ROOT_DIR, filePath);
+    console.log(`Processing: ${relativePath}`);
+
     let content = fs.readFileSync(filePath, 'utf8');
 
     // Skip if the file has already been processed
     if (content.includes('IconProps')) {
-      return;
+      return false;
     }
 
     // Add import for IconProps
@@ -80,7 +88,7 @@ function processReactComponent(filePath) {
 
     // Update SVG element attributes
     content = content.replace(/<svg([^>]*)>/g, (match, attributes) => {
-      // Don't replace if it already has width, height and stroke attributes
+      // Don't replace if it already has size and color attributes
       if (
         attributes.includes('width={size}') &&
         attributes.includes('stroke={color}')
@@ -97,7 +105,7 @@ function processReactComponent(filePath) {
       {...props}>`;
     });
 
-    // Fix export
+    // Fix export with displayName for better debugging
     const componentName = path.basename(filePath, '.tsx');
     content = content.replace(
       /export default \w+;/,
@@ -105,9 +113,11 @@ function processReactComponent(filePath) {
     );
 
     fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`✅ Fixed: ${path.relative(ROOT_DIR, filePath)}`);
+    console.log(`✅ Fixed: ${relativePath}`);
+    return true;
   } catch (error) {
     console.error(`❌ Error processing ${filePath}:`, error);
+    return false;
   }
 }
 
@@ -117,21 +127,30 @@ function processReactComponent(filePath) {
 function main() {
   console.log('🔧 Fixing React component types...');
 
-  // Find all React component files using native Node.js methods
+  // Find all React component files
   const componentFiles = findFilesWithExt(REACT_ICONS_DIR, '.tsx');
   console.log(`Found ${componentFiles.length} component files to process.`);
 
   let processed = 0;
-  for (const file of componentFiles) {
-    processReactComponent(file);
-    processed++;
+  let modified = 0;
 
+  // Process each file
+  for (const file of componentFiles) {
+    const wasModified = processReactComponent(file);
+    processed++;
+    if (wasModified) modified++;
+
+    // Show progress every 10 files
     if (processed % 10 === 0) {
-      console.log(`Progress: ${processed}/${componentFiles.length}`);
+      console.log(
+        `Progress: ${processed}/${componentFiles.length} (${modified} modified)`,
+      );
     }
   }
 
-  console.log(`🎉 Finished processing ${processed} files.`);
+  console.log(
+    `🎉 Finished processing ${processed} files. Modified ${modified} files.`,
+  );
 }
 
 // Run main function

@@ -40,24 +40,24 @@ const svgoConfig = {
       name: 'preset-default',
       params: {
         overrides: {
-          removeViewBox: false,
+          removeViewBox: false, // Maintain viewBox for proper scaling
         },
       },
     },
-    'removeDimensions',
+    'removeDimensions', // Remove width/height to make icons resizable
     {
       name: 'removeAttrs',
       params: {
-        attrs: ['data-name', 'class', 'xmlns'],
+        attrs: ['data-name', 'class', 'xmlns'], // Remove unnecessary attributes
       },
     },
     {
-      name: 'sortAttrs',
+      name: 'sortAttrs', // Sort attributes for consistent output
     },
     {
       name: 'addAttributesToSVGElement',
       params: {
-        attributes: [{ role: 'img' }],
+        attributes: [{ role: 'img' }], // Add role for accessibility
       },
     },
   ],
@@ -107,6 +107,9 @@ function cleanupDirectory(dir) {
 
 /**
  * Optimizes SVG content using SVGO directly.
+ * @param {string} svgContent - The raw SVG content
+ * @param {string} iconName - Name of the icon for logging
+ * @returns {Promise<string>} Optimized SVG content
  */
 async function optimizeSvg(svgContent, iconName) {
   try {
@@ -141,19 +144,24 @@ async function optimizeSvg(svgContent, iconName) {
 
 /**
  * Converts a string to PascalCase.
+ * @param {string} input - Input string to convert
+ * @returns {string} PascalCase string
  */
 function pascalCase(input) {
   return input
     .toLowerCase()
-    .replace(/[-_]+/g, ' ')
-    .replace(/[^\w\s]/g, '')
-    .replace(/ (.)/g, (m, w) => w.toUpperCase())
-    .replace(/^(.)/, (m, w) => w.toUpperCase())
-    .replace(/\s+/g, '');
+    .replace(/[-_]+/g, ' ') // Replace hyphens and underscores with spaces
+    .replace(/[^\w\s]/g, '') // Remove non-word characters
+    .replace(/ (.)/g, (m, w) => w.toUpperCase()) // Capitalize first letter of each word
+    .replace(/^(.)/, (m, w) => w.toUpperCase()) // Capitalize first letter of string
+    .replace(/\s+/g, ''); // Remove spaces
 }
 
 /**
  * Ensures directory exists and writes file content.
+ * @param {string} filePath - Path to write file to
+ * @param {string} content - Content to write
+ * @returns {boolean} Whether write was successful
  */
 function ensureWrite(filePath, content) {
   try {
@@ -168,6 +176,10 @@ function ensureWrite(filePath, content) {
 
 /**
  * Generates a React or React Native component from SVG content using SVGR.
+ * @param {string} svgContent - Optimized SVG content
+ * @param {string} componentName - PascalCase component name
+ * @param {boolean} isNative - Whether to generate a React Native component
+ * @returns {Promise<string>} Component code
  */
 async function generateComponent(svgContent, componentName, isNative) {
   try {
@@ -177,6 +189,7 @@ async function generateComponent(svgContent, componentName, isNative) {
 
     const svgrConfig = getSvgrConfig(isNative, componentName);
 
+    // Add a timeout to prevent hanging on problematic SVGs
     const transformPromise = svgrTransform(svgContent, svgrConfig, {
       componentName,
     });
@@ -218,7 +231,10 @@ async function generateComponent(svgContent, componentName, isNative) {
 }
 
 /**
- * Generates a basic fallback component string.
+ * Generates a basic fallback component string when normal generation fails.
+ * @param {string} componentName - Component name
+ * @param {boolean} isNative - Whether to generate a React Native fallback
+ * @returns {string} Fallback component code
  */
 function generateFallbackComponent(componentName, isNative) {
   console.warn(
@@ -226,6 +242,7 @@ function generateFallbackComponent(componentName, isNative) {
       isNative ? 'Native' : 'Web'
     })`,
   );
+
   const propsType = isNative ? 'SvgProps' : 'React.SVGProps<SVGSVGElement>';
   const SvgComponent = isNative ? 'Svg' : 'svg';
   const PathComponent = isNative ? 'Path' : 'path';
@@ -254,6 +271,15 @@ export default ${componentName};`;
 
 /**
  * Process a single SVG file
+ * @param {string} categoryDir - Directory path for the category
+ * @param {string} category - Category name
+ * @param {string} file - SVG filename
+ * @param {Set<string>} processedSvgs - Set of processed SVG keys
+ * @param {Array} manifest - Array to store manifest entries
+ * @param {Array<string>} reactExports - Array to store React export statements
+ * @param {Array<string>} rnExports - Array to store React Native export statements
+ * @param {Array<string>} allErrors - Array to store error messages
+ * @returns {Promise<boolean>} Whether processing was successful
  */
 async function processSvgFile(
   categoryDir,
@@ -271,7 +297,7 @@ async function processSvgFile(
   // Skip duplicates
   if (processedSvgs.has(svgKey)) {
     console.log(`    ⏩ Skipping duplicate key: ${svgKey}`);
-    return;
+    return false;
   }
 
   const rawSvgPath = path.join(categoryDir, file);
@@ -331,8 +357,8 @@ async function processSvgFile(
     const rnFilePath = path.join(rnOutDir, `${componentName}.tsx`);
 
     if (ensureWrite(rnFilePath, rnComponentCode)) {
+      // Ensure the path uses the PascalCase componentName for the file segment
       rnExports.push(
-        // Ensure the path uses the PascalCase componentName for the file segment
         `export { default as ${componentName} } from './icons/${category}/${componentName}';`,
       );
     }
@@ -391,7 +417,6 @@ async function processSvgFile(
         rnFallback,
       );
       rnExports.push(
-        // Ensure the path uses the PascalCase componentName for the fallback file segment
         `export { default as ${fallbackComponentName} } from './icons/${category}/${fallbackComponentName}';`,
       );
     } catch (fbError) {
@@ -403,6 +428,72 @@ async function processSvgFile(
 
     return false;
   }
+}
+
+/**
+ * Process all SVGs in a category in parallel with concurrency control
+ * @param {string} category - Category name
+ * @param {Array<string>} files - Array of filenames
+ * @param {Set<string>} processedSvgs - Set of processed SVG keys
+ * @param {Array} manifest - Array to store manifest entries
+ * @param {Array<string>} reactExports - Array to store React export statements
+ * @param {Array<string>} rnExports - Array to store React Native export statements
+ * @param {Array<string>} allErrors - Array to store error messages
+ * @param {number} concurrency - Max number of parallel processes
+ * @returns {Promise<number>} Number of successfully processed files
+ */
+async function processCategoryFiles(
+  category,
+  files,
+  processedSvgs,
+  manifest,
+  reactExports,
+  rnExports,
+  allErrors,
+  concurrency = 4,
+) {
+  const categoryDir = path.join(SVGS_DIR, category);
+  let successCount = 0;
+
+  // Create output directories for this category once
+  const categoryDirs = [
+    path.join(REACT_OUT_DIR, category),
+    path.join(RN_OUT_DIR, category),
+    path.join(FLUTTER_ASSETS_DIR, category),
+    path.join(VUE_ICONS_DIR, category),
+  ];
+
+  categoryDirs.forEach((dir) => ensureDirectoryExists(dir));
+
+  // Process files in batches to control concurrency
+  for (let i = 0; i < files.length; i += concurrency) {
+    const batch = files.slice(i, i + concurrency);
+    const results = await Promise.all(
+      batch.map((file) =>
+        processSvgFile(
+          categoryDir,
+          category,
+          file,
+          processedSvgs,
+          manifest,
+          reactExports,
+          rnExports,
+          allErrors,
+        ),
+      ),
+    );
+
+    successCount += results.filter(Boolean).length;
+
+    // Show progress every batch
+    console.log(
+      `    Progress: ${Math.min(i + concurrency, files.length)}/${
+        files.length
+      }`,
+    );
+  }
+
+  return successCount;
 }
 
 /**
@@ -447,10 +538,6 @@ async function main() {
     // Process each category
     for (const category of categories) {
       const categoryDir = path.join(SVGS_DIR, category);
-      ensureDirectoryExists(path.join(REACT_OUT_DIR, category));
-      ensureDirectoryExists(path.join(RN_OUT_DIR, category));
-      ensureDirectoryExists(path.join(FLUTTER_ASSETS_DIR, category));
-      ensureDirectoryExists(path.join(VUE_ICONS_DIR, category));
 
       let categoryFiles;
       try {
@@ -468,21 +555,17 @@ async function main() {
         `\nProcessing category: ${category} (${categoryFiles.length} SVGs)`,
       );
 
-      // Process files sequentially to avoid overwhelming system resources
-      let categorySuccessCount = 0;
-      for (const file of categoryFiles) {
-        const success = await processSvgFile(
-          categoryDir,
-          category,
-          file,
-          processedSvgs,
-          manifest,
-          reactExports,
-          rnExports,
-          allErrors,
-        );
-        if (success) categorySuccessCount++;
-      }
+      // Use the new helper function for concurrent processing
+      const categorySuccessCount = await processCategoryFiles(
+        category,
+        categoryFiles,
+        processedSvgs,
+        manifest,
+        reactExports,
+        rnExports,
+        allErrors,
+        4, // Concurrency level - adjust based on system capabilities
+      );
 
       totalProcessed += categorySuccessCount;
       console.log(
@@ -510,19 +593,19 @@ export const icons: ReadonlyArray<IconMeta> = ${JSON.stringify(
     // 5. Write Barrel Index Files
     console.log('✍️ Writing barrel index files...');
 
-    // Filter unique exports
-    const uniqueReactExports = [...new Set(reactExports)];
-    const uniqueRnExports = [...new Set(rnExports)];
+    // Filter unique exports and sort them
+    const uniqueReactExports = [...new Set(reactExports)].sort();
+    const uniqueRnExports = [...new Set(rnExports)].sort();
 
-    const reactIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueReactExports
-      .sort()
-      .join('\n')}\n`;
+    const reactIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueReactExports.join(
+      '\n',
+    )}\n`;
     ensureWrite(REACT_INDEX_FILE, reactIndexContent);
     console.log('    ✅ React index written successfully.');
 
-    const rnIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueRnExports
-      .sort()
-      .join('\n')}\n`;
+    const rnIndexContent = `// Auto-generated by generate-icons.js script @ ${new Date().toISOString()}\n${uniqueRnExports.join(
+      '\n',
+    )}\n`;
     ensureWrite(RN_INDEX_FILE, rnIndexContent);
     console.log('    ✅ React Native index written successfully.');
 
@@ -545,6 +628,7 @@ export const icons: ReadonlyArray<IconMeta> = ${JSON.stringify(
       console.warn(
         `\n⚠️ Generation completed with ${allErrors.length} errors:`,
       );
+
       // Only show first 10 unique errors to avoid overwhelming the console
       const uniqueErrors = [...new Set(allErrors)];
       uniqueErrors
@@ -552,9 +636,11 @@ export const icons: ReadonlyArray<IconMeta> = ${JSON.stringify(
         .forEach((err, index) =>
           console.warn(`   ${index + 1}. ${err.split('\n')[0]}`),
         );
+
       if (uniqueErrors.length > 10) {
         console.warn(`   ... and ${uniqueErrors.length - 10} more errors`);
       }
+
       console.warn(
         '\nCheck the logs above for details. Some components were replaced with fallbacks.',
       );

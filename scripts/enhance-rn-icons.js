@@ -3,17 +3,19 @@
  * enhance-rn-icons.js
  *
  * This script wraps all React Native icon components with the withIconProps HOC
- * to add size prop support and updates the index file exports.
+ * to add size prop support and converts file imports to use the IconComponent type.
  */
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 
+// Promisify file system operations for better async/await usage
 const readdir = promisify(fs.readdir);
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const stat = promisify(fs.stat);
 
+// Define paths
 const RN_ICONS_DIR = path.resolve(
   __dirname,
   '../packages/react-native/src/icons',
@@ -25,6 +27,8 @@ const RN_INDEX_PATH = path.resolve(
 
 /**
  * Recursively gets all files in a directory
+ * @param {string} dir - Directory to search
+ * @returns {Promise<string[]>} Array of file paths
  */
 async function getFiles(dir) {
   const subdirs = await readdir(dir);
@@ -39,8 +43,17 @@ async function getFiles(dir) {
 
 /**
  * Updates a React Native icon component to use withIconProps HOC
+ * @param {string} content - File content
+ * @param {string} componentName - Component name
+ * @param {string} filePath - File path
+ * @returns {string} Updated content
  */
 function enhanceIconComponent(content, componentName, filePath) {
+  // Skip if already enhanced
+  if (content.includes('withIconProps')) {
+    return content;
+  }
+
   // Calculate the relative path to the withIconProps file
   const iconDirPath = path.dirname(filePath);
   const packageSrcPath = path.resolve(
@@ -85,43 +98,70 @@ export default ${exportMatch[1]}WithProps;`,
  */
 async function enhanceAllIconComponents() {
   try {
-    console.log('Enhancing React Native icons with size prop support...');
+    console.log('🔄 Enhancing React Native icons with size prop support...');
 
     // 1. Get all React Native icon components
     const files = await getFiles(RN_ICONS_DIR);
     const tsxFiles = files.filter((file) => file.endsWith('.tsx'));
 
-    console.log(`Found ${tsxFiles.length} icon components to enhance.`);
+    console.log(`🔍 Found ${tsxFiles.length} icon components to process.`);
 
     // 2. Update each component
     let updatedCount = 0;
-    for (const file of tsxFiles) {
-      const content = await readFile(file, 'utf8');
-      const componentName = path.basename(file, '.tsx');
-      const updatedContent = enhanceIconComponent(content, componentName, file);
+    let skippedCount = 0;
 
-      if (content !== updatedContent) {
-        await writeFile(file, updatedContent);
-        updatedCount++;
-        process.stdout.write(
-          `\rUpdated ${updatedCount}/${tsxFiles.length} components...`,
-        );
-      }
+    // Process in batches of 20 to avoid overwhelming the console with messages
+    const batchSize = 20;
+    for (let i = 0; i < tsxFiles.length; i += batchSize) {
+      const batch = tsxFiles.slice(i, i + batchSize);
+
+      await Promise.all(
+        batch.map(async (file) => {
+          try {
+            const content = await readFile(file, 'utf8');
+            const componentName = path.basename(file, '.tsx');
+            const updatedContent = enhanceIconComponent(
+              content,
+              componentName,
+              file,
+            );
+
+            if (content !== updatedContent) {
+              await writeFile(file, updatedContent);
+              updatedCount++;
+            } else {
+              skippedCount++;
+            }
+          } catch (fileError) {
+            console.error(
+              `❌ Error processing file ${file}:`,
+              fileError.message,
+            );
+          }
+        }),
+      );
+
+      // Show progress update for each batch
+      console.log(
+        `Progress: ${Math.min(i + batchSize, tsxFiles.length)}/${
+          tsxFiles.length
+        } files processed`,
+      );
     }
 
     console.log(
-      `\n✅ Successfully enhanced ${updatedCount} React Native icon components.`,
+      `\n✅ Summary: ${updatedCount} components enhanced, ${skippedCount} already enhanced or skipped.`,
     );
 
-    console.log('All icons now support the size prop in React Native!');
+    console.log('🚀 All icons now support the size prop in React Native!');
   } catch (error) {
-    console.error('Error updating React Native components:', error);
+    console.error('❌ Error enhancing React Native components:', error);
     process.exit(1);
   }
 }
 
-// Run the main function
+// Run the main function with proper error handling
 enhanceAllIconComponents().catch((error) => {
-  console.error('Unhandled error during script execution:', error);
+  console.error('❌ Unhandled error during script execution:', error);
   process.exit(1);
 });
