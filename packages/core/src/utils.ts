@@ -1,9 +1,15 @@
 import type { IconMeta } from './icon-manifest';
 import { icons } from './icon-manifest';
 
+// Define a type for icon module imports
+type IconModule = {
+  default: unknown;
+  [key: string]: unknown;
+};
+
 // Define interface for dynamic imports
 interface DynamicImport {
-  [key: string]: () => Promise<any>;
+  [key: string]: () => Promise<IconModule>;
 }
 
 // Base map for dynamic imports - frameworks should extend this
@@ -14,7 +20,10 @@ const iconImports: DynamicImport = {};
  * @param name - Icon name
  * @param importFn - Function that returns a promise resolving to the icon
  */
-export function registerIconImport(name: string, importFn: () => Promise<any>) {
+export function registerIconImport(
+  name: string,
+  importFn: () => Promise<IconModule>,
+) {
   iconImports[name] = importFn;
 }
 
@@ -22,7 +31,7 @@ export function registerIconImport(name: string, importFn: () => Promise<any>) {
  * Dynamically load an icon by its name
  * @param name - PascalCase icon name
  */
-export async function getIcon(name: string): Promise<any> {
+export async function getIcon(name: string): Promise<IconModule> {
   const loader = iconImports[name];
   if (!loader) {
     throw new Error(`Icon not found: ${name}`);

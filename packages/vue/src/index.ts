@@ -1,5 +1,5 @@
-import type { App, Plugin } from 'vue';
-import { icons } from '@airqo-icons/core';
+import type { App, Plugin, Component } from 'vue';
+import { icons } from '@airqo-icons-min/core';
 
 const AirqoIcons: Plugin = {
   install(app: App) {
@@ -7,7 +7,7 @@ const AirqoIcons: Plugin = {
 
     for (const meta of icons) {
       const iconPath = `./icons/${meta.category}/${meta.name}.vue`;
-      const module = modules[iconPath] as { default: any };
+      const module = modules[iconPath] as { default: Component };
       if (module) {
         app.component(meta.name, module.default);
       }

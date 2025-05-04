@@ -1,4 +1,4 @@
-import { ComponentClass, Component } from 'react';
+import { Component } from 'react';
 
 declare module 'react-native-svg' {
   import { ViewProps } from 'react-native';
@@ -45,18 +45,18 @@ declare module 'react-native-svg' {
 
 declare module 'react-native-svg' {
   interface Svg {
-    refs: any;
+    refs: Record<string, unknown>;
   }
   interface Path {
-    refs: any;
+    refs: Record<string, unknown>;
   }
-  interface G<P = any> {
-    refs: any;
+  interface G {
+    refs: Record<string, unknown>;
   }
   interface Defs {
-    refs: any;
+    refs: Record<string, unknown>;
   }
   interface ClipPath {
-    refs: any;
+    refs: Record<string, unknown>;
   }
 }

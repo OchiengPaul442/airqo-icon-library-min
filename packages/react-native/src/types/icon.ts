@@ -1,5 +1,5 @@
 import { SvgProps } from 'react-native-svg';
-import { ForwardedRef } from 'react';
+import React from 'react';
 
 /**
  * Props for AirQo icon components in React Native
@@ -18,5 +18,5 @@ export interface IconProps extends SvgProps {
  * Type for a forwardRef'd SVG icon component for React Native
  */
 export type IconComponent = React.ForwardRefExoticComponent<
-  IconProps & React.RefAttributes<any>
+  IconProps & React.RefAttributes<SVGElement>
 >;

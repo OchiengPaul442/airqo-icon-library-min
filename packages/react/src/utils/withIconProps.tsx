@@ -6,7 +6,7 @@ import { IconProps } from '../types/icon';
  * Higher Order Component that wraps SVG components with standardized icon props
  * This helps ensure consistent behavior across all icons
  */
-function withIconProps<Props extends {}>(
+function withIconProps<Props extends Record<string, unknown>>(
   Component: React.ComponentType<Props>,
 ): React.ForwardRefExoticComponent<
   IconProps & React.RefAttributes<SVGSVGElement>
@@ -16,7 +16,8 @@ function withIconProps<Props extends {}>(
       const {
         size = 24,
         color = 'currentColor',
-        title,
+        // Keep title for future use
+        title, // eslint-disable-line @typescript-eslint/no-unused-vars
         titleId,
         ...rest
       } = props;
@@ -29,7 +30,7 @@ function withIconProps<Props extends {}>(
           ref={ref}
           aria-labelledby={titleId}
           role="img"
-          {...(rest as any)}
+          {...(rest as Props)}
         />
       );
     },
