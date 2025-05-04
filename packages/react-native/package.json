@@ -12,7 +12,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "prebuild": "pnpm --filter @airqo-icons/core run build",
     "build": "tsc -b && pnpm run build:esm",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react-native --sourcemap",
     "clean": "rimraf dist"

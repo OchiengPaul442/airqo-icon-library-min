@@ -12,7 +12,6 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "prebuild": "pnpm --filter @airqo-icons/core run build",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",

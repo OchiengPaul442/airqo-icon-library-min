@@ -1,24 +1,29 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [vue(), {
-    name: 'svg-transform',
-    enforce: 'pre',
-    transform(src, id) {
-      if (id.endsWith('.svg')) {
-        return require('vue-svg-loader').call(this, src, id);
-      }
-    }
-  }],
+  plugins: [vue()],
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: path.resolve(__dirname, 'src/index.ts'),
+      name: 'AirqoIconsVue',
       formats: ['es', 'cjs'],
-      name: 'AirqoIcons'
+      fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
-      external: ['vue', '@airqo-icons/core']
-    }
-  }
+      external: ['vue', '@airqo-icons/core'],
+      output: {
+        globals: {
+          vue: 'Vue',
+          '@airqo-icons/core': 'AirqoIconsCore',
+        },
+      },
+    },
+  },
+  resolve: {
+    alias: {
+      '@airqo-icons/core': path.resolve(__dirname, '../core/src'),
+    },
+  },
 });

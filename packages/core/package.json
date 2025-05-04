@@ -13,11 +13,10 @@
   },
   "scripts": {
     "prebuild": "rimraf dist && pnpm run generate-icons",
-    "build": "tsc -b && pnpm run build:esm",
+    "build": "tsc --emitDeclarationOnly && pnpm run build:esm",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "clean": "rimraf dist",
-    "generate-icons": "cd ../.. && node scripts/generate-icons.js",
-    "prepare": "pnpm run build"
+    "generate-icons": "cd ../.. && node scripts/generate-icons.js"
   },
   "dependencies": {
     "csstype": "^3.1.3"

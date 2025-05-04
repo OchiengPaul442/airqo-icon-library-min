@@ -9,25 +9,18 @@
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "skipLibCheck": true,
     "outDir": "dist",
+    "rootDir": "src",
     "composite": true,
     "declaration": true,
+    "declarationDir": "dist",
     "declarationMap": true,
-    "paths": {
-      "@airqo-icons/core": ["../core/src"]
-    },
-    "tsBuildInfoFile": "tsconfig.tsbuildinfo"
+    "types": ["node", "vite/client"]
   },
-  "references": [{ "path": "../core" }],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/icons/**/*"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }
