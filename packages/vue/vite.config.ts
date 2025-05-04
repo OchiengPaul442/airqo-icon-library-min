@@ -8,22 +8,19 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'AirqoIconsVue',
-      formats: ['es', 'cjs'],
+      formats: ['es', 'umd'],
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
     },
     rollupOptions: {
       external: ['vue', '@airqo-icons/core'],
       output: {
+        exports: 'named',
         globals: {
           vue: 'Vue',
           '@airqo-icons/core': 'AirqoIconsCore',
         },
       },
     },
-  },
-  resolve: {
-    alias: {
-      '@airqo-icons/core': path.resolve(__dirname, '../core/src'),
-    },
+    minify: false,
   },
 });

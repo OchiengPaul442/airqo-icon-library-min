@@ -4,7 +4,7 @@
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
@@ -19,8 +19,16 @@
     "declaration": true,
     "declarationDir": "dist",
     "declarationMap": true,
-    "types": ["node", "vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "@airqo-icons/core": ["../core/src"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "references": [
+    {
+      "path": "../core"
+    }
+  ],
   "exclude": ["node_modules", "dist"]
 }

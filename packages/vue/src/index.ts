@@ -1,9 +1,8 @@
-import { App, Plugin } from 'vue';
+import type { App, Plugin } from 'vue';
 import { icons } from '@airqo-icons/core';
 
 const AirqoIcons: Plugin = {
   install(app: App) {
-    // Import all SVG files
     const modules = import.meta.glob('./icons/**/*.vue', { eager: true });
 
     for (const meta of icons) {
@@ -16,5 +15,6 @@ const AirqoIcons: Plugin = {
   },
 };
 
+// Export both the plugin and icons
+export { icons, type Plugin };
 export default AirqoIcons;
-export { icons };

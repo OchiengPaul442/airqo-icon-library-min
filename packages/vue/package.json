@@ -1,9 +1,10 @@
 {
   "name": "@airqo-icons/vue",
   "version": "0.0.0-development",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -12,7 +13,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "vite build && vue-tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "vite build",
     "clean": "rimraf dist"
   },
   "dependencies": {
@@ -22,9 +23,9 @@
     "vue": "^3.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
-    "typescript": "^5.2.2",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "typescript": "~5.0.4",
     "vite": "^4.5.0",
-    "vue-tsc": "^1.8.22"
+    "vue": "^3.3.0"
   }
 }
