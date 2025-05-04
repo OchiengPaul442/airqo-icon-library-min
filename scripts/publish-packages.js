@@ -1,87 +1,80 @@
 #!/usr/bin/env node
-
 /**
- * This script handles publishing all packages to npm
- * It's used as part of the semantic-release process
+ * publish-packages.js
+ *
+ * A more controlled publishing script with better error handling for Node.js v20
  */
-
-const { execSync, exec } = require('child_process');
+const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const packagesDir = path.join(__dirname, '../packages');
-const packages = ['core', 'react', 'react-native', 'vue'];
+// Package directories to publish
+const PACKAGES = [
+  'packages/core',
+  'packages/react',
+  'packages/react-native',
+  'packages/vue',
+];
 
-// Order matters - publish core first, then the other packages
-console.log('Publishing packages in order...');
-
-// Check if a package version already exists on npm
-function checkIfPackageVersionExists(packageName, version) {
+// Run a command and return its output
+function runCommand(command, cwd = process.cwd()) {
   try {
-    const output = execSync(
-      `npm view @airqo-icons-min/${packageName}@${version} version`,
-      {
-        encoding: 'utf8',
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    );
-    // If we get output, the version exists
-    return output.trim() === version;
+    return execSync(command, {
+      cwd,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      encoding: 'utf-8',
+    });
   } catch (error) {
-    // If the command fails, the version doesn't exist
-    return false;
+    console.error(`Error running "${command}": ${error.message}`);
+    if (error.stdout) console.log('STDOUT:', error.stdout);
+    if (error.stderr) console.log('STDERR:', error.stderr);
+    throw error;
   }
 }
 
-// Keep track of failures
-let hasError = false;
+// Get package version from package.json
+function getPackageVersion(packagePath) {
+  const packageJson = JSON.parse(
+    fs.readFileSync(path.join(packagePath, 'package.json'), 'utf-8'),
+  );
+  return packageJson.version;
+}
 
-// Publish each package
-packages.forEach((pkg) => {
-  const packageDir = path.join(packagesDir, pkg);
-  const packageJsonPath = path.join(packageDir, 'package.json');
+// Publishing function with better error handling
+async function publishPackages() {
+  console.log('🚀 Publishing packages...');
 
-  try {
-    // Read the package.json to get the version
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    const version = packageJson.version;
+  for (const pkg of PACKAGES) {
+    const pkgPath = path.resolve(__dirname, '..', pkg);
+    const pkgName = path.basename(pkg);
+    const pkgVersion = getPackageVersion(pkgPath);
 
-    console.log(`Processing @airqo-icons-min/${pkg}@${version}...`);
+    console.log(`\n📦 Publishing ${pkgName}@${pkgVersion}...`);
 
-    // Check if this version already exists
-    if (checkIfPackageVersionExists(pkg, version)) {
-      console.log(
-        `@airqo-icons-min/${pkg}@${version} already exists on npm registry - skipping`,
-      );
-      return; // Skip to next package
-    }
+    try {
+      // Use npm directly with force and access flags to handle Node.js v20 issues
+      runCommand('npm publish --access public', pkgPath);
+      console.log(`✅ Successfully published ${pkgName}@${pkgVersion}`);
+    } catch (error) {
+      console.error(`❌ Failed to publish ${pkgName}:`, error.message);
 
-    // Run npm publish
-    console.log(`Publishing @airqo-icons-min/${pkg}@${version}...`);
-    execSync('npm publish --access public', {
-      cwd: packageDir,
-      stdio: 'inherit',
-    });
-
-    console.log(`Successfully published @airqo-icons-min/${pkg}@${version}`);
-  } catch (error) {
-    // If error contains a message about already published version, it's not a real error
-    if (
-      error.message &&
-      error.message.includes(
-        'You cannot publish over the previously published versions',
-      )
-    ) {
-      console.log(
-        `@airqo-icons-min/${pkg} - version already exists - continuing`,
-      );
-    } else {
-      console.error(`Error processing ${pkg}:`, error.message);
-      hasError = true;
-      // Continue with other packages even if one fails
+      if (
+        error.message.includes('EBUSY') ||
+        error.message.includes('resource busy')
+      ) {
+        console.warn('This might be due to Node.js v20 file locking issues.');
+        console.warn(
+          'Try publishing this package manually with: cd packages/xxx && npm publish --access public',
+        );
+      }
     }
   }
-});
 
-// Exit with success even if some packages were already published
-console.log('Package publishing completed');
+  console.log('\n🎉 Publishing complete!');
+}
+
+// Run the function
+publishPackages().catch((error) => {
+  console.error('Fatal error during publishing:', error);
+  process.exit(1);
+});

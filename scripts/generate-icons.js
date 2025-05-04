@@ -71,11 +71,9 @@ const getSvgrConfig = (isNative, componentName) => ({
   icon: !isNative,
   ref: !isNative,
   titleProp: true,
-  svgProps: {
-    fill: 'currentColor',
-    ...(!isNative && { role: 'img' }),
-  },
-  state: { componentName },
+  svgProps: isNative
+    ? { width: '24', height: '24' } // Default size for React Native
+    : { role: 'img' }, // Default props for React
 });
 
 // --- Helper Functions ---

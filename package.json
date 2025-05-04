@@ -8,15 +8,17 @@
   "scripts": {
     "clean": "pnpm -r run clean",
     "generate": "node scripts/generate-icons.js",
+    "enhance-rn": "node scripts/enhance-rn-icons.js",
     "optimize": "node scripts/optimize-svgs.js",
-    "prebuild": "pnpm clean && pnpm generate",
+    "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn",
     "build": "pnpm build:core && pnpm build:packages-no-vue",
     "build:core": "cd packages/core && npm run build",
     "build:packages-no-vue": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" build",
     "build:packages": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"./packages/vue\" build",
+    "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
-    "release": "pnpm build && pnpm -r publish --access public && semantic-release"
+    "release": "pnpm build && node scripts/publish-packages.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
@@ -51,5 +53,10 @@
       "prettier --write",
       "eslint --fix"
     ]
-  }
+  },
+  "engines": {
+    "node": ">=16",
+    "npm": ">=8"
+  },
+  "packageManager": "pnpm@8.10.0"
 }
