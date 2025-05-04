@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.2.0...v1.3.0) (2025-05-04)
+
+
+### Features
+
+* add TypeScript ESLint plugins and config for improved linting ([6ae4e32](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/6ae4e328b9ae4d7397506d4c9789f87e5ce4b4b2))
+
 # [1.2.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.1.0...v1.2.0) (2025-05-04)
 
 
