@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.1.0...v1.2.0) (2025-05-04)
+
+
+### Features
+
+* add new SVG icons for charts and trends ([f2fab72](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/f2fab72a0b99ff88e9f4fef9eeed609fc2b57aae))
+* Enhance React Native icon components with size prop support ([fe8e75f](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/fe8e75f38358c6bdb4448b33767e4e1f8e73c577))
+* Enhance React Native icon components with size prop support and type conversions ([14d0546](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/14d054695c42db9250d7e5a5ec5bb1d43f8c193a))
+
 # [1.1.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.5...v1.1.0) (2025-05-04)
 
 
