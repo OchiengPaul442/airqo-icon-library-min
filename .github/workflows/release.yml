@@ -48,8 +48,9 @@ jobs:
           node scripts/generate-icons.js
           pnpm run build
 
+      # Fixed: Use actions/upload-artifact@v2 instead of v3
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: dist
           path: |
@@ -80,8 +81,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
 
+      # Fixed: Use actions/download-artifact@v2 instead of v3
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: dist
           path: packages
