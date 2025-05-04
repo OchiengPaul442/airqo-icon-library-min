@@ -55,9 +55,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Install semantic-release-exec plugin
+      # Install semantic-release-exec plugin with -w flag to add it to workspace root
       - name: Install additional dependencies
-        run: pnpm add -D @semantic-release/exec
+        run: pnpm add -D @semantic-release/exec -w
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
