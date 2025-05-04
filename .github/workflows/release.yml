@@ -101,7 +101,6 @@ jobs:
           flutter-version: '3.7.0'
 
   release:
-    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -130,20 +129,13 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Configure NPM with Auth Token
+      - name: Configure NPM Authentication
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "access=public" >> ~/.npmrc
           npm config set access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Verify NPM Authentication
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
 
       - name: Install dependencies
         run: pnpm install
@@ -158,11 +150,16 @@ jobs:
           mkdir -p packages/vue/src/icons
           mkdir -p packages/core/src
 
-      - name: Generate Icons and Build
+      - name: Build packages
         run: |
           pnpm run optimize
           node scripts/generate-icons.js
           pnpm run build
+
+      - name: Verify NPM Authentication
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run Semantic Release
         env:
@@ -170,9 +167,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          # Ensure clean npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "access=public" >> ~/.npmrc
+
+          # Run semantic release with debug output
           npx semantic-release --debug
 
       - name: Debug Publishing (if failure)
@@ -181,6 +182,7 @@ jobs:
           echo "=== Semantic Release failed, showing diagnostic information ==="
           echo "NPM Config:"
           npm config list
+          cat ~/.npmrc || echo "No .npmrc file found"
           echo "=== Checking NPM user:"
           npm whoami || echo "Not logged in to NPM"
 
