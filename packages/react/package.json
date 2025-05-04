@@ -9,8 +9,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "directory": "dist"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
@@ -20,7 +19,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "workspace:*"
+    "@airqo-icons-min/core": "^1.0.2"
   },
   "peerDependencies": {
     "react": "^17 || ^18"

@@ -39,7 +39,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      # Set up global .npmrc first for all operations
+      # Create basic .npmrc with npm token for later use
       - name: Setup NPM Authentication
         run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
@@ -47,8 +47,6 @@ jobs:
           echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "access=public" >> ~/.npmrc
           chmod 0600 ~/.npmrc
-          cp ~/.npmrc .npmrc
-          npm config list
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -72,21 +70,6 @@ jobs:
           pnpm run build
 
       # Only run release steps on main branch
-      - name: Setup NPM for publishing
-        if: github.ref == 'refs/heads/main'
-        run: |
-          # Copy .npmrc to each package directory for publishing
-          for pkg in core react react-native vue; do
-            cp ~/.npmrc "packages/$pkg/.npmrc"
-            chmod 0600 "packages/$pkg/.npmrc"
-          done
-
-          # Verify access
-          npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Run Semantic Release
         if: github.ref == 'refs/heads/main'
         env:
@@ -94,44 +77,35 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Ensure .npmrc exists in each package and project root
-          cat ~/.npmrc
+          # Save NPM token to each package directory
+          for pkg in core react react-native vue; do
+            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "packages/$pkg/.npmrc"
+            echo "registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
+            echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
+            echo "access=public" >> "packages/$pkg/.npmrc"
+            chmod 0600 "packages/$pkg/.npmrc"
+          done
+
+          # Verify authentication works
+          npm whoami
+
+          # Run semantic-release
           npx semantic-release --debug
 
       - name: Manual Package Publishing
         if: github.ref == 'refs/heads/main' && failure()
         run: |
           echo "Attempting manual package publishing..."
-          cat ~/.npmrc
+          # Ensure npm auth is still set up
+          npm config list
+
+          # Publish each package individually
           for pkg in core react react-native vue; do
             cd "packages/$pkg"
             echo "Publishing @airqo-icons-min/$pkg..."
-            npm config list
-            npm publish --access public || echo "$pkg package publish failed"
+            npm publish --access public || echo "Failed to publish $pkg"
             cd ../..
           done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Debug Publishing (if failure)
-        if: github.ref == 'refs/heads/main' && failure()
-        run: |
-          echo "=== Release failed, showing diagnostic information ==="
-          echo "Current directory: $(pwd)"
-          echo "=== NPM configuration:"
-          npm config list || echo "Could not list npm config"
-          echo "=== NPM whoami:"
-          npm whoami || echo "Not logged in to NPM"
-          echo "=== Repository .npmrc:"
-          cat .npmrc || echo "No .npmrc in repository root"
-          echo "=== Home directory .npmrc:"
-          cat ~/.npmrc || echo "No .npmrc in home directory"
-          echo "=== Package versions and .npmrc files:"
-          for pkg in core react react-native vue; do
-            echo "=== @airqo-icons-min/$pkg ===="
-            echo "package.json contents:"
-            cat "packages/$pkg/package.json" || echo "Can't find package.json for $pkg"
-            echo ".npmrc contents:"
-            cat "packages/$pkg/.npmrc" || echo "No .npmrc found for $pkg"
-          done

@@ -9,8 +9,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/",
-    "directory": "dist"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "prebuild": "rimraf dist && pnpm run generate-icons",
