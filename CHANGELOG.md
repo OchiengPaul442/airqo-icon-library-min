@@ -1,3 +1,5 @@
+## [1.0.1](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.0...v1.0.1) (2025-05-04)
+
 # 1.0.0 (2025-05-04)
 
 
