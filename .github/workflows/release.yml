@@ -11,56 +11,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 7
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Create output directories
-        run: |
-          mkdir -p packages/react/src/icons
-          mkdir -p packages/react-native/src/icons
-          mkdir -p packages/flutter/assets
-          mkdir -p packages/vue/src/icons
-          mkdir -p packages/core/src
-
-      - name: Build packages
-        run: |
-          pnpm run optimize
-          node scripts/generate-icons.js
-          pnpm run build
-
-      # Fixed: Use actions/upload-artifact@v2 instead of v3
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: |
-            packages/*/dist
-            packages/*/package.json
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -78,71 +30,108 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
-
-      # Fixed: Use actions/download-artifact@v2 instead of v3
-      - name: Download build artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: dist
-          path: packages
 
       - name: Configure Git User
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Setup NPM token in package directories
+      # Set up global .npmrc first for all operations
+      - name: Setup NPM Authentication
         run: |
-          for pkg in core react react-native vue; do
-            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "packages/$pkg/.npmrc"
-            echo "registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
-            echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
-            echo "access=public" >> "packages/$pkg/.npmrc"
-            chmod 0600 "packages/$pkg/.npmrc"
-          done
-
-      - name: Verify NPM Authentication
-        run: npm whoami
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "access=public" >> ~/.npmrc
+          chmod 0600 ~/.npmrc
+          cp ~/.npmrc .npmrc
+          npm config list
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create output directories
+        run: |
+          mkdir -p packages/react/src/icons
+          mkdir -p packages/react-native/src/icons
+          mkdir -p packages/flutter/assets
+          mkdir -p packages/vue/src/icons
+          mkdir -p packages/core/src
+
+      - name: Build packages
+        run: |
+          pnpm run optimize
+          node scripts/generate-icons.js
+          pnpm run build
+
+      # Only run release steps on main branch
+      - name: Setup NPM for publishing
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Copy .npmrc to each package directory for publishing
+          for pkg in core react react-native vue; do
+            cp ~/.npmrc "packages/$pkg/.npmrc"
+            chmod 0600 "packages/$pkg/.npmrc"
+          done
+
+          # Verify access
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Run Semantic Release
+        if: github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release --debug
+        run: |
+          # Ensure .npmrc exists in each package and project root
+          cat ~/.npmrc
+          npx semantic-release --debug
 
       - name: Manual Package Publishing
-        if: failure()
+        if: github.ref == 'refs/heads/main' && failure()
         run: |
           echo "Attempting manual package publishing..."
+          cat ~/.npmrc
           for pkg in core react react-native vue; do
             cd "packages/$pkg"
             echo "Publishing @airqo-icons-min/$pkg..."
+            npm config list
             npm publish --access public || echo "$pkg package publish failed"
             cd ../..
           done
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Debug Publishing (if failure)
-        if: failure()
+        if: github.ref == 'refs/heads/main' && failure()
         run: |
           echo "=== Release failed, showing diagnostic information ==="
-          echo "Current working directory: $(pwd)"
+          echo "Current directory: $(pwd)"
+          echo "=== NPM configuration:"
+          npm config list || echo "Could not list npm config"
           echo "=== NPM whoami:"
           npm whoami || echo "Not logged in to NPM"
-          echo "=== Package versions:"
+          echo "=== Repository .npmrc:"
+          cat .npmrc || echo "No .npmrc in repository root"
+          echo "=== Home directory .npmrc:"
+          cat ~/.npmrc || echo "No .npmrc in home directory"
+          echo "=== Package versions and .npmrc files:"
           for pkg in core react react-native vue; do
             echo "=== @airqo-icons-min/$pkg ===="
             echo "package.json contents:"
-            cat "packages/$pkg/package.json"
+            cat "packages/$pkg/package.json" || echo "Can't find package.json for $pkg"
             echo ".npmrc contents:"
-            cat "packages/$pkg/.npmrc" | sed 's/:.*/: ***/'
+            cat "packages/$pkg/.npmrc" || echo "No .npmrc found for $pkg"
           done

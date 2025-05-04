@@ -30,6 +30,7 @@ module.exports = {
       {
         pkgRoot: './packages/core',
         npmPublish: true,
+        // Remove tarball option since it's not needed and can cause issues
       },
     ],
     [
