@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.3...v1.0.4) (2025-05-04)
+
+
+### Bug Fixes
+
+* downgrade actions/upload-artifact and actions/download-artifact to v2 ([2f112bc](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/2f112bcc32ae40245b59a521999c266b5b7f927d))
+
 ## [1.0.3](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.2...v1.0.3) (2025-05-04)
 
 ## [1.0.2](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.1...v1.0.2) (2025-05-04)
