@@ -3,12 +3,15 @@
  * @param name - Icon name
  * @param importFn - Function that returns a promise resolving to the icon
  */
-export declare function registerIconImport(name: string, importFn: () => Promise<any>): void;
+export declare function registerIconImport(
+  name: string,
+  importFn: () => Promise<unknown>,
+): void;
 /**
  * Dynamically load an icon by its name
  * @param name - PascalCase icon name
  */
-export declare function getIcon(name: string): Promise<any>;
+export declare function getIcon(name: string): Promise<unknown>;
 /**
  * List all icon names in a given category.
  * @param category - category folder name
