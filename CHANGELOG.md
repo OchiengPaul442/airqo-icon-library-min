@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.1...v1.4.2) (2025-05-04)
+
+
+### Bug Fixes
+
+* update type definitions to use 'unknown' instead of 'any' for better type safety ([b5124ff](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/b5124ff8efa4d7cfaed1d2748480bfb0d8d91f47))
+
 ## [1.4.1](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.0...v1.4.1) (2025-05-04)
 
 
