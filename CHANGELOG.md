@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.3.0...v1.4.0) (2025-05-04)
+
+
+### Features
+
+* enhance type safety in icon utilities and React components ([347f49f](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/347f49f8df571929e9e8e937c4fea7cabebea2d8))
+
 # [1.3.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.2.0...v1.3.0) (2025-05-04)
 
 
