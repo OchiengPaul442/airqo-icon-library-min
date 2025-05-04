@@ -1,5 +1,5 @@
 {
-  "name": "@airqo-icons/core",
+  "name": "@airqo-icons-min/core",
   "version": "0.0.0-development",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

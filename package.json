@@ -1,5 +1,5 @@
 {
-  "name": "airqo-icon-library",
+  "name": "@airqo-icons-min/icons",
   "version": "0.0.0-development",
   "private": true,
   "workspaces": [
