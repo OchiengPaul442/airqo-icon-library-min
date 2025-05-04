@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import * as React from 'react';
 
 declare module 'react-native-svg' {
   import { ViewProps } from 'react-native';
@@ -36,27 +36,13 @@ declare module 'react-native-svg' {
     children?: React.ReactNode;
   }
 
-  export class Svg extends Component<SvgProps> {}
-  export class Path extends Component<PathProps> {}
-  export class G extends Component<GProps> {}
-  export class Defs extends Component<DefsProps> {}
-  export class ClipPath extends Component<ClipPathProps> {}
-}
+  // Define components as React.ComponentType which can be used directly in JSX
+  export const Svg: React.ComponentType<SvgProps>;
+  export const Path: React.ComponentType<PathProps>;
+  export const G: React.ComponentType<GProps>;
+  export const Defs: React.ComponentType<DefsProps>;
+  export const ClipPath: React.ComponentType<ClipPathProps>;
 
-declare module 'react-native-svg' {
-  interface Svg {
-    refs: Record<string, unknown>;
-  }
-  interface Path {
-    refs: Record<string, unknown>;
-  }
-  interface G {
-    refs: Record<string, unknown>;
-  }
-  interface Defs {
-    refs: Record<string, unknown>;
-  }
-  interface ClipPath {
-    refs: Record<string, unknown>;
-  }
+  // Default export
+  export default Svg;
 }
