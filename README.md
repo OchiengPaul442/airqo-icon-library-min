@@ -2,12 +2,12 @@
 
 A comprehensive SVG icon library for AirQo applications, providing consistent icons for React, React Native, Vue, and Flutter projects.
 
-[![NPM Version](https://img.shields.io/npm/v/@airqo-icons/react)](https://www.npmjs.com/package/@airqo-icons/react)
+[![NPM Version](https://img.shields.io/npm/v/@airqo-icons-min/react)](https://www.npmjs.com/package/@airqo-icons-min/react)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Overview
 
-AirQo Icon Library is a meticulously crafted collection of SVG icons optimized for use across multiple frontend frameworks. It provides a unified set of icons that can be easily integrated into different application types while maintaining visual consistency.
+AirQo Icon Library is a meticulously crafted collection of SVG icons optimized for use across multiple frontend frameworks. It provides a unified set of icons that can be easily integrated into different application types while maintaining visual consistency across all AirQo products and services.
 
 ## Features
 
@@ -16,16 +16,17 @@ AirQo Icon Library is a meticulously crafted collection of SVG icons optimized f
 - 🚀 **Optimized SVGs** - Minified and optimized for web and mobile performance
 - 📦 **Categorized Icons** - Well-organized icon sets for different use cases
 - 📱 **Native Support** - First-class support for React Native with react-native-svg
+- 🧩 **TypeScript Support** - Full type definitions for all components
 
 ## Available Packages
 
-| Package                   | Description              | Link                                                           |
-| ------------------------- | ------------------------ | -------------------------------------------------------------- |
-| @airqo-icons/core         | Core types and utilities | [NPM](https://www.npmjs.com/package/@airqo-icons/core)         |
-| @airqo-icons/react        | React components         | [NPM](https://www.npmjs.com/package/@airqo-icons/react)        |
-| @airqo-icons/react-native | React Native components  | [NPM](https://www.npmjs.com/package/@airqo-icons/react-native) |
-| @airqo-icons/vue          | Vue components           | [NPM](https://www.npmjs.com/package/@airqo-icons/vue)          |
-| airqo_icons_flutter       | Flutter package          | [Pub.dev](https://pub.dev)                                     |
+| Package                       | Description              | Link                                                               |
+| ----------------------------- | ------------------------ | ------------------------------------------------------------------ |
+| @airqo-icons-min/core         | Core types and utilities | [NPM](https://www.npmjs.com/package/@airqo-icons-min/core)         |
+| @airqo-icons-min/react        | React components         | [NPM](https://www.npmjs.com/package/@airqo-icons-min/react)        |
+| @airqo-icons-min/react-native | React Native components  | [NPM](https://www.npmjs.com/package/@airqo-icons-min/react-native) |
+| @airqo-icons-min/vue          | Vue 3 components         | [NPM](https://www.npmjs.com/package/@airqo-icons-min/vue)          |
+| airqo_icons                   | Flutter package          | [Pub.dev](https://pub.dev)                                         |
 
 ## Installation
 
@@ -33,26 +34,26 @@ AirQo Icon Library is a meticulously crafted collection of SVG icons optimized f
 
 ```bash
 # npm
-npm install @airqo-icons/react
+npm install @airqo-icons-min/react
 
 # yarn
-yarn add @airqo-icons/react
+yarn add @airqo-icons-min/react
 
 # pnpm
-pnpm add @airqo-icons/react
+pnpm add @airqo-icons-min/react
 ```
 
 ### React Native
 
 ```bash
 # npm
-npm install @airqo-icons/react-native react-native-svg
+npm install @airqo-icons-min/react-native react-native-svg
 
 # yarn
-yarn add @airqo-icons/react-native react-native-svg
+yarn add @airqo-icons-min/react-native react-native-svg
 
 # pnpm
-pnpm add @airqo-icons/react-native react-native-svg
+pnpm add @airqo-icons-min/react-native react-native-svg
 ```
 
 Note: React Native icons require `react-native-svg` as a peer dependency.
@@ -61,14 +62,16 @@ Note: React Native icons require `react-native-svg` as a peer dependency.
 
 ```bash
 # npm
-npm install @airqo-icons/vue
+npm install @airqo-icons-min/vue
 
 # yarn
-yarn add @airqo-icons/vue
+yarn add @airqo-icons-min/vue
 
 # pnpm
-pnpm add @airqo-icons/vue
+pnpm add @airqo-icons-min/vue
 ```
+
+Note: The Vue package is compatible with Vue 3.x.
 
 ### Flutter
 
@@ -76,7 +79,8 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  airqo_icons_flutter: ^1.0.0
+  airqo_icons: ^0.1.0
+  flutter_svg: ^1.0.3
 ```
 
 Then run:
@@ -85,18 +89,33 @@ Then run:
 flutter pub get
 ```
 
-## Usage
+## Usage Examples
 
 ### React
 
-```jsx
-import { AlertCircle, BellRinging01 } from '@airqo-icons/react';
+Basic usage with customized size and color:
 
-function MyComponent() {
+```jsx
+import React from 'react';
+import { AlertCircle, BellRinging01, ThumbsUp } from '@airqo-icons-min/react';
+
+function IconsDemo() {
   return (
-    <div>
+    <div className="icons-container">
       <AlertCircle size={24} color="red" />
       <BellRinging01 size={32} color="#3366FF" />
+
+      {/* With custom width and height */}
+      <ThumbsUp width={40} height={30} color="green" />
+
+      {/* With additional SVG props */}
+      <AlertCircle
+        size={24}
+        color="orange"
+        strokeWidth={1.5}
+        opacity={0.8}
+        onClick={() => console.log('Icon clicked!')}
+      />
     </div>
   );
 }
@@ -104,59 +123,136 @@ function MyComponent() {
 
 ### React Native
 
-```jsx
-import { AlertTriangle, Bell03 } from '@airqo-icons/react-native';
+Basic usage within React Native components:
 
-function MyComponent() {
+```jsx
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import {
+  AlertTriangle,
+  Bell03,
+  NotificationBox,
+} from '@airqo-icons-min/react-native';
+
+function IconsDemo() {
   return (
-    <View>
+    <View style={styles.container}>
       <AlertTriangle width={24} height={24} fill="red" />
       <Bell03 width={32} height={32} fill="#3366FF" />
+
+      {/* With stroke customization */}
+      <NotificationBox
+        width={40}
+        height={40}
+        fill="none"
+        stroke="#222222"
+        strokeWidth={1.5}
+      />
+
+      {/* Responding to touch events */}
+      <AlertTriangle
+        width={30}
+        height={30}
+        fill="orange"
+        onPress={() => console.log('Icon pressed')}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    padding: 16,
+  },
+});
 ```
 
 ### Vue
 
+Basic usage in Vue 3 components:
+
 ```vue
 <template>
-  <div>
+  <div class="icons-demo">
     <AlertSquare :size="24" color="red" />
     <Bell04 :size="32" color="#3366FF" />
+
+    <!-- With custom width and height -->
+    <ThumbsDown :width="40" :height="30" color="tomato" />
+
+    <!-- With event handling -->
+    <AlertOctagon :size="28" color="purple" @click="handleIconClick" />
   </div>
 </template>
 
-<script>
-import { AlertSquare, Bell04 } from '@airqo-icons/vue';
+<script setup>
+import {
+  AlertSquare,
+  Bell04,
+  ThumbsDown,
+  AlertOctagon,
+} from '@airqo-icons-min/vue';
 
-export default {
-  components: {
-    AlertSquare,
-    Bell04,
-  },
+const handleIconClick = () => {
+  console.log('Icon clicked!');
 };
 </script>
+
+<style>
+.icons-demo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+</style>
 ```
 
 ### Flutter
 
-```dart
-import 'package:airqo_icons_flutter/airqo_icons_flutter.dart';
+Basic usage in Flutter widgets:
 
-Widget build(BuildContext context) {
-  return Column(
-    children: [
-      AirqoIcons.alertCircle(
-        size: 24,
-        color: Colors.red,
-      ),
-      AirqoIcons.bell01(
-        size: 32,
-        color: Color(0xFF3366FF),
-      ),
-    ],
-  );
+```dart
+import 'package:flutter/material.dart';
+import 'package:airqo_icons/airqo_icons.dart';
+
+class IconsDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // Basic icon with default size
+        AirqoIcons.alertCircle(
+          color: Colors.red,
+        ),
+
+        // Custom size icon
+        AirqoIcons.bell01(
+          size: 32,
+          color: Color(0xFF3366FF),
+        ),
+
+        // Custom width and height
+        AirqoIcons.thumbsUp(
+          width: 40,
+          height: 30,
+          color: Colors.green,
+        ),
+
+        // With gesture detection
+        GestureDetector(
+          onTap: () => print('Icon tapped!'),
+          child: AirqoIcons.alertTriangle(
+            size: 28,
+            color: Colors.orange,
+          ),
+        ),
+      ],
+    );
+  }
 }
 ```
 
@@ -165,55 +261,69 @@ Widget build(BuildContext context) {
 The library includes several categories of icons:
 
 - **Alerts & Feedback**: Notification bells, alerts, and user feedback icons
-- **Arrows**: Directional icons in various styles (circle, narrow, block)
+
+  - Examples: `AlertCircle`, `BellRinging01`, `ThumbsUp`, `NotificationBox`
+
+- **Arrows**: Directional icons in various styles
+
+  - Examples: `ArrowCircleDown`, `ArrowNarrowLeft`, `ArrowBlockRight`
+
 - **Charts**: Data visualization and chart related icons
-- And more...
+  - Examples: `BarChart01`, `LineChart`, `PieChart`
+
+A complete icon reference is available in each package's documentation.
 
 ## Icon Properties
 
 ### React & Vue
 
-| Prop     | Type   | Default        | Description                |
-| -------- | ------ | -------------- | -------------------------- |
-| `size`   | number | 24             | Sets both width and height |
-| `color`  | string | 'currentColor' | Sets the fill color        |
-| `width`  | number | -              | Overrides the width        |
-| `height` | number | -              | Overrides the height       |
+| Prop          | Type   | Default        | Description                   |
+| ------------- | ------ | -------------- | ----------------------------- |
+| `size`        | number | 24             | Sets both width and height    |
+| `color`       | string | 'currentColor' | Sets the fill or stroke color |
+| `width`       | number | -              | Overrides the width           |
+| `height`      | number | -              | Overrides the height          |
+| `stroke`      | string | 'currentColor' | Stroke color (if applicable)  |
+| `fill`        | string | 'none'         | Fill color (if applicable)    |
+| `strokeWidth` | number | 2              | Stroke width (if applicable)  |
 
-Plus all standard SVG attributes.
+Plus all standard SVG attributes like `className`, `style`, `onClick`, etc.
 
 ### React Native
 
-| Prop     | Type   | Default        | Description    |
-| -------- | ------ | -------------- | -------------- |
-| `width`  | number | 24             | Width of icon  |
-| `height` | number | 24             | Height of icon |
-| `fill`   | string | 'currentColor' | Fill color     |
+| Prop          | Type   | Default        | Description                  |
+| ------------- | ------ | -------------- | ---------------------------- |
+| `width`       | number | 24             | Width of icon                |
+| `height`      | number | 24             | Height of icon               |
+| `fill`        | string | 'currentColor' | Fill color                   |
+| `stroke`      | string | 'currentColor' | Stroke color (if applicable) |
+| `strokeWidth` | number | 2              | Stroke width (if applicable) |
 
 Plus all props from `react-native-svg`.
 
 ### Flutter
 
-| Parameter | Type   | Default      | Description                |
-| --------- | ------ | ------------ | -------------------------- |
-| `size`    | double | 24.0         | Sets both width and height |
-| `color`   | Color  | Colors.black | Icon color                 |
-| `width`   | double | -            | Overrides the width        |
-| `height`  | double | -            | Overrides the height       |
+| Parameter     | Type   | Default      | Description                  |
+| ------------- | ------ | ------------ | ---------------------------- |
+| `size`        | double | 24.0         | Sets both width and height   |
+| `color`       | Color  | Colors.black | Icon color                   |
+| `width`       | double | -            | Overrides the width          |
+| `height`      | double | -            | Overrides the height         |
+| `strokeWidth` | double | 2.0          | Stroke width (if applicable) |
 
 ## Development
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - PNPM package manager
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/airqo-icon-library.git
-cd airqo-icon-library
+git clone https://github.com/airqo-platform/airqo-icon-library-min.git
+cd airqo-icon-library-min
 
 # Install dependencies
 pnpm install
@@ -222,20 +332,27 @@ pnpm install
 ### Building
 
 ```bash
+# Optimize SVGs and generate components
+pnpm run optimize
+pnpm run generate
+
 # Build all packages
 pnpm build
 
 # Build specific packages
 pnpm build:core
-pnpm build:packages
+pnpm build:packages-no-vue  # Builds React and React Native
+pnpm build:packages         # Builds React, React Native, and Vue
 ```
 
 ### Development Workflow
 
 1. Add SVG files to the appropriate category in the `svgs/` directory
-2. Run `pnpm optimize` to optimize SVGs
+2. Run `pnpm optimize` to optimize the SVGs with SVGO
 3. Run `pnpm generate` to generate components for all frameworks
-4. Build and test with `pnpm build`
+4. Build the packages with `pnpm build`
+5. Test your changes in each framework
+6. Submit a PR with your changes
 
 ### SVG Guidelines
 
