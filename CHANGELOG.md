@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.5...v1.1.0) (2025-05-04)
+
+
+### Features
+
+* update icon components to use new IconProps interface and add client support ([77ef6e6](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/77ef6e61a386da3d7c7dc8f3b160b0571f1d7492))
+
 ## [1.0.5](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.4...v1.0.5) (2025-05-04)
 
 ## [1.0.4](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.0.3...v1.0.4) (2025-05-04)
