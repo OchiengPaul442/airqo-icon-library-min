@@ -23,7 +23,6 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 7
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -33,74 +32,25 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
 
-      - name: Configure NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          npm config set access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Install dependencies
         run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create output directories
+      - name: Build packages
         run: |
-          mkdir -p packages/react/src/icons
-          mkdir -p packages/react-native/src/icons
-          mkdir -p packages/flutter/assets
-          mkdir -p packages/vue/src/icons
-          mkdir -p packages/core/src
-
-      - name: Optimize SVGs
-        run: |
-          echo "Running SVG optimization..."
           pnpm run optimize
-
-      - name: Generate Icons
-        run: |
-          echo "Generating icons..."
           node scripts/generate-icons.js
-          echo "Verifying generated files..."
-          ls -la packages/react-native/src/icons || echo "Icons not generated in react-native"
-          ls -la packages/react/src/icons || echo "Icons not generated in react"
-
-      - name: Build Core Package
-        run: |
-          cd packages/core
           pnpm run build
 
-      - name: Build All Packages
-        run: pnpm run build
-
-      - name: Debug Build Failure (if occurs)
-        if: failure()
-        run: |
-          echo "=== Build failed, showing diagnostic information ==="
-          echo "=== Directory structure ==="
-          ls -R packages/
-          echo "=== Package versions ==="
-          pnpm list
-          echo "=== Checking for error patterns ==="
-          find packages -name "*.log" -exec cat {} \; 2>/dev/null || echo "No log files found"
-          echo "=== React Native index.ts ==="
-          if [ -f "packages/react-native/src/index.ts" ]; then
-            cat packages/react-native/src/index.ts
-          fi
-          echo "=== React index.ts ==="
-          if [ -f "packages/react/src/index.ts" ]; then
-            cat packages/react/src/index.ts
-          fi
-
-      - name: Setup Flutter SDK
-        uses: subosito/flutter-action@v2
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
         with:
-          flutter-version: '3.7.0'
+          name: dist
+          path: |
+            packages/*/dist
+            packages/*/package.json
 
   release:
+    needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -114,7 +64,6 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 7
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -124,7 +73,18 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
 
-      - name: Create .npmrc file
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: packages
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create npmrc
         run: |
           cat << EOF > .npmrc
           //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
@@ -134,31 +94,10 @@ jobs:
           access=public
           EOF
 
-      - name: Configure Git User
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
       - name: Install dependencies
         run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create output directories
-        run: |
-          mkdir -p packages/react/src/icons
-          mkdir -p packages/react-native/src/icons
-          mkdir -p packages/flutter/assets
-          mkdir -p packages/vue/src/icons
-          mkdir -p packages/core/src
-
-      - name: Build packages
-        run: |
-          pnpm run optimize
-          node scripts/generate-icons.js
-          pnpm run build
-
-      - name: Verify NPM Token
+      - name: Verify npm authentication
         run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -168,31 +107,32 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release --debug
+        run: |
+          echo "Running semantic release..."
+          npx semantic-release --debug
+
+      - name: Manual Package Publishing (fallback)
+        if: success()
+        run: |
+          cd packages/core && npm publish --access public || echo "Core package publish failed"
+          cd ../react && npm publish --access public || echo "React package publish failed"
+          cd ../react-native && npm publish --access public || echo "React Native package publish failed"
+          cd ../vue && npm publish --access public || echo "Vue package publish failed"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Debug Publishing (if failure)
         if: failure()
         run: |
-          echo "=== Semantic Release failed, showing diagnostic information ==="
+          echo "=== Release failed, showing diagnostic information ==="
           echo "NPM Config:"
           npm config list
           echo "=== .npmrc contents:"
           cat .npmrc | sed 's/:.*/: ***/'
-          echo "=== Checking NPM user:"
+          echo "=== NPM whoami:"
           npm whoami || echo "Not logged in to NPM"
-
-      - name: Setup Flutter SDK for publish
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.7.0'
-
-      - name: Publish Flutter package to pub.dev
-        if: env.PUB_DEV_TOKEN != ''
-        env:
-          PUB_DEV_TOKEN: ${{ secrets.PUB_DEV_TOKEN }}
-        run: |
-          cd packages/flutter
-          flutter pub get
-          mkdir -p ~/.pub-cache
-          echo '{"https://pub.dev":{"token":"'$PUB_DEV_TOKEN'"}}' > ~/.pub-cache/credentials.json
-          flutter pub publish --force
+          echo "=== Package versions:"
+          for pkg in core react react-native vue; do
+            echo "Version of @airqo-icons-min/$pkg:"
+            cat "packages/$pkg/package.json" | grep version
+          done
