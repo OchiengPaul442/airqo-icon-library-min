@@ -18,7 +18,8 @@
     "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
-    "release": "pnpm build && node scripts/publish-packages.js"
+    "release": "pnpm build && node scripts/publish-packages.js",
+    "changelog": "node scripts/generate-changelog.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

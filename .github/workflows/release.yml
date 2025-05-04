@@ -1,8 +1,13 @@
-name: CI & Release
+name: Release
+
 on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force release'
+        required: false
+        default: 'false'
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
 
 permissions:
@@ -11,113 +16,59 @@ permissions:
   pull-requests: write
 
 jobs:
-  build-and-release:
+  release:
+    name: Semantic Release
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 7
-          run_install: false
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@airqo-icons-min'
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
 
-      - name: Configure Git User
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+          run_install: false
 
-      # Create basic .npmrc with npm token
-      - name: Setup NPM Authentication
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "access=public" >> ~/.npmrc
-          chmod 0600 ~/.npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup PNPM cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
         run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Install semantic-release-exec plugin with -w flag to add it to workspace root
-      - name: Install additional dependencies
-        run: pnpm add -D @semantic-release/exec -w
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create output directories
-        run: |
-          mkdir -p packages/react/src/icons
-          mkdir -p packages/react-native/src/icons
-          mkdir -p packages/flutter/assets
-          mkdir -p packages/vue/src/icons
-          mkdir -p packages/core/src
 
       - name: Build packages
-        run: |
-          pnpm run optimize
-          node scripts/generate-icons.js
-          pnpm run build
+        run: pnpm build
 
-      # Make the publish scripts executable
-      - name: Prepare scripts
-        run: |
-          chmod +x scripts/update-versions.js
-          chmod +x scripts/publish-packages.js
-
-      # Save NPM token to each package directory for publishing
-      - name: Setup package NPM Authentication
-        run: |
-          for pkg in core react react-native vue; do
-            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > "packages/$pkg/.npmrc"
-            echo "registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
-            echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> "packages/$pkg/.npmrc"
-            echo "access=public" >> "packages/$pkg/.npmrc"
-            chmod 0600 "packages/$pkg/.npmrc"
-          done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # Only run release steps on main branch
-      - name: Run Semantic Release
-        if: github.ref == 'refs/heads/main'
+      - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release --debug
-
-      # Manual fallback if semantic-release fails
-      - name: Manual Package Publishing (Fallback)
-        if: github.ref == 'refs/heads/main' && failure()
+          FORCE: ${{ github.event.inputs.force }}
         run: |
-          echo "Attempting manual package publishing..."
-          # Verify auth
-          npm whoami || echo "Authentication failed, but continuing anyway"
-
-          # Try to publish each package directly with npm
-          for pkg in core react react-native vue; do
-            cd "packages/$pkg"
-            echo "Publishing @airqo-icons-min/$pkg..."
-            npm publish --access public || echo "Failed to publish $pkg"
-            cd ../..
-          done
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          if [ "$FORCE" == "true" ]; then
+            pnpm semantic-release --no-ci
+          else
+            pnpm semantic-release
+          fi

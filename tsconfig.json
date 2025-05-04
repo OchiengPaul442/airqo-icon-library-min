@@ -18,7 +18,7 @@
     "paths": {
       "@airqo-icons/*": ["packages/*/src"]
     },
-    "allowJs": true,
+    "allowJs": false, // Changed from true to false to avoid generating declarations for JS files
     "jsx": "preserve"
   },
   "references": [
@@ -27,6 +27,6 @@
     { "path": "./packages/react-native" },
     { "path": "./packages/vue" }
   ],
-  "include": ["packages/*/src", "packages/*/src/icons/**/*", "scripts"],
-  "exclude": ["node_modules", "**/dist", "**/*.test.ts"]
+  "include": ["packages/*/src", "packages/*/src/icons/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/*.test.ts", "scripts/**/*"] // Added scripts directory to exclusions
 }

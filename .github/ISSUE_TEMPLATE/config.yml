@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/airqo-platform/airqo-icon-library-min/discussions
+    about: Please ask and answer questions here
+  - name: Documentation
+    url: https://github.com/airqo-platform/airqo-icon-library-min#readme
+    about: Check the documentation for usage information
