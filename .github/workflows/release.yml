@@ -23,6 +23,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 7
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -34,6 +35,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create output directories
+        run: |
+          mkdir -p packages/react/src/icons
+          mkdir -p packages/react-native/src/icons
+          mkdir -p packages/flutter/assets
+          mkdir -p packages/vue/src/icons
+          mkdir -p packages/core/src
 
       - name: Build packages
         run: |
@@ -41,13 +52,15 @@ jobs:
           node scripts/generate-icons.js
           pnpm run build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Save build artifacts
+        uses: actions/cache@v3
         with:
-          name: dist
           path: |
             packages/*/dist
             packages/*/package.json
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
   release:
     needs: build
@@ -64,6 +77,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 7
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -73,31 +87,32 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
+      - name: Restore build artifacts
+        uses: actions/cache@v3
         with:
-          name: dist
-          path: packages
+          path: |
+            packages/*/dist
+            packages/*/package.json
+          key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: Configure Git User
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Create npmrc
+      - name: Configure NPM Authentication
         run: |
-          cat << EOF > .npmrc
-          //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
-          registry=https://registry.npmjs.org/
-          @airqo-icons-min:registry=https://registry.npmjs.org/
-          always-auth=true
-          access=public
-          EOF
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "access=public" >> ~/.npmrc
 
       - name: Install dependencies
         run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Verify npm authentication
+      - name: Verify NPM Authentication
         run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -111,9 +126,10 @@ jobs:
           echo "Running semantic release..."
           npx semantic-release --debug
 
-      - name: Manual Package Publishing (fallback)
+      - name: Manual Package Publishing
         if: success()
         run: |
+          echo "Publishing packages manually..."
           cd packages/core && npm publish --access public || echo "Core package publish failed"
           cd ../react && npm publish --access public || echo "React package publish failed"
           cd ../react-native && npm publish --access public || echo "React Native package publish failed"
@@ -128,7 +144,7 @@ jobs:
           echo "NPM Config:"
           npm config list
           echo "=== .npmrc contents:"
-          cat .npmrc | sed 's/:.*/: ***/'
+          cat ~/.npmrc | sed 's/:.*/: ***/'
           echo "=== NPM whoami:"
           npm whoami || echo "Not logged in to NPM"
           echo "=== Package versions:"
