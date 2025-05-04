@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.0...v1.4.1) (2025-05-04)
+
+
+### Bug Fixes
+
+* update module resolution and types in tsconfig for Vue package ([d00e1de](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/d00e1de189b4693ee9c34c9346edcc41345604fd))
+
 # [1.4.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.3.0...v1.4.0) (2025-05-04)
 
 
