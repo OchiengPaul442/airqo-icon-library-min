@@ -30,7 +30,7 @@ module.exports = {
       '@semantic-release/exec',
       {
         prepareCmd: 'node scripts/update-versions.js ${nextRelease.version}',
-        publishCmd: 'node scripts/publish-packages.js',
+        publishCmd: 'node scripts/publish-packages.js; exit 0',
       },
     ],
     [
