@@ -1,0 +1,27 @@
+# 1.0.0 (2025-05-04)
+
+
+### Bug Fixes
+
+* ensure tarballDir is set to false for all npm packages ([cea7be1](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/cea7be10602febd9c9ed53533785d78c66710cc4))
+* for deployment ([3d3e58a](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/3d3e58ab614a48013c22dc41a00152919fbada9a))
+* improve SVG optimization and icon generation process ([21bd7f0](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/21bd7f0986bf21328ea04ab32a69a0b1bdd40ef3))
+* improve TypeScript configurations for generated files ([c56bba8](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/c56bba8d542028d01ca58ac8d8d1da6014db806b))
+* new changes here to test ([06987c7](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/06987c721f870ce86c1519ce724a9c4ae8cfab72))
+* remove unnecessary prepare script from package.json ([f165677](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/f165677b603519c64f69832199293d91016fd956))
+* replace workspace protocol dependencies with version numbers ([6468108](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/646810829d5c8d5ed6f710e453fbde30cd9c21e4))
+* update GitHub Actions workflow for NPM authentication and version management ([11466a7](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/11466a7c87346c1f747bd227b147d67a4d40f5c4))
+* update icon exports and adjust component naming convention ([5172463](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/5172463c9dea6b40dc583dde3d488b04b9b2d9b3))
+* update NPM configuration for authentication and improve release process ([f7b0544](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/f7b0544cee53df748e81266e5d29a5fc308302cb))
+* update package dependencies and publishing configuration ([17fe704](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/17fe704ad6be28f6b011cbb0c4a8c0b7de1fde52))
+* update release configuration to handle package dependencies correctly ([ecc4f11](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/ecc4f11eac2b4aeffa05ab466b56804991013ae9))
+* update semantic-release configuration and add user config for npm ([8f694af](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/8f694af8f69fe85630a5dc84561561881603779a))
+* update TypeScript configurations and build process ([b9d941a](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/b9d941abca60aa9a20eaea92404ec43b3a52048f))
+* workflow installation issue ([f4e6207](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/f4e62075c09cd21014cca929af29a274a53b4a4b))
+
+
+### Features
+
+* add initial README.md for AirQo Icon Library with installation and usage instructions ([90eee64](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/90eee647ec0fe7c7608feafa43cec7ec3ef51d01))
+* initial release of icon packages ([4d00375](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/4d00375ca4034e22bcc3cd1698fc99ad05abd04d))
+* initial setup of airqo-icons packages ([5fc55ef](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/5fc55ef2168d05797d6cfefc57b6a06592aeba77))
