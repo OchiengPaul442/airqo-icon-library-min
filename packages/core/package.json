@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/core",
-  "version": "0.0.0-development",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,8 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "directory": "dist"
   },
   "scripts": {
     "prebuild": "rimraf dist && pnpm run generate-icons",

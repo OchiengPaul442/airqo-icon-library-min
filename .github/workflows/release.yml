@@ -124,18 +124,20 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           scope: '@airqo-icons-min'
 
+      - name: Create .npmrc file
+        run: |
+          cat << EOF > .npmrc
+          //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
+          registry=https://registry.npmjs.org/
+          @airqo-icons-min:registry=https://registry.npmjs.org/
+          always-auth=true
+          access=public
+          EOF
+
       - name: Configure Git User
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Configure NPM Authentication
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          npm config set access public
-          npm config set '//registry.npmjs.org/:_authToken' "${{ secrets.NPM_TOKEN }}"
 
       - name: Install dependencies
         run: pnpm install
@@ -156,7 +158,7 @@ jobs:
           node scripts/generate-icons.js
           pnpm run build
 
-      - name: Verify NPM Authentication
+      - name: Verify NPM Token
         run: npm whoami
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -166,15 +168,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          # Ensure clean npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@airqo-icons-min:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "access=public" >> ~/.npmrc
-
-          # Run semantic release with debug output
-          npx semantic-release --debug
+        run: npx semantic-release --debug
 
       - name: Debug Publishing (if failure)
         if: failure()
@@ -182,7 +176,8 @@ jobs:
           echo "=== Semantic Release failed, showing diagnostic information ==="
           echo "NPM Config:"
           npm config list
-          cat ~/.npmrc || echo "No .npmrc file found"
+          echo "=== .npmrc contents:"
+          cat .npmrc | sed 's/:.*/: ***/'
           echo "=== Checking NPM user:"
           npm whoami || echo "Not logged in to NPM"
 

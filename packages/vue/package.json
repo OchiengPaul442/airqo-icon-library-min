@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/vue",
-  "version": "0.0.0-development",
+  "version": "1.0.2",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -10,7 +10,8 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "directory": "dist"
   },
   "scripts": {
     "build": "vite build",
