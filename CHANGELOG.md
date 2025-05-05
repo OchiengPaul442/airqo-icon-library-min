@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.2...v1.5.0) (2025-05-05)
+
+
+### Features
+
+* add category tabs component for icon filtering ([fc191c0](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/fc191c0918c613bfb74d86e2c0f34c74a337e530))
+
 ## [1.4.2](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.1...v1.4.2) (2025-05-04)
 
 
