@@ -1,4 +1,5 @@
-import * as React from "react";
+import * as React from 'react';
+import { IconProps } from '../../types/icon';
 import type { SVGProps } from "react";
 import { Ref, forwardRef } from "react";
 interface SVGRProps {
@@ -9,6 +10,13 @@ const ChartsTrendUp01 = ({
   title,
   titleId,
   ...props
-}: SVGProps<SVGSVGElement> & SVGRProps, ref: Ref<SVGSVGElement>) => <svg fill="none" viewBox="0 0 24 24" role="img" width="1em" height="1em" ref={ref} aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path stroke="#1C1D20" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m22 7-7.869 7.869c-.396.396-.594.594-.822.668a1 1 0 0 1-.618 0c-.228-.074-.426-.272-.822-.668L9.13 12.13c-.396-.396-.594-.594-.822-.668a1 1 0 0 0-.618 0c-.228.074-.426.272-.822.668L2 17M22 7h-7m7 0v7" /></svg>;
+}: SVGProps<SVGSVGElement> & SVGRProps, ref: Ref<SVGSVGElement>) => <svg fill="none" viewBox="0 0 24 24" role="img" width="1em" height="1em" ref={ref} aria-labelledby={titleId} {...props}
+      ref={ref}
+      width={size}
+      height={size}
+      stroke={color}
+      role="img"
+      {...props}>{title ? <title id={titleId}>{title}</title> : null}<path stroke="#1C1D20" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m22 7-7.869 7.869c-.396.396-.594.594-.822.668a1 1 0 0 1-.618 0c-.228-.074-.426-.272-.822-.668L9.13 12.13c-.396-.396-.594-.594-.822-.668a1 1 0 0 0-.618 0c-.228.074-.426.272-.822.668L2 17M22 7h-7m7 0v7" /></svg>;
 const ForwardRef = forwardRef(ChartsTrendUp01);
-export default ForwardRef;
+ChartsTrendUp01.displayName = 'ChartsTrendUp01';
+export default ChartsTrendUp01;

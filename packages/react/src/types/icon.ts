@@ -9,8 +9,17 @@ export interface IconProps extends SVGProps<SVGSVGElement> {
   /** Icon size (width and height) */
   size?: number | string;
 
-  /** Icon color - defaults to 'currentColor' */
+  /** Icon color - defaults to 'currentColor' (deprecated, use fill or stroke instead) */
   color?: string;
+  
+  /** Fill color for the icon - defaults to 'none' or inherits from color */
+  fill?: string;
+  
+  /** Stroke color for the icon - defaults to 'currentColor' or inherits from color */
+  stroke?: string;
+  
+  /** Stroke width for the icon - defaults to 2 */
+  strokeWidth?: number | string;
 
   /** Title text for accessibility */
   title?: string;

@@ -1,4 +1,5 @@
-import * as React from "react";
+import * as React from 'react';
+import { withIconProps } from '../../withIconProps';
 import Svg, { Path } from "react-native-svg";
 import type { SvgProps } from "react-native-svg";
 interface SVGRProps {
@@ -10,4 +11,6 @@ const ArrowsCornerUpLeft = ({
   titleId,
   ...props
 }: SvgProps & SVGRProps) => <Svg fill="none" viewBox="0 0 24 24" role="img" width="24" height="24" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<Path stroke="#1C1D20" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14 4 9m0 0 5-5M4 9h6.4c3.36 0 5.04 0 6.324.654a6 6 0 0 1 2.622 2.622C20 13.56 20 15.24 20 18.6V20" /></Svg>;
-export default ArrowsCornerUpLeft;
+const ArrowsCornerUpLeftWithProps = withIconProps(ArrowsCornerUpLeft);
+ArrowsCornerUpLeftWithProps.displayName = 'ArrowsCornerUpLeft';
+export default ArrowsCornerUpLeftWithProps;
