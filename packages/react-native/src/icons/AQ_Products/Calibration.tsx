@@ -1,0 +1,13 @@
+import * as React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const Calibration = ({
+  title,
+  titleId,
+  ...props
+}: SvgProps & SVGRProps) => <Svg fill="none" viewBox="0 0 24 24" role="img" width="24" height="24" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<Path stroke="#1C1D20" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.38 20.992A9.96 9.96 0 0 1 12 22C6.477 22 2 17.523 2 12S6.477 2 12 2a9.96 9.96 0 0 1 4.38 1.008M20.002 6A10.006 10.006 0 0 1 20 18.002M12 8l-.618 1.236c-.265.53-.398.796-.575 1.026-.158.204-.34.387-.545.545-.23.177-.495.31-1.026.575L8 12l1.236.618c.53.265.796.398 1.026.575.204.158.387.34.545.545.177.23.31.495.575 1.026L12 16l.618-1.236c.265-.53.398-.796.575-1.026.158-.204.34-.387.545-.545.23-.177.495-.31 1.026-.575L16 12l-1.236-.618c-.53-.265-.796-.398-1.026-.575a2.992 2.992 0 0 1-.545-.545c-.177-.23-.31-.495-.575-1.026L12 8Z" /></Svg>;
+export default Calibration;

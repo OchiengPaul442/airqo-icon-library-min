@@ -1,0 +1,14 @@
+import * as React from "react";
+import type { SVGProps } from "react";
+import { Ref, forwardRef } from "react";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const MessageCheckCircle = ({
+  title,
+  titleId,
+  ...props
+}: SVGProps<SVGSVGElement> & SVGRProps, ref: Ref<SVGSVGElement>) => <svg fill="none" viewBox="0 0 24 24" role="img" width="1em" height="1em" ref={ref} aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<path stroke="#1C1D20" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="m9.499 11.5 2 2 4.5-4.5m-3.5 11a8.5 8.5 0 1 0-8.057-5.783c.108.32.162.481.172.604a.899.899 0 0 1-.028.326c-.03.12-.098.245-.232.494l-1.636 3.027c-.233.432-.35.648-.324.815a.5.5 0 0 0 .234.35c.144.087.388.062.876.011l5.121-.529a2.25 2.25 0 0 1 .304-.021.903.903 0 0 1 .186.024c.069.016.155.05.329.116a8.479 8.479 0 0 0 3.055.566Z" /></svg>;
+const ForwardRef = forwardRef(MessageCheckCircle);
+export default ForwardRef;

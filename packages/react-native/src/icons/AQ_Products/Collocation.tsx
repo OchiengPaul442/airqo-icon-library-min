@@ -1,0 +1,13 @@
+import * as React from "react";
+import Svg, { Path } from "react-native-svg";
+import type { SvgProps } from "react-native-svg";
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
+const Collocation = ({
+  title,
+  titleId,
+  ...props
+}: SvgProps & SVGRProps) => <Svg fill="none" viewBox="0 0 24 24" role="img" width="24" height="24" aria-labelledby={titleId} {...props}>{title ? <title id={titleId}>{title}</title> : null}<Path stroke="#1C1D20" strokeWidth={1.5} d="m8.796 18.028-1.586.326a3.124 3.124 0 0 1-3.69-2.432L1.845 7.761a3.124 3.124 0 0 1 2.432-3.69l6.12-1.257a3.124 3.124 0 0 1 3.69 2.432l.25 1.218M11.931 21h6.249a3.124 3.124 0 0 0 3.124-3.125V9.544a3.124 3.124 0 0 0-3.124-3.125h-6.25a3.124 3.124 0 0 0-3.124 3.125v8.331A3.124 3.124 0 0 0 11.931 21Zm1.255-7.741 1.04-1.386a1.04 1.04 0 0 1 1.662 0l1.039 1.386a1.04 1.04 0 0 1-.831 1.662h-2.079a1.04 1.04 0 0 1-.83-1.662Z" /></Svg>;
+export default Collocation;
