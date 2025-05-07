@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { IconProps } from '../../types/icon';
 import type { SVGProps } from 'react';
 import { Ref, forwardRef } from 'react';
 interface SVGRProps {
@@ -19,12 +18,6 @@ const ChartsLineChartDown01 = (
     ref={ref}
     aria-labelledby={titleId}
     {...props}
-    ref={ref}
-    width={size}
-    height={size}
-    stroke={color}
-    role="img"
-    {...props}
   >
     {title ? <title id={titleId}>{title}</title> : null}
     <path
@@ -39,5 +32,4 @@ const ChartsLineChartDown01 = (
 
 const ForwardRef = forwardRef(ChartsLineChartDown01);
 ForwardRef.displayName = 'ChartsLineChartDown01';
-ChartsLineChartDown01.displayName = 'ChartsLineChartDown01';
-export default ChartsLineChartDown01;
+export default ForwardRef;

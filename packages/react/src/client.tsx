@@ -3,8 +3,8 @@
 import React from 'react';
 import withIconProps from './withIconProps';
 import type { IconProps } from './withIconProps';
-// Import raw icons but don't use them directly - they're re-exported
-import * as _ from './index';
+// Import raw icons for side effects only
+import './index';
 import enhancedIcons from './enhanceIcons';
 
 /**
