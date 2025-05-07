@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.6.0...v1.7.0) (2025-05-07)
+
+
+### Features
+
+* integrate IconRenderer for dynamic icon rendering in IconGrid and IconSheet components ([1434ca6](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/1434ca6b77224784b9c9cdd0a1a240203fe7e82e))
+
 # [1.6.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.5.0...v1.6.0) (2025-05-07)
 
 
