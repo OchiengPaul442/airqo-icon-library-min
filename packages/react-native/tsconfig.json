@@ -32,8 +32,8 @@
     "tsBuildInfoFile": "tsconfig.tsbuildinfo",
     "noEmit": false,
     "allowImportingTsExtensions": false,
-    "emitDeclarationOnly": true,
-    "forceConsistentCasingInFileNames": false // Temporarily disable strict casing
+    "emitDeclarationOnly": false,
+    "forceConsistentCasingInFileNames": true
   },
   "references": [{ "path": "../core" }],
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/*.d.ts"],

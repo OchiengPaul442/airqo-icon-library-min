@@ -21,7 +21,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "noEmit": false
+    "noEmit": false,
+    "emitDeclarationOnly": false
   },
   "references": [{ "path": "../core" }],
   "include": [
