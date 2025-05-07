@@ -1,3 +1,17 @@
+# [1.6.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.5.0...v1.6.0) (2025-05-07)
+
+
+### Bug Fixes
+
+* update TypeScript configuration to disable emit and adjust declaration settings across packages ([3f1f0ed](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/3f1f0eda21f0c80f74b3f30a587be58cdbdbb20d))
+* update TypeScript configuration to enable emitDeclarationOnly and adjust noEmit settings across packages ([1cd3a18](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/1cd3a1825b95c928ecc19c72671e44a28ba69ba6))
+
+
+### Features
+
+* add icon generation step to CI and update .gitignore for generated files ([3e8301c](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/3e8301c63b456337202ee9ccb2fa653a665aca21))
+* implement icon category utilities and components for displaying icons ([7d5a195](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/7d5a195fc61f6920e688de42402dd61251684954))
+
 # [1.5.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.4.2...v1.5.0) (2025-05-05)
 
 
