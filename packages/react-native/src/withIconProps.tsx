@@ -1,44 +1,65 @@
 import * as React from 'react';
-import { ComponentType } from 'react';
 import { SvgProps } from 'react-native-svg';
-import { IconProps, IconComponent } from './types/icon';
+
+// Define the IconNativeProps interface directly to avoid import issues
+export interface IconNativeProps {
+  size?: number | string;
+  color?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  fill?: string;
+}
 
 /**
- * Simplified HOC that adds size prop support to SVG icons
- * Automatically sets width and height based on size prop if provided
+ * Props for React Native SVG icon components with proper TypeScript support
  */
-export function withIconProps<P extends SvgProps>(
-  WrappedComponent: ComponentType<P>,
-): IconComponent {
-  const WithIconProps = React.forwardRef<SVGElement, P & IconProps>(
-    (props, ref) => {
-      // Extract size and other props safely
-      const { size, ...otherProps } = props;
+export type IconNativeComponentProps = IconNativeProps & SvgProps;
 
-      // Prepare the props for the wrapped component
-      const componentProps = {
-        ...otherProps,
-        width:
-          props.width !== undefined
-            ? props.width
-            : size !== undefined
-            ? size
-            : 24,
-        height:
-          props.height !== undefined
-            ? props.height
-            : size !== undefined
-            ? size
-            : 24,
-      } as unknown as P;
+/**
+ * Higher-order component that enhances React Native SVG icons with proper size, fill, and stroke handling
+ * @param IconComponent The original icon component to enhance
+ */
+export function withIconProps<P extends object>(
+  IconComponent: React.ComponentType<P>,
+): React.FC<P & IconNativeComponentProps> {
+  const WithIconProps: React.FC<P & IconNativeComponentProps> = (props) => {
+    const {
+      size,
+      width,
+      height,
+      color,
+      stroke = color,
+      fill = color,
+      strokeWidth,
+      ...restProps
+    } = props as IconNativeComponentProps & P;
 
-      return <WrappedComponent ref={ref} {...componentProps} />;
-    },
-  );
+    // Calculate dimensions based on size, with width/height taking precedence
+    const dimensions = {
+      width: width !== undefined ? width : size,
+      height: height !== undefined ? height : size,
+    };
+
+    // Apply stroke color and fill color if provided
+    const colorProps: Record<string, string | number | undefined> = {};
+    if (stroke) colorProps.stroke = stroke;
+    if (fill) colorProps.fill = fill;
+    if (strokeWidth) colorProps.strokeWidth = strokeWidth;
+
+    return (
+      <IconComponent
+        {...dimensions}
+        {...colorProps}
+        {...(restProps as unknown as P)}
+      />
+    );
+  };
 
   WithIconProps.displayName = `WithIconProps(${
-    WrappedComponent.displayName || WrappedComponent.name || 'Component'
+    IconComponent.displayName || 'IconComponent'
   })`;
 
-  return WithIconProps as IconComponent;
+  return WithIconProps;
 }
+
+export default withIconProps;

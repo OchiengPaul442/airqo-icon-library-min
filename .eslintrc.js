@@ -5,9 +5,18 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'prettier'
+    'prettier',
   ],
   rules: {
     // Add or override rules as needed
-  }
+  },
+  overrides: [
+    // Allow require() in JavaScript files
+    {
+      files: ['*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+  ],
 };

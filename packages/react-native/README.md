@@ -1,138 +1,151 @@
-# @airqo-icons-min/react-native
+# AirQo React Native Icons
 
-React Native optimized icon components for AirQo applications.
-
-[![NPM Version](https://img.shields.io/npm/v/@airqo-icons-min/react-native)](https://www.npmjs.com/package/@airqo-icons-min/react-native)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+React Native SVG icon components for AirQo projects, with TypeScript support for customizing size, color, fill, and stroke properties.
 
 ## Installation
 
 ```bash
-# npm
-npm install @airqo-icons-min/react-native react-native-svg
+# Install the package
+npm install @airqo-icons-min/react-native
 
-# yarn
-yarn add @airqo-icons-min/react-native react-native-svg
-
-# pnpm
-pnpm add @airqo-icons-min/react-native react-native-svg
+# Make sure you have react-native-svg installed
+npm install react-native-svg
 ```
-
-> **Note**: This package requires `react-native-svg` as a peer dependency.
 
 ## Usage
 
+### Basic Usage
+
 ```jsx
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import {
-  AlertTriangle,
-  Bell03,
-  NotificationBox,
-} from '@airqo-icons-min/react-native';
+import { AlertCircle, ChevronDown } from '@airqo-icons-min/react-native';
 
-function IconsDemo() {
+function MyComponent() {
   return (
-    <View style={styles.container}>
-      {/* Use the size prop for equal width/height */}
-      <AlertTriangle size={24} fill="red" />
-
-      {/* Size prop takes precedence unless width/height are explicitly set */}
-      <Bell03 size={32} fill="#3366FF" />
-
-      {/* Explicit width/height overrides size */}
-      <NotificationBox
-        width={40}
-        height={40}
-        fill="none"
-        stroke="#222222"
-        strokeWidth={1.5}
-      />
-
-      {/* Responding to touch events */}
-      <AlertTriangle
-        size={30}
-        fill="orange"
-        onPress={() => console.log('Icon pressed')}
-      />
+    <View>
+      <AlertCircle />
+      <ChevronDown />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    padding: 16,
-  },
-});
 ```
 
-## Props
+### Customizing Icons
 
-All icons accept the following props:
+All icons accept standard React Native SVG properties along with:
 
-| Prop          | Type   | Default        | Description                                   |
-| ------------- | ------ | -------------- | --------------------------------------------- |
-| `size`        | number | 24             | Sets both width and height (convenience prop) |
-| `width`       | number | size or 24     | Width of icon (overrides size)                |
-| `height`      | number | size or 24     | Height of icon (overrides size)               |
-| `fill`        | string | 'currentColor' | Fill color                                    |
-| `stroke`      | string | 'currentColor' | Stroke color (if applicable)                  |
-| `strokeWidth` | number | 2              | Stroke width (if applicable)                  |
+- `size`: Sets both width and height (number)
+- `width`: Explicitly sets the width (overrides size)
+- `height`: Explicitly sets the height (overrides size)
+- `color`: Sets both fill and stroke if not otherwise specified
+- `fill`: Sets the fill color
+- `stroke`: Sets the stroke color
+- `strokeWidth`: Sets the stroke width
 
-Additionally, all icons accept any props from `react-native-svg` components, including touch event handlers like `onPress`.
+```jsx
+import { AlertCircle } from '@airqo-icons-min/react-native';
 
-## Available Icons
+// Size and color
+<AlertCircle size={24} color="red" />
 
-The library includes hundreds of icons organized by category. Here are some examples:
+// Different fill and stroke
+<AlertCircle fill="blue" stroke="black" />
 
-### Alerts & Feedback
+// Custom width/height
+<AlertCircle width={32} height={24} />
 
-- `AlertCircle`
-- `AlertTriangle`
-- `BellRinging01`
-- `NotificationBox`
-- `ThumbsUp`
+// With style props
+<AlertCircle style={{ margin: 8 }} />
+```
 
-### Arrows
+### Enhanced Icons with Consistent Props
 
-- `ArrowCircleDown`
-- `ArrowNarrowLeft`
-- `ArrowBlockRight`
+For projects that need consistent prop handling for all icons, you can use the enhanced icons:
 
-### Charts
+```jsx
+import { icons } from '@airqo-icons-min/react-native/main';
 
-- `BarChart01`
-- `LineChartUp01`
-- `PieChart01`
-
-For a complete list, refer to the [main documentation](https://github.com/airqo-platform/airqo-icon-library-min).
-
-## TypeScript Support
-
-All icons include full TypeScript definitions:
-
-```tsx
-import React from 'react';
-import { View } from 'react-native';
-import { AlertCircle, IconProps } from '@airqo-icons-min/react-native';
-
-// You can use the IconProps type for your icon props
-interface Props {
-  iconProps: IconProps;
-}
-
-const MyComponent = ({ iconProps }: Props) => {
+function MyComponent() {
   return (
     <View>
+      <icons.AlertCircle size={24} color="red" />
+      <icons.ChevronDown stroke="#0088FF" strokeWidth={2} />
+    </View>
+  );
+}
+```
+
+### TypeScript Support
+
+All icons have complete TypeScript definitions for their props:
+
+```tsx
+import {
+  AlertCircle,
+  IconNativeComponentProps,
+} from '@airqo-icons-min/react-native/main';
+
+// You can extend the icon props for your components
+interface CustomIconProps extends IconNativeComponentProps {
+  label?: string;
+}
+
+function CustomIcon({ label, ...iconProps }: CustomIconProps) {
+  return (
+    <View>
+      {label && <Text>{label}</Text>}
       <AlertCircle {...iconProps} />
     </View>
   );
-};
+}
 ```
 
-## License
+## API Reference
 
-MIT © AirQo
+### Icon Components
+
+All icons follow the same naming convention from the original SVG files, but without the category prefix (e.g., `alert-circle.svg` becomes `AlertCircle`).
+
+### Props
+
+All icons accept the following props:
+
+| Prop          | Type                   | Description                                          |
+| ------------- | ---------------------- | ---------------------------------------------------- |
+| `size`        | `number \| string`     | Sets both width and height                           |
+| `width`       | `number \| string`     | Sets the width (overrides size)                      |
+| `height`      | `number \| string`     | Sets the height (overrides size)                     |
+| `color`       | `string`               | Sets both fill and stroke if not otherwise specified |
+| `fill`        | `string`               | Sets the fill color                                  |
+| `stroke`      | `string`               | Sets the stroke color                                |
+| `strokeWidth` | `number \| string`     | Sets the stroke width                                |
+| `style`       | `StyleProp<ViewStyle>` | React Native style object                            |
+
+Plus all standard props from `react-native-svg`.
+
+## Creating Custom Icon Components
+
+You can use the `withIconProps` HOC to add consistent icon prop handling to your own components:
+
+```tsx
+import { withIconProps } from '@airqo-icons-min/react-native/main';
+import MyCustomSvgIcon from './MyCustomIcon';
+
+const EnhancedIcon = withIconProps(MyCustomSvgIcon);
+
+// Now your custom icon supports the same props as the library's icons
+<EnhancedIcon size={24} color="blue" />;
+```
+
+## Troubleshooting
+
+### Icons not visible on Android
+
+Make sure you have properly set up `react-native-svg` in your project according to their installation instructions.
+
+### Size Issues
+
+If you're having issues with icon sizes, try using explicit width and height props rather than the size prop:
+
+```jsx
+<AlertCircle width={24} height={24} />
+```

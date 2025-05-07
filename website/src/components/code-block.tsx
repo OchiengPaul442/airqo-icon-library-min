@@ -111,7 +111,7 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
           ],
         }}
       >
-        {({ className, style, tokens, getLineProps, getTokenProps }) => (
+        {({ style, tokens, getLineProps, getTokenProps }) => (
           <pre
             className="relative overflow-x-auto rounded-lg border bg-muted p-4 font-mono text-sm"
             style={style}

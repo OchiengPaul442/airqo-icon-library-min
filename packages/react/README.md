@@ -1,9 +1,6 @@
-# @airqo-icons-min/react
+# AirQo React Icons
 
-React optimized SVG icon components for AirQo applications.
-
-[![NPM Version](https://img.shields.io/npm/v/@airqo-icons-min/react)](https://www.npmjs.com/package/@airqo-icons-min/react)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+React SVG icon components for AirQo projects, with full TypeScript support for customizing size, color, fill, and stroke properties.
 
 ## Installation
 
@@ -20,116 +17,145 @@ pnpm add @airqo-icons-min/react
 
 ## Usage
 
+### Basic Usage
+
 ```jsx
-import React from 'react';
-import { AlertCircle, BellRinging01, ThumbsUp } from '@airqo-icons-min/react';
+import { AlertCircle, ChevronDown } from '@airqo-icons-min/react';
 
-function IconsDemo() {
+function MyComponent() {
   return (
-    <div className="icons-container">
-      <AlertCircle size={24} color="red" />
-      <BellRinging01 size={32} color="#3366FF" />
+    <div>
+      <AlertCircle />
+      <ChevronDown />
+    </div>
+  );
+}
+```
 
-      {/* With custom width and height */}
-      <ThumbsUp width={40} height={30} color="green" />
+### Customizing Icons
 
-      {/* With additional SVG props */}
-      <AlertCircle
+All icons accept standard SVG properties along with:
+
+- `size`: Sets both width and height (string or number)
+- `color`: Sets both fill and stroke if not otherwise specified
+- `fill`: Sets the fill color
+- `stroke`: Sets the stroke color
+- `strokeWidth`: Sets the stroke width
+
+```jsx
+import { AlertCircle } from '@airqo-icons-min/react';
+
+// Size and color
+<AlertCircle size={24} color="red" />
+
+// Different fill and stroke
+<AlertCircle fill="blue" stroke="black" />
+
+// Using standard SVG props
+<AlertCircle width={32} height={32} className="my-icon" onClick={handleClick} />
+
+// With style props
+<AlertCircle style={{ margin: '8px' }} />
+```
+
+### Enhanced Icons with Consistent Props
+
+For projects that need consistent prop handling for all icons, you can use the enhanced icons:
+
+```jsx
+import { icons } from '@airqo-icons-min/react/main';
+
+function MyComponent() {
+  return (
+    <div>
+      <icons.AlertCircle size={24} color="red" />
+      <icons.ChevronDown size="2rem" stroke="#0088FF" strokeWidth={2} />
+    </div>
+  );
+}
+```
+
+### Using with Next.js
+
+For Next.js applications with Server Components, use the client import for interactive icons:
+
+```jsx
+// app/my-component.jsx
+'use client';
+
+import { ClientIcon } from '@airqo-icons-min/react/client';
+import { AlertCircle } from '@airqo-icons-min/react';
+
+function MyComponent() {
+  return (
+    <div>
+      {/* For interactive events in client components */}
+      <ClientIcon
+        icon={AlertCircle}
         size={24}
-        color="orange"
-        strokeWidth={1.5}
-        opacity={0.8}
-        onClick={() => console.log('Icon clicked!')}
+        color="red"
+        onClick={handleClick}
       />
     </div>
   );
 }
 ```
 
-## Props
+### TypeScript Support
 
-All icons accept the following props:
-
-| Prop          | Type          | Default        | Description                   |
-| ------------- | ------------- | -------------- | ----------------------------- |
-| `size`        | number/string | 24             | Sets both width and height    |
-| `color`       | string        | 'currentColor' | Sets the stroke color         |
-| `width`       | number/string | size or 24     | Width of icon                 |
-| `height`      | number/string | size or 24     | Height of icon                |
-| `title`       | string        | undefined      | Accessible title for the icon |
-| `titleId`     | string        | undefined      | ID for the title element      |
-| `stroke`      | string        | 'currentColor' | Stroke color                  |
-| `fill`        | string        | 'none'         | Fill color                    |
-| `strokeWidth` | number/string | 2              | Stroke width                  |
-
-Additionally, all icons accept any standard SVG attributes like `className`, `style`, `onClick`, etc.
-
-## Available Icons
-
-The library includes hundreds of icons organized by category. Here are some examples:
-
-### Alerts & Feedback
-
-- `AlertCircle`
-- `AlertTriangle`
-- `BellRinging01`
-- `NotificationBox`
-- `ThumbsUp`
-
-### Arrows
-
-- `ArrowCircleDown`
-- `ArrowNarrowLeft`
-- `ArrowBlockRight`
-
-### Charts
-
-- `BarChart01`
-- `LineChartUp01`
-- `PieChart01`
-
-For a complete list, refer to the [main documentation](https://github.com/airqo-platform/airqo-icon-library-min).
-
-## TypeScript Support
-
-All icons include full TypeScript definitions:
+All icons have complete TypeScript definitions for their props:
 
 ```tsx
-import React from 'react';
-import { AlertCircle, IconProps } from '@airqo-icons-min/react';
+import { AlertCircle, IconProps } from '@airqo-icons-min/react/main';
 
-// You can use the IconProps type for your custom components
-interface Props {
-  iconProps: IconProps;
+// You can extend the icon props for your components
+interface CustomIconProps extends IconProps {
+  label?: string;
 }
 
-const MyComponent = ({ iconProps }: Props) => {
+function CustomIcon({ label, ...iconProps }: CustomIconProps) {
   return (
     <div>
+      {label && <span>{label}</span>}
       <AlertCircle {...iconProps} />
     </div>
   );
-};
-```
-
-## Server-Side Rendering
-
-This package is fully compatible with server-side rendering (SSR) frameworks like Next.js:
-
-```jsx
-// Next.js page example
-import { AlertTriangle } from '@airqo-icons-min/react';
-
-export default function WarningPage() {
-  return (
-    <div className="warning">
-      <AlertTriangle size={48} color="orange" />
-      <h1>Warning: Proceed with caution</h1>
-    </div>
-  );
 }
 ```
 
-## License
+## API Reference
 
-MIT © AirQo
+### Icon Components
+
+All icons follow the same naming convention from the original SVG files, but without the category prefix (e.g., `alert-circle.svg` becomes `AlertCircle`).
+
+### Props
+
+All icons accept the following props:
+
+| Prop          | Type                  | Description                                          |
+| ------------- | --------------------- | ---------------------------------------------------- |
+| `size`        | `number \| string`    | Sets both width and height                           |
+| `color`       | `string`              | Sets both fill and stroke if not otherwise specified |
+| `fill`        | `string`              | Sets the fill color                                  |
+| `stroke`      | `string`              | Sets the stroke color                                |
+| `strokeWidth` | `number \| string`    | Sets the stroke width                                |
+| `className`   | `string`              | CSS class name                                       |
+| `style`       | `React.CSSProperties` | Inline styles                                        |
+| `title`       | `string`              | Accessible title for the icon                        |
+
+Plus all standard SVG attributes and event handlers.
+
+## Creating Custom Icon Components
+
+You can use the `withIconProps` HOC to add consistent icon prop handling to your own components:
+
+```tsx
+import { withIconProps } from '@airqo-icons-min/react/main';
+import MyCustomSvgIcon from './MyCustomIcon';
+
+const EnhancedIcon = withIconProps(MyCustomSvgIcon);
+
+// Now your custom icon supports the same props as the library's icons
+<EnhancedIcon size={24} color="blue" />;
+```

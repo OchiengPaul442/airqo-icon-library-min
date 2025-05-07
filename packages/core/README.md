@@ -1,66 +1,108 @@
-# @airqo-icons-min/core
+# AirQo Icons Core
 
-Core utilities and type definitions for AirQo icon packages.
+Core utilities, types, and shared functionality for AirQo icon packages.
 
-[![NPM Version](https://img.shields.io/npm/v/@airqo-icons-min/core)](https://www.npmjs.com/package/@airqo-icons-min/core)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+## Overview
 
-## About
+This package provides the foundation for other AirQo icon packages, including:
 
-This package provides shared utilities and type definitions used by all AirQo icon packages. It includes:
-
-- Icon metadata and manifest
-- Common type definitions
+- TypeScript interfaces and types
+- Icon metadata
 - Shared utilities
-
-## Installation
-
-```bash
-# npm
-npm install @airqo-icons-min/core
-
-# yarn
-yarn add @airqo-icons-min/core
-
-# pnpm
-pnpm add @airqo-icons-min/core
-```
+- Common configuration
 
 ## Usage
+
+This package is primarily intended to be used as a dependency for other AirQo icon packages. However, you can also use it directly if you need access to icon metadata or types.
+
+### Accessing Icon Metadata
 
 ```typescript
 import { icons, IconMeta } from '@airqo-icons-min/core';
 
-// Use the icon manifest to get information about all available icons
+// Get all available icons
 console.log(`Total icons available: ${icons.length}`);
 
 // Filter icons by category
 const alertIcons = icons.filter((icon) => icon.category === 'alerts_feedback');
 console.log(`Alert icons available: ${alertIcons.length}`);
-
-// Find a specific icon
-const alertCircle = icons.find((icon) => icon.name === 'AlertCircle');
 ```
 
-## Icon Manifest
-
-The icon manifest contains metadata for all available icons:
+### Using Types
 
 ```typescript
-interface IconMeta {
-  name: string; // PascalCase component name (e.g., 'AlertCircle')
-  category: string; // Original category folder name (e.g., 'alerts_feedback')
+import { IconBaseProps } from '@airqo-icons-min/core';
+
+// Create your own icon component with consistent props
+interface MyCustomIconProps extends IconBaseProps {
+  customProp?: string;
+}
+
+function MyCustomIcon({
+  size,
+  color,
+  stroke,
+  fill,
+  customProp,
+  ...props
+}: MyCustomIconProps) {
+  // Implementation
 }
 ```
 
-## Note for Package Authors
+## API Reference
 
-This package is primarily intended for internal use by other AirQo icon packages. End users should typically import from the framework-specific packages like:
+### Types
 
-- `@airqo-icons-min/react`
-- `@airqo-icons-min/react-native`
-- `@airqo-icons-min/vue`
+#### `IconMeta`
 
-## License
+```typescript
+interface IconMeta {
+  name: string; // PascalCase component name
+  category: string; // Original category folder name
+}
+```
 
-MIT © AirQo
+#### `IconBaseProps`
+
+```typescript
+interface IconBaseProps {
+  size?: string | number; // Sets both width and height
+  color?: string; // Sets both fill and stroke if not specified individually
+  stroke?: string; // Sets the stroke color
+  fill?: string; // Sets the fill color
+  strokeWidth?: string | number; // Sets the stroke width
+  style?: CSS.Properties; // CSS style object
+  className?: string; // CSS class name
+  title?: string; // Accessible title
+}
+```
+
+#### `IconNativeProps`
+
+```typescript
+interface IconNativeProps extends IconBaseProps {
+  width?: string | number; // Explicit width (overrides size)
+  height?: string | number; // Explicit height (overrides size)
+}
+```
+
+### Constants
+
+#### `icons`
+
+An array of all available icons with their metadata:
+
+```typescript
+const icons: ReadonlyArray<IconMeta>;
+```
+
+## For Developers
+
+If you're developing with the AirQo icon library and need to extend functionality, this package is where you should add:
+
+1. Shared types and interfaces
+2. Utility functions used by multiple packages
+3. Common configurations
+
+When adding new features, ensure they are properly exported from the main entry point (`index.ts`).

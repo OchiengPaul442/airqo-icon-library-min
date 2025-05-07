@@ -4,6 +4,11 @@
  *
  * Automates SVG optimization, component generation, asset copying, and manifest/index creation.
  */
+
+/* eslint-disable no-undef */
+// ^ Disable ESLint no-undef warnings for Node.js globals (setTimeout, console, __dirname, require)
+
+// Use ES modules syntax instead of CommonJS require
 const fs = require('fs');
 const path = require('path');
 const { optimize } = require('svgo');
@@ -73,7 +78,18 @@ const getSvgrConfig = (isNative, componentName) => ({
   titleProp: true,
   svgProps: isNative
     ? { width: '24', height: '24' } // Default size for React Native
-    : { role: 'img' }, // Default props for React
+    : {
+        role: 'img',
+        width: '1em',
+        height: '1em',
+      }, // Default props for React
+  replaceAttrValues: {
+    '#1C1D20': 'currentColor', // Replace hardcoded colors with currentColor
+    '#000': 'currentColor',
+    '#000000': 'currentColor',
+    black: 'currentColor',
+  },
+  svgo: false, // We already optimize SVG separately
 });
 
 // --- Helper Functions ---
@@ -237,12 +253,6 @@ async function generateComponent(svgContent, componentName, isNative) {
  * @returns {string} Fallback component code
  */
 function generateFallbackComponent(componentName, isNative) {
-  console.warn(
-    `⚠️ Generating fallback component for ${componentName} (${
-      isNative ? 'Native' : 'Web'
-    })`,
-  );
-
   const propsType = isNative ? 'SvgProps' : 'React.SVGProps<SVGSVGElement>';
   const SvgComponent = isNative ? 'Svg' : 'svg';
   const PathComponent = isNative ? 'Path' : 'path';
@@ -256,7 +266,7 @@ ${importStatement}
 
 // Fallback component due to generation error for ${componentName}
 const ${componentName} = (props: ${propsType}) => {
-  console.warn('Rendering fallback icon component: ${componentName}');
+  // Fallback icon component
   return (
     <${SvgComponent} width={props.width ?? 24} height={props.height ?? 24} viewBox="0 0 24 24" fill="currentColor" {...props}>
       {/* Error/Warning Icon Path */}
@@ -301,8 +311,8 @@ async function processSvgFile(
   }
 
   const rawSvgPath = path.join(categoryDir, file);
-  // Generate PascalCase component name by combining category and baseName
-  const componentName = pascalCase(`${category}-${baseName}`);
+  // Generate PascalCase component name using only the baseName, not the category
+  const componentName = pascalCase(baseName);
 
   try {
     // Read Raw SVG
