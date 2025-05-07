@@ -20,7 +20,7 @@
     },
     "allowJs": false,
     "jsx": "preserve",
-    "noEmit": false
+    "noEmit": true // Changed from false to true for the root config
   },
   "references": [
     { "path": "./packages/core" },
@@ -28,6 +28,6 @@
     { "path": "./packages/react-native" },
     { "path": "./packages/vue" }
   ],
-  "include": ["packages/*/src", "packages/*/src/icons/**/*"],
+  "include": [], // Empty the include array at the root level
   "exclude": ["node_modules", "**/dist", "**/*.test.ts", "scripts/**/*"]
 }

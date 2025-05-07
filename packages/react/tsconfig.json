@@ -22,7 +22,7 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "noEmit": false,
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": true
   },
   "references": [{ "path": "../core" }],
   "include": [

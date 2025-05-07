@@ -22,7 +22,9 @@
     "types": ["vite/client", "vue"],
     "paths": {
       "@airqo-icons-min/core": ["../core/src"]
-    }
+    },
+    "noEmit": false,
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "references": [
