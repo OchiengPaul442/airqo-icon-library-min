@@ -17,6 +17,7 @@
     "build:packages": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"./packages/vue\" --filter=\"{./packages/core}...\" build",
     "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "pnpm build && tsc --noEmit",
     "prepare": "husky install",
     "release": "pnpm build && node scripts/publish-packages.js",
     "changelog": "node scripts/generate-changelog.js",
