@@ -4,7 +4,7 @@ import { Inter as FontSans } from 'next/font/google';
 import Link from 'next/link';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ThemeProvider } from '@/components/theme-provider';
-import { ClientThemeToggle } from '@/components/client-theme-toggle'; // Fixed import to use the existing file
+import { ClientThemeToggle } from '@/components/client-theme-toggle';
 import { Toaster } from 'sonner';
 import './globals.css';
 
@@ -37,6 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="relative flex min-h-screen flex-col">
+            {/* Header */}
             <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center space-x-6">
@@ -65,13 +66,17 @@ export default function RootLayout({
                   </nav>
                 </div>
                 <div className="flex items-center gap-2">
-                  <ClientThemeToggle /> {/* Using the correct component name */}
+                  <ClientThemeToggle />
                 </div>
               </div>
             </header>
+
+            {/* Main Content */}
             <main className="flex-1">
               <ErrorBoundary>{children}</ErrorBoundary>
             </main>
+
+            {/* Footer */}
             <footer className="border-t py-6 md:py-0">
               <div className="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
                 <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
@@ -89,8 +94,8 @@ export default function RootLayout({
               </div>
             </footer>
           </div>
+          <Toaster position="bottom-right" />
         </ThemeProvider>
-        <Toaster position="bottom-right" theme="system" />
       </body>
     </html>
   );

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@airqo-icons-min/core": "^1.1.0",
     "@airqo-icons-min/react": "file:../packages/react",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-tabs": "^1.1.9",

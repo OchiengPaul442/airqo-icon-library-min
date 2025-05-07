@@ -1,11 +1,5 @@
 import { useMemo } from 'react';
-import {
-  getIconCategories,
-  getIconsByCategory as getIconsByCategoryUtil,
-  getIconsForCategory,
-  formatCategoryName,
-  IconMeta,
-} from '@airqo-icons-min/core';
+import { icons, IconMeta } from '@airqo-icons-min/core';
 
 type IconsGroupedByCategory = Record<
   string,
@@ -15,6 +9,54 @@ type IconsGroupedByCategory = Record<
     icons: IconMeta[];
   }
 >;
+
+/**
+ * Utility function to get all icon categories
+ */
+function getIconCategories(): string[] {
+  // Extract unique categories from icons
+  const categoriesSet = new Set<string>();
+  icons.forEach((icon) => {
+    categoriesSet.add(icon.category);
+  });
+  return Array.from(categoriesSet);
+}
+
+/**
+ * Utility function to format a category name for display
+ */
+function formatCategoryName(category: string): string {
+  return category
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Utility function to get icons grouped by category
+ */
+function getIconsByCategory(): Record<string, IconMeta[]> {
+  const categorized: Record<string, IconMeta[]> = {};
+
+  icons.forEach((icon) => {
+    if (!categorized[icon.category]) {
+      categorized[icon.category] = [];
+    }
+    categorized[icon.category].push({ ...icon });
+  });
+
+  return categorized;
+}
+
+/**
+ * Utility function to get icons for a specific category
+ */
+function getIconsForCategory(category: string): IconMeta[] {
+  return icons
+    .filter((icon) => icon.category === category)
+    .map((icon) => ({ ...icon }));
+}
 
 /**
  * React hook that provides categorized icons and helper functions
@@ -34,7 +76,7 @@ export function useIconCategories() {
 
   // Group all icons by their categories with formatted category names
   const iconsByCategory = useMemo<IconsGroupedByCategory>(() => {
-    const categorized = getIconsByCategoryUtil();
+    const categorized = getIconsByCategory();
     const result: IconsGroupedByCategory = {};
 
     Object.keys(categorized).forEach((category) => {
@@ -49,9 +91,10 @@ export function useIconCategories() {
   }, []);
 
   // Get all icons across all categories
-  const allIcons = useMemo(() => {
-    return Object.values(iconsByCategory).flatMap((category) => category.icons);
-  }, [iconsByCategory]);
+  const allIcons = useMemo<IconMeta[]>(() => {
+    // Create a new array with copies of the icons to make it mutable
+    return icons.map((icon) => ({ ...icon }));
+  }, []);
 
   /**
    * Get icons for a specific category

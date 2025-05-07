@@ -1,15 +1,19 @@
 import type { IconMeta } from './icon-manifest';
 import { icons } from './icon-manifest';
+import * as React from 'react';
 
-// Define a type for icon module imports
+// Define a type for icon module imports with a more specific type
 type IconModule = {
-  default: unknown;
-  [key: string]: unknown;
+  default: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  // We still need to allow for other properties that might exist on the imported module
+  // but we'll make it as specific as possible
+  displayName?: string;
+  id?: string;
 };
 
-// Define interface for dynamic imports
+// Define interface for dynamic imports with a more specific return type
 interface DynamicImport {
-  [key: string]: () => Promise<IconModule>;
+  [iconName: string]: () => Promise<IconModule>;
 }
 
 // Base map for dynamic imports - frameworks should extend this

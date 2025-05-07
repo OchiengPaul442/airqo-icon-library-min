@@ -2,29 +2,31 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn } from '../lib/utils';
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 interface CategoryTabsProps {
+  categories: Category[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
 }
 
 export function CategoryTabs({
+  categories,
   selectedCategory,
   onSelectCategory,
 }: CategoryTabsProps) {
-  const categories = [
-    { id: 'all', label: 'All Icons' },
-    { id: 'alerts_feedback', label: 'Alerts & Feedback' },
-    { id: 'arrows', label: 'Arrows' },
-    { id: 'charts', label: 'Charts' },
-    // Add any other categories here
-  ];
+  // Add the 'All Icons' category at the beginning
+  const allCategories = [{ id: 'all', name: 'All Icons' }, ...categories];
 
   return (
     <div className="relative">
       <div className="scrollbar-hide mb-2 flex w-full items-center gap-2 overflow-x-auto pb-2">
-        {categories.map(({ id, label }) => (
+        {allCategories.map(({ id, name }) => (
           <button
             key={id}
             onClick={() => onSelectCategory(id)}
@@ -35,7 +37,7 @@ export function CategoryTabs({
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            {label}
+            {name}
             {selectedCategory === id && (
               <motion.div
                 layoutId="activeTab"
