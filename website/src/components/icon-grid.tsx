@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, XCircle } from 'lucide-react';
 import { IconMeta } from '@airqo-icons-min/core';
 import { cn } from '@/lib/utils';
+import { IconRenderer } from './icon-renderer';
 
 interface IconGridProps {
   icons: IconMeta[];
@@ -50,36 +51,6 @@ export function IconGrid({
 
   const displayedIcons = icons.slice(0, displayCount);
   const hasMore = displayCount < icons.length;
-
-  // Create a simple SVG element for each icon
-  const renderIconSvg = (iconName: string) => {
-    // Default simple SVG if we don't have a component
-    return (
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <text
-          x="12"
-          y="12"
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="currentColor"
-          fontSize="8"
-          fontFamily="sans-serif"
-        >
-          {iconName.substring(0, 2).toUpperCase()}
-        </text>
-      </svg>
-    );
-  };
 
   if (icons.length === 0) {
     return (
@@ -174,18 +145,13 @@ export function IconGrid({
                     hoveredIcon === icon.name && 'scale-110',
                   )}
                 >
-                  {renderIconSvg(icon.name)}
+                  <IconRenderer icon={icon} size={32} />
                 </div>
               </div>
 
-              {/* Icon name */}
+              {/* Icon name - show only the name without transforming */}
               <span className="mt-3 text-center text-xs font-medium tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">
-                {icon.name.replace(/-/g, ' ')}
-              </span>
-
-              {/* Category badge */}
-              <span className="absolute right-2 top-2 inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                {icon.category.replace(/_/g, ' ')}
+                {icon.name}
               </span>
             </motion.button>
           );

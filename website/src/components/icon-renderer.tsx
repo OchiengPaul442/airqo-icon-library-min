@@ -112,17 +112,11 @@ export function IconRenderer({
       const DynamicIconComponent = dynamic(
         () =>
           import('@airqo-icons-min/react').then((mod) => {
-            // Convert kebab-case to PascalCase for component name
-            const pascalCaseName = icon.name
-              .split('-')
-              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-              .join('');
-
-            // Check if the icon exists in the module
-            const IconComp = mod[pascalCaseName];
+            // Use the icon name directly since it's already in PascalCase in the manifest
+            const IconComp = mod[icon.name];
             if (!IconComp) {
               console.error(
-                `Icon ${pascalCaseName} not found in @airqo-icons-min/react`,
+                `Icon ${icon.name} not found in @airqo-icons-min/react`,
               );
               // Return a named function component as fallback
               const FallbackIcon = function FallbackIcon(

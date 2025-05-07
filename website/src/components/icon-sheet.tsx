@@ -8,6 +8,7 @@ import { CodeBlock } from './code-block';
 import { toast } from 'sonner';
 import { IconMeta } from '@airqo-icons-min/core';
 import { cn } from '@/lib/utils';
+import { IconRenderer } from './icon-renderer';
 
 interface IconSheetProps {
   icon: IconMeta | null;
@@ -56,7 +57,8 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   const generateSvgString = () => {
     if (!icon) return '';
 
-    // Create a basic SVG for the icon
+    // Create a basic SVG for the icon - this is a placeholder
+    // In a real implementation, you'd want to get the actual SVG path data
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="12" cy="12" r="10" />
   <text x="12" y="13" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="8" font-family="sans-serif" stroke="none">
@@ -93,15 +95,8 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
 
   if (!icon) return null;
 
-  // Format icon name for display
-  const formattedName = icon.name.replace(/-/g, ' ');
-  const categoryName = icon.category.replace(/_/g, ' ');
-
-  // Convert kebab-case to PascalCase for component name examples
-  const pascalCaseName = icon.name
-    .split('-')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
+  // Use the icon name directly without formatting
+  const iconName = icon.name;
 
   return (
     <AnimatePresence>
@@ -127,8 +122,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
             {/* Header */}
             <div className="flex items-center justify-between border-b p-4">
               <div>
-                <h2 className="text-lg font-medium">{formattedName}</h2>
-                <p className="text-sm text-muted-foreground">{categoryName}</p>
+                <h2 className="text-lg font-medium">{iconName}</h2>
               </div>
               <button
                 onClick={onClose}
@@ -177,30 +171,12 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                   <div className="flex flex-col items-center justify-center">
                     <div className="flex h-48 w-48 items-center justify-center rounded-lg border bg-white p-4 shadow-sm dark:bg-zinc-900">
                       <div className="transition-transform duration-200 hover:scale-110">
-                        <svg
-                          width={size}
-                          height={size}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={color}
+                        <IconRenderer
+                          icon={icon}
+                          size={size}
+                          color={color}
                           strokeWidth={strokeWidth}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <text
-                            x="12"
-                            y="13"
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fill={color}
-                            fontSize="8"
-                            fontFamily="sans-serif"
-                            stroke="none"
-                          >
-                            {icon.name.substring(0, 2).toUpperCase()}
-                          </text>
-                        </svg>
+                        />
                       </div>
                     </div>
                   </div>
@@ -307,11 +283,11 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${pascalCaseName} } from '@airqo-icons-min/react';
+                      code={`import { ${icon.name} } from '@airqo-icons-min/react';
 
 export default function MyComponent() {
   return (
-    <${pascalCaseName}
+    <${icon.name}
       color="${color}"
       size={${size}}
       strokeWidth={${strokeWidth}}
@@ -329,11 +305,11 @@ export default function MyComponent() {
                     <CodeBlock
                       language="vue"
                       code={`<script setup>
-import { ${pascalCaseName} } from '@airqo-icons-min/vue';
+import { ${icon.name} } from '@airqo-icons-min/vue';
 </script>
 
 <template>
-  <${pascalCaseName}
+  <${icon.name}
     :size="${size}"
     color="${color}"
     :stroke-width="${strokeWidth}"
@@ -349,11 +325,11 @@ import { ${pascalCaseName} } from '@airqo-icons-min/vue';
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${pascalCaseName} } from '@airqo-icons-min/react-native';
+                      code={`import { ${icon.name} } from '@airqo-icons-min/react-native';
 
 export default function MyComponent() {
   return (
-    <${pascalCaseName}
+    <${icon.name}
       color="${color}"
       size={${size}}
       strokeWidth={${strokeWidth}}
@@ -416,10 +392,10 @@ export default function MyComponent() {
                         <h4 className="text-sm font-medium">Basic Usage</h4>
                         <CodeBlock
                           language="tsx"
-                          code={`import { ${pascalCaseName} } from '@airqo-icons-min/react';
+                          code={`import { ${icon.name} } from '@airqo-icons-min/react';
 
 function MyComponent() {
-  return <${pascalCaseName} />;
+  return <${icon.name} />;
 }`}
                         />
                       </div>
@@ -430,11 +406,11 @@ function MyComponent() {
                         </h4>
                         <CodeBlock
                           language="tsx"
-                          code={`import { ${pascalCaseName} } from '@airqo-icons-min/react';
+                          code={`import { ${icon.name} } from '@airqo-icons-min/react';
 
 function MyComponent() {
   return (
-    <${pascalCaseName} 
+    <${icon.name} 
       size={${size}} 
       color="${color}" 
       strokeWidth={${strokeWidth}}
