@@ -51,7 +51,7 @@ jobs:
         run: pnpm lint
 
       - name: Generate Icons
-        run: pnpm generate-icons
+        run: pnpm generate
 
       - name: Build packages
         run: pnpm build
