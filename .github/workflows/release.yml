@@ -60,6 +60,34 @@ jobs:
       - name: Build packages
         run: pnpm build
 
+      - name: Get next version
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          FORCE: ${{ github.event.inputs.force }}
+        run: |
+          if [ "$FORCE" == "true" ]; then
+            VERSION=$(npx semantic-release --dry-run --no-ci | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
+          else
+            VERSION=$(npx semantic-release --dry-run | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
+          fi
+
+          if [ -n "$VERSION" ]; then
+            echo "NEXT_VERSION=$VERSION" >> $GITHUB_ENV
+            echo "next_version=$VERSION" >> $GITHUB_OUTPUT
+            echo "Next version will be: $VERSION"
+          else
+            echo "No new version to release"
+            echo "NEXT_VERSION=0.0.0" >> $GITHUB_ENV
+            echo "next_version=0.0.0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update package versions
+        if: steps.semantic.outputs.next_version != '0.0.0'
+        run: node scripts/update-versions.js ${{ steps.semantic.outputs.next_version }}
+
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,3 +100,9 @@ jobs:
           else
             pnpm semantic-release
           fi
+
+      - name: Publish to NPM
+        if: steps.semantic.outputs.next_version != '0.0.0'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/publish-packages.js
