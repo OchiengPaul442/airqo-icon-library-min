@@ -50,6 +50,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Generate Icons
+        run: pnpm generate-icons
+
       - name: Build packages
         run: pnpm build
 

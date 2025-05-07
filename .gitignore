@@ -46,7 +46,7 @@ coverage/
 *.sw?
 *.swp
 *.swo
-.env
+*.env
 .env.local
 .env.development.local
 .env.test.local
@@ -65,6 +65,28 @@ build/
 .turbo/
 .cache/
 temp/
+
+# Generated icon components and assets
+packages/*/src/icons/
+packages/flutter/lib/src/icons/
+packages/flutter/assets/
+packages/core/src/icon-manifest.ts
+packages/vue/src/components/
+
+# Generated index files
+packages/react/src/index.ts
+packages/react-native/src/index.ts
+packages/vue/src/index.ts
+packages/flutter/lib/src/index.dart
+
+# Generated client files
+packages/*/client.js
+packages/*/client.js.map
+
+# Build artifacts
+packages/*/dist/
+packages/*/*.tsbuildinfo
+**/*.tsbuildinfo
 
 # Website - NextJS
 .next/

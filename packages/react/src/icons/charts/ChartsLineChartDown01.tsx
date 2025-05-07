@@ -4,24 +4,32 @@ import { Ref, forwardRef } from 'react';
 interface SVGRProps {
   title?: string;
   titleId?: string;
+  size?: number | string;
+  color?: string;
 }
 const ChartsLineChartDown01 = (
-  { title, titleId, ...props }: SVGProps<SVGSVGElement> & SVGRProps,
+  {
+    title,
+    titleId,
+    size = '1em',
+    color = 'currentColor',
+    ...props
+  }: SVGProps<SVGSVGElement> & SVGRProps,
   ref: Ref<SVGSVGElement>,
 ) => (
   <svg
     fill="none"
     viewBox="0 0 24 24"
     role="img"
-    width="1em"
-    height="1em"
+    width={size}
+    height={size}
     ref={ref}
     aria-labelledby={titleId}
     {...props}
   >
     {title ? <title id={titleId}>{title}</title> : null}
     <path
-      stroke="currentColor"
+      stroke={color}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.5}
