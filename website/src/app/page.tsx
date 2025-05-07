@@ -1,9 +1,19 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowRight, Download, LayoutGrid, Repeat, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  LayoutGrid,
+  Repeat,
+  Zap,
+  Download,
+  Database,
+  Settings,
+} from 'lucide-react';
+import { useIconCategories } from '@/hooks/use-icon-categories';
+import { useState, useEffect } from 'react';
+import { IconMeta } from '@airqo-icons-min/core';
 
 // Animation variants
 const fadeIn = {
@@ -21,6 +31,45 @@ const stagger = {
 };
 
 export default function Home() {
+  const { allIcons } = useIconCategories();
+  const [featuredIcons, setFeaturedIcons] = useState<JSX.Element[]>([]);
+
+  // Prepare featured icons for the showcase grid
+  useEffect(() => {
+    if (allIcons.length === 0) return;
+
+    // Select a subset of icons for the showcase grid (40 icons or fewer if not enough icons)
+    const selectedIcons = [...allIcons]
+      .sort(() => 0.5 - Math.random()) // Shuffle the icons
+      .slice(0, Math.min(40, allIcons.length));
+
+    const iconComponents = selectedIcons.map(
+      (icon: IconMeta, index: number) => {
+        // Create a simple SVG element for each icon as a fallback
+        // This ensures we always have something to display even if the icon component isn't found
+        return (
+          <svg
+            key={index}
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v8" />
+            <path d="M8 12h8" />
+          </svg>
+        );
+      },
+    );
+
+    setFeaturedIcons(iconComponents);
+  }, [allIcons]);
+
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
@@ -73,17 +122,32 @@ export default function Home() {
               <div className="relative aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-xl border bg-background/50 shadow-2xl backdrop-blur-sm">
                 <div className="absolute inset-0 flex items-center justify-center p-4">
                   <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
-                    {Array.from({ length: 40 }).map((_, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: i * 0.02, duration: 0.5 }}
-                        className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm"
-                      >
-                        <div className="h-6 w-6 rounded-md bg-primary/20"></div>
-                      </motion.div>
-                    ))}
+                    {featuredIcons.length > 0
+                      ? featuredIcons.map((IconComponent, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: i * 0.02, duration: 0.5 }}
+                            className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
+                          >
+                            <div className="text-primary/80">
+                              {IconComponent}
+                            </div>
+                          </motion.div>
+                        ))
+                      : // Show placeholders while loading
+                        Array.from({ length: 40 }).map((_, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: i * 0.02, duration: 0.5 }}
+                            className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm"
+                          >
+                            <div className="h-6 w-6 rounded-md bg-primary/20"></div>
+                          </motion.div>
+                        ))}
                   </div>
                 </div>
               </div>
@@ -184,19 +248,7 @@ export default function Home() {
               className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-                  />
-                </svg>
+                <Database className="h-6 w-6" />
               </div>
               <h3 className="mb-2 text-xl font-bold">TypeScript Support</h3>
               <p className="text-muted-foreground">
@@ -210,19 +262,7 @@ export default function Home() {
               className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                  />
-                </svg>
+                <Settings className="h-6 w-6" />
               </div>
               <h3 className="mb-2 text-xl font-bold">Consistent Design</h3>
               <p className="text-muted-foreground">

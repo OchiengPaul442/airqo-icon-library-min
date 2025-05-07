@@ -1,18 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { IconGrid } from '@/components/icon-grid';
 import { SearchBar } from '@/components/search-bar';
 import { CategoryTabs } from '@/components/category-tabs';
-import { fetchApi } from '@/lib/api';
-import { toast } from 'sonner';
-
-interface IconMetadata {
-  category: string;
-  name: string;
-  svg: string;
-}
+import { useIconCategories } from '@/hooks/use-icon-categories';
+import { IconMeta } from '@airqo-icons-min/core';
 
 const container = {
   hidden: { opacity: 0 },
@@ -32,29 +26,13 @@ const item = {
 export default function IconsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [icons, setIcons] = useState<IconMetadata[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>([]);
+  const { allIcons, formattedCategories, getIconsByCategoryName, searchIcons } =
+    useIconCategories();
 
-  useEffect(() => {
-    fetchApi<IconMetadata[]>('/api/icons')
-      .then((data) => {
-        setIcons(data);
-
-        // Extract unique categories
-        const uniqueCategories = Array.from(
-          new Set(data.map((icon) => icon.category)),
-        );
-        setCategories(uniqueCategories);
-      })
-      .catch((error) => {
-        console.error('Error loading icons:', error);
-        toast.error('Failed to load icons. Please try refreshing the page.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+  // Get filtered icons based on search and category
+  const filteredIcons: IconMeta[] = searchQuery
+    ? searchIcons(searchQuery, selectedCategory)
+    : getIconsByCategoryName(selectedCategory);
 
   return (
     <motion.div
@@ -73,7 +51,7 @@ export default function IconsPage() {
               Icon Library
             </motion.h1>
             <motion.p variants={item} className="text-lg text-muted-foreground">
-              Browse and search through our collection of {icons.length}{' '}
+              Browse and search through our collection of {allIcons.length}{' '}
               professionally designed icons.
             </motion.p>
           </div>
@@ -85,30 +63,19 @@ export default function IconsPage() {
 
         <motion.div variants={item}>
           <CategoryTabs
+            categories={formattedCategories}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
         </motion.div>
 
-        {loading ? (
-          <motion.div
-            variants={item}
-            className="flex h-[400px] items-center justify-center"
-          >
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-10 w-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></div>
-              <p className="text-sm text-muted-foreground">Loading icons...</p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div variants={item}>
-            <IconGrid
-              initialIcons={icons}
-              searchQuery={searchQuery}
-              selectedCategory={selectedCategory}
-            />
-          </motion.div>
-        )}
+        <motion.div variants={item}>
+          <IconGrid
+            icons={filteredIcons}
+            searchQuery={searchQuery}
+            selectedCategory={selectedCategory}
+          />
+        </motion.div>
       </motion.div>
     </motion.div>
   );

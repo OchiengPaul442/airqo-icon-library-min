@@ -22,7 +22,7 @@ const stagger = {
 
 type FrameworkType = 'react' | 'vue' | 'flutter';
 
-const CodeBlock = ({ code, language }: { code: string; language: string }) => {
+const CodeBlock = ({ code }: { code: string }) => {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
@@ -248,28 +248,19 @@ export default function DocsPage() {
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>npm</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="npm install @airqo-icons-min/react"
-                          />
+                          <CodeBlock code="npm install @airqo-icons-min/react" />
                         </div>
                         <div className="rounded-md bg-muted p-4">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>yarn</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="yarn add @airqo-icons-min/react"
-                          />
+                          <CodeBlock code="yarn add @airqo-icons-min/react" />
                         </div>
                         <div className="rounded-md bg-muted p-4">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>pnpm</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="pnpm add @airqo-icons-min/react"
-                          />
+                          <CodeBlock code="pnpm add @airqo-icons-min/react" />
                         </div>
                       </div>
                     )}
@@ -280,28 +271,19 @@ export default function DocsPage() {
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>npm</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="npm install @airqo-icons-min/vue"
-                          />
+                          <CodeBlock code="npm install @airqo-icons-min/vue" />
                         </div>
                         <div className="rounded-md bg-muted p-4">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>yarn</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="yarn add @airqo-icons-min/vue"
-                          />
+                          <CodeBlock code="yarn add @airqo-icons-min/vue" />
                         </div>
                         <div className="rounded-md bg-muted p-4">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>pnpm</span>
                           </div>
-                          <CodeBlock
-                            language="bash"
-                            code="pnpm add @airqo-icons-min/vue"
-                          />
+                          <CodeBlock code="pnpm add @airqo-icons-min/vue" />
                         </div>
                       </div>
                     )}
@@ -313,7 +295,6 @@ export default function DocsPage() {
                             <span>pubspec.yaml</span>
                           </div>
                           <CodeBlock
-                            language="yaml"
                             code={`dependencies:
   airqo_icons_min_flutter: ^latest_version`}
                           />
@@ -322,7 +303,7 @@ export default function DocsPage() {
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                             <span>flutter cli</span>
                           </div>
-                          <CodeBlock language="bash" code="flutter pub get" />
+                          <CodeBlock code="flutter pub get" />
                         </div>
                       </div>
                     )}
@@ -377,7 +358,6 @@ export default function DocsPage() {
                     {activeFramework === 'react' && (
                       <div className="rounded-md bg-muted p-4">
                         <CodeBlock
-                          language="tsx"
                           code={`import { AlertCircle } from '@airqo-icons-min/react';
 
 function MyComponent() {
@@ -396,7 +376,6 @@ function MyComponent() {
                     {activeFramework === 'vue' && (
                       <div className="rounded-md bg-muted p-4">
                         <CodeBlock
-                          language="vue"
                           code={`<template>
   <AlertCircle
     :size="24"
@@ -415,7 +394,6 @@ import { AlertCircle } from '@airqo-icons-min/vue'
                     {activeFramework === 'flutter' && (
                       <div className="rounded-md bg-muted p-4">
                         <CodeBlock
-                          language="dart"
                           code={`import 'package:airqo_icons_min_flutter/airqo_icons_min_flutter.dart';
 
 // In your widget
@@ -475,7 +453,7 @@ AirqoIcon(
                         <td className="p-4 font-mono text-sm">strokeWidth</td>
                         <td className="p-4 font-mono text-sm">number</td>
                         <td className="p-4 font-mono text-sm">1.5</td>
-                        <td className="p-4">Width of the icon's stroke</td>
+                        <td className="p-4">Width of the icon&apos;s stroke</td>
                       </tr>
                       <tr className="bg-muted/20">
                         <td className="p-4 font-mono text-sm">className</td>
@@ -497,12 +475,11 @@ AirqoIcon(
                   </p>
                   <div className="rounded-md bg-muted p-4">
                     <CodeBlock
-                      language="typescript"
-                      code={`import { IconProps } from '@airqo-icons-min/react';
+                      code="import { IconProps } from '@airqo-icons-min/react';
 
 interface MyComponentProps {
   iconProps?: IconProps;
-}`}
+}"
                     />
                   </div>
                 </div>

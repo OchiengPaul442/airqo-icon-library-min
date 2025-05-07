@@ -14,30 +14,25 @@ export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  public refs: {
-    [key: string]: React.ReactInstance;
-  };
-
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
-    this.refs = {};
   }
 
-  static getDerivedStateFromError(/*error*/): ErrorBoundaryState {
+  static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('Error:', error, errorInfo);
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-          <h2 className="text-2xl font-bold mb-4">Something went wrong</h2>
-          <p className="text-muted-foreground mb-4">
+        <div className="flex min-h-[400px] flex-col items-center justify-center text-center">
+          <h2 className="mb-4 text-2xl font-bold">Something went wrong</h2>
+          <p className="mb-4 text-muted-foreground">
             Please try refreshing the page or contact support if the problem
             persists.
           </p>
