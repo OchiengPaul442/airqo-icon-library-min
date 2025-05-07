@@ -1,18 +1,22 @@
 'use client';
 
 import React from 'react';
-import { IconProps } from './types/icon';
+import withIconProps from './withIconProps';
+import type { IconProps } from './withIconProps';
+// Import raw icons for side effects only
+import './index';
+import enhancedIcons from './enhanceIcons';
 
 /**
  * Wraps an icon component with 'use client' directive for Next.js support
  * Use this wrapper when you need interactive icons with event handlers in Next.js
  *
  * @example
- * import { AlertsFeedbackAlertCircle } from '@airqo-icons-min/react';
+ * import { AlertCircle } from '@airqo-icons-min/react';
  * import { ClientIcon } from '@airqo-icons-min/react/client';
  *
  * // In your component:
- * <ClientIcon icon={AlertsFeedbackAlertCircle} onClick={() => alert('clicked')} />
+ * <ClientIcon icon={AlertCircle} onClick={() => alert('clicked')} />
  */
 export const ClientIcon: React.FC<
   {
@@ -21,3 +25,16 @@ export const ClientIcon: React.FC<
 > = ({ icon: IconComponent, ...props }) => {
   return <IconComponent {...props} />;
 };
+
+// Export raw icons
+export * from './index';
+
+// Export enhanced icons with proper props support
+export { enhancedIcons as icons };
+
+// Export the HOC and types
+export { withIconProps };
+export type { IconProps };
+
+// Export a default object with all enhanced icons
+export default enhancedIcons;

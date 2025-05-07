@@ -12,15 +12,17 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "module": "commonjs",
+    "moduleDetection": "force",
     "paths": {
-      "@airqo-icons/core": ["../core/src"]
+      "@airqo-icons-min/core": ["../core/src"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "./src/types", "../core/src"],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "noEmit": false
+    "noEmit": false,
+    "emitDeclarationOnly": true
   },
   "references": [{ "path": "../core" }],
   "include": [

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Book, Package, Code, Zap } from 'lucide-react';
+import { Copy, Check, Package, Code, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 // Animation variants

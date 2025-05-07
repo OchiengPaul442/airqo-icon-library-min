@@ -13,13 +13,15 @@
     "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn",
     "build": "pnpm build:core && pnpm build:packages-no-vue",
     "build:core": "cd packages/core && npm run build",
-    "build:packages-no-vue": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" build",
-    "build:packages": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"./packages/vue\" build",
+    "build:packages-no-vue": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"{./packages/core}...\" build",
+    "build:packages": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"./packages/vue\" --filter=\"{./packages/core}...\" build",
     "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "pnpm build && tsc --noEmit",
     "prepare": "husky install",
     "release": "pnpm build && node scripts/publish-packages.js",
-    "changelog": "node scripts/generate-changelog.js"
+    "changelog": "node scripts/generate-changelog.js",
+    "untrack-generated": "node scripts/untrack-generated-files.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

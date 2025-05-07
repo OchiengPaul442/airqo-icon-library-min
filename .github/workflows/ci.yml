@@ -50,6 +50,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Generate Icons
+        run: pnpm generate
+
       - name: Build packages
         run: pnpm build
 
@@ -57,4 +60,4 @@ jobs:
         run: pnpm optimize --check
 
       - name: Check TypeScript
-        run: pnpm tsc --noEmit
+        run: pnpm type-check

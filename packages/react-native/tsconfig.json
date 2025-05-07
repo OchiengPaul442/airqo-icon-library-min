@@ -11,10 +11,18 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "module": "commonjs",
+    "moduleDetection": "force",
+    "isolatedModules": true,
     "paths": {
-      "@airqo-icons/core": ["../core/src"]
+      "@airqo-icons-min/core": ["../core/src"]
     },
-    "types": ["react-native", "react-native-svg"],
+    "types": ["react-native"],
+    "typeRoots": [
+      "../../node_modules/@types",
+      "./node_modules/@types",
+      "../core/src",
+      "./src/types"
+    ],
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
@@ -23,16 +31,11 @@
     "declarationMap": true,
     "tsBuildInfoFile": "tsconfig.tsbuildinfo",
     "noEmit": false,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": false,
     "emitDeclarationOnly": true,
-    "forceConsistentCasingInFileNames": false // Temporarily disable strict casing
+    "forceConsistentCasingInFileNames": true
   },
   "references": [{ "path": "../core" }],
-  "include": [
-    "src/index.ts",
-    "src/types/*.d.ts",
-    // Include generated icon component files
-    "src/icons/**/*.tsx"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/types/*.d.ts"],
   "exclude": ["node_modules", "dist", "**/__tests__/*"]
 }
