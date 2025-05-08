@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/react-native",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -35,7 +35,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "^1.10.0"
+    "@airqo-icons-min/core": "^1.11.0"
   },
   "peerDependencies": {
     "react": "^17 || ^18 || ^19",

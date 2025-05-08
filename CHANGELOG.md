@@ -1,3 +1,17 @@
+# [1.11.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.10.0...v1.11.0) (2025-05-08)
+
+
+### Bug Fixes
+
+* update react-syntax-highlighter version to ^5.8.0 in package.json and package-lock.json ([93faccf](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/93faccf69bcb0ef993036328ac99258f8130cd5a))
+
+
+### Features
+
+* add loading state to search functionality and improve user experience ([4285197](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/42851972d4b9f619ce4a1c1c6eda5e494965896d))
+* Add TypeScript definitions and scripts for @airqo-icons-min/react-native and @airqo-icons-min/react ([a182702](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/a182702adf5f52eafc900e649ed0b94365ec37bb))
+* enhance website setup and improve development experience ([806c893](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/806c893bd777323ee3f51982b20cfa47b9f40be7))
+
 # [1.10.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.9.0...v1.10.0) (2025-05-08)
 
 
