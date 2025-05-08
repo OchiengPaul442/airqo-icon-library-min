@@ -58,9 +58,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   const [strokeWidth, setStrokeWidth] = React.useState(1.5);
   const [activeTab, setActiveTab] = React.useState<TabType>('preview');
   const [isCopied, setIsCopied] = React.useState(false);
-  const [showExtendedColors, setShowExtendedColors] = React.useState(false);
-  const [iconKey, setIconKey] = React.useState(0); // Add a key to force re-render
-  const [generatedSvgCode, setGeneratedSvgCode] = React.useState(''); // Store the generated SVG code
+  const [showColorPicker, setShowColorPicker] = React.useState(false); // Renamed from showExtendedColors
+  const [iconKey, setIconKey] = React.useState(0);
+  const [generatedSvgCode, setGeneratedSvgCode] = React.useState('');
 
   // Reset state when icon changes
   React.useEffect(() => {
@@ -69,27 +69,19 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       setSize(24);
       setStrokeWidth(1.5);
       setActiveTab('preview');
-      setShowExtendedColors(false);
-      setIconKey((prev) => prev + 1); // Force re-render when icon changes
-
-      // Generate initial SVG code
-      if (activeTab === 'code') {
-        generateAndUpdateSvgCode();
-      }
+      setShowColorPicker(false);
+      // iconKey will be updated by the effect below, which depends on icon
     }
   }, [icon]);
 
-  // Force re-render when size or stroke width changes
+  // This useEffect is crucial for live updates of the icon preview (via IconRenderer)
+  // and for regenerating SVG code for the 'Code' tab.
   React.useEffect(() => {
-    setIconKey((prev) => prev + 1);
-  }, [size, strokeWidth]);
-
-  // Update SVG code when tab changes to 'code' or when properties change while on 'code' tab
-  React.useEffect(() => {
-    if (activeTab === 'code' && icon) {
-      generateAndUpdateSvgCode();
+    setIconKey((prev) => prev + 1); // Force re-render of IconRenderer by changing its key
+    if (icon) {
+      generateAndUpdateSvgCode(); // Update SVG code for the 'Code' tab
     }
-  }, [activeTab, color, size, strokeWidth]);
+  }, [size, strokeWidth, color, icon, activeTab]); // Dependencies that trigger preview/code update
 
   // Get the actual icon component to extract SVG path data
   const IconComponent = icon
@@ -186,9 +178,10 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
         setGeneratedSvgCode(svgCode);
       } catch (error) {
         console.error('Error updating SVG code:', error);
-        // Set fallback in case of error
         setGeneratedSvgCode(createSvgFallback());
       }
+    } else {
+      setGeneratedSvgCode(''); // Clear if no icon
     }
   };
 
@@ -326,245 +319,176 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
             onClick={onClose}
           />
 
-          {/* Sheet - now a drawer from the right side */}
+          {/* Sheet - right drawer */}
           <motion.div
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto rounded-l-xl border-l bg-background p-6 shadow-lg"
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }} // Slightly adjusted animation
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l border-border bg-background/90 shadow-xl dark:bg-zinc-900/90 backdrop-blur-lg" // Removed rounded-l-2xl, adjusted blur & opacity
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between bg-background pb-4">
-              <h2 className="text-lg font-medium">{icon.name}</h2>
+            <div className="sticky top-0 z-20 flex items-center justify-between bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md p-4 border-b border-border"> {/* Adjusted padding */}
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">{icon.name}</h2>
               <button
                 onClick={onClose}
-                className="rounded-lg p-2.5 text-muted-foreground hover:bg-muted"
+                className="rounded-md p-2 text-muted-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted focus ring
+                aria-label="Close icon sheet"
               >
                 <ClientIcon icon={X} className="h-5 w-5" />
-                <span className="sr-only">Close</span>
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="sticky top-[60px] z-10 flex bg-background border-b">
-              <button
-                onClick={() => setActiveTab('preview')}
-                className={cn(
-                  'flex-1 border-b-2 border-transparent py-2 text-sm font-medium',
-                  activeTab === 'preview' && 'border-primary text-primary',
-                )}
-              >
-                Preview
-              </button>
-              <button
-                onClick={() => setActiveTab('code')}
-                className={cn(
-                  'flex-1 border-b-2 border-transparent py-2 text-sm font-medium',
-                  activeTab === 'code' && 'border-primary text-primary',
-                )}
-              >
-                Code
-              </button>
-              <button
-                onClick={() => setActiveTab('usage')}
-                className={cn(
-                  'flex-1 border-b-2 border-transparent py-2 text-sm font-medium',
-                  activeTab === 'usage' && 'border-primary text-primary',
-                )}
-              >
-                Usage
-              </button>
+            <div className="sticky top-[68px] z-20 flex bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-border"> {/* Adjusted top value */}
+              {['preview', 'code', 'usage'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as TabType)}
+                  className={cn(
+                    'flex-1 border-b-2 py-2.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-primary', // Adjusted padding, text size, focus
+                    activeTab === tab
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/40',
+                  )}
+                  aria-current={activeTab === tab ? 'page' : undefined}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
             </div>
 
-            <div className="p-6 space-y-8">
+            <div className="p-6 space-y-6"> {/* Reduced padding and space-y */}
               {activeTab === 'preview' && (
-                <div className="space-y-8">
-                  {/* Icon Preview */}
+                <div className="space-y-6"> {/* Reduced space-y */}
+                  {/* Icon Preview Card */}
                   <div className="flex flex-col items-center justify-center">
-                    <div className="flex h-48 w-48 items-center justify-center rounded-lg border bg-white p-4 shadow-sm dark:bg-zinc-900 relative">
-                      {/* Grid pattern background for better visibility */}
-                      <div className="absolute inset-0 rounded-lg bg-[linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%),linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%)] bg-[length:16px_16px] [background-position:0_0,8px_8px] opacity-50 dark:bg-[linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%),linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%)]"></div>
+                    <div className="relative flex h-44 w-44 items-center justify-center rounded-lg border border-border bg-gradient-to-br from-white via-zinc-50 to-zinc-100 shadow-md dark:from-zinc-800 dark:via-zinc-700/50 dark:to-zinc-800"> {/* Adjusted size, shadow, gradient */}
+                      <div className="absolute inset-0 rounded-lg bg-[linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%),linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%)] bg-[length:16px_16px] [background-position:0_0,8px_8px] opacity-40 dark:bg-[linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%),linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%)] pointer-events-none" />
                       <div
-                        className="relative transition-all duration-200 hover:scale-110"
+                        className="relative transition-transform duration-150 hover:scale-105"
                         style={{
-                          width: `${Math.max(size, 32)}px`,
+                          width: `${Math.max(size, 32)}px`, // Adjusted min size
                           height: `${Math.max(size, 32)}px`,
                         }}
                       >
                         <IconRenderer
-                          key={iconKey}
+                          key={iconKey} // This key is crucial for re-rendering
                           icon={icon}
                           size={size}
                           color={color}
                           strokeWidth={strokeWidth}
+                          className="drop-shadow-sm" // Adjusted shadow
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Customization Controls */}
-                  <div className="space-y-6">
+                  <div className="space-y-6"> {/* Reduced space-y */}
                     {/* Color Selection */}
-                    <div className="space-y-4">
+                    <section aria-labelledby="color-label" className="space-y-3"> {/* Reduced space-y */}
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">Color</label>
+                        <label id="color-label" className="text-sm font-medium text-foreground">Color</label> {/* Adjusted font size */}
                         <button
-                          onClick={() =>
-                            setShowExtendedColors(!showExtendedColors)
-                          }
-                          className="flex items-center gap-1 text-xs text-primary"
+                          onClick={() => setShowColorPicker(!showColorPicker)}
+                          className="flex items-center gap-1 text-xs text-primary hover:underline focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
+                          aria-expanded={showColorPicker}
                         >
-                          {showExtendedColors ? (
+                          {showColorPicker ? (
                             <>
-                              Show less{' '}
-                              <ClientIcon
-                                icon={ChevronUp}
-                                className="h-3 w-3"
-                              />
+                              Hide Picker <ClientIcon icon={ChevronUp} className="h-3 w-3" />
                             </>
                           ) : (
                             <>
-                              Show more{' '}
-                              <ClientIcon
-                                icon={ChevronDown}
-                                className="h-3 w-3"
-                              />
+                              Custom Color <ClientIcon icon={ChevronDown} className="h-3 w-3" />
                             </>
                           )}
                         </button>
                       </div>
-
-                      {/* Initial 4 colors - enhanced design */}
-                      <div className="grid grid-cols-4 gap-3">
+                      {/* Preset Colors */}
+                      <div className="grid grid-cols-4 gap-2"> {/* Adjusted gap */}
                         {presetColors.map((presetColor) => (
                           <button
                             key={presetColor}
                             type="button"
                             className={cn(
-                              'relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 shadow transition-all hover:shadow-md',
+                              'relative flex h-8 w-8 items-center justify-center rounded-full border-2 shadow-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background', // Adjusted size & focus
                               color === presetColor
-                                ? 'border-primary ring-2 ring-primary ring-offset-2'
-                                : 'border-border hover:border-primary/50',
+                                ? 'border-primary ring-1 ring-primary' // Simplified active state
+                                : 'border-border hover:border-primary/60',
                             )}
                             style={{ backgroundColor: presetColor }}
                             onClick={() => setColor(presetColor)}
+                            aria-label={`Select color ${presetColor}`}
                           >
-                            <span className="sr-only">
-                              Select color {presetColor}
-                            </span>
                             {color === presetColor && (
-                              <span className="absolute inset-0 flex items-center justify-center bg-black/5">
-                                <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/10 dark:bg-white/10 rounded-full">
+                                <div className="h-1.5 w-1.5 rounded-full bg-white dark:bg-zinc-900 border border-primary/50" />
                               </span>
                             )}
                           </button>
                         ))}
                       </div>
-
-                      {/* Extended color palette */}
+                      {/* Color Picker */}
                       <AnimatePresence>
-                        {showExtendedColors && (
+                        {showColorPicker && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="grid grid-cols-5 gap-3 pt-2"
+                            className="mt-2.5 rounded-md border border-border bg-muted/20 p-2.5 dark:bg-zinc-800/40" // Adjusted styling
                           >
-                            {extendedColors.map((extendedColor) => (
-                              <button
-                                key={extendedColor}
-                                type="button"
-                                className={cn(
-                                  'relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border-2 shadow transition-all hover:shadow-md',
-                                  color === extendedColor
-                                    ? 'border-primary ring-2 ring-primary ring-offset-1'
-                                    : 'border-border hover:border-primary/50',
-                                )}
-                                style={{ backgroundColor: extendedColor }}
-                                onClick={() => setColor(extendedColor)}
-                              >
-                                <span className="sr-only">
-                                  Select color {extendedColor}
-                                </span>
-                                {color === extendedColor && (
-                                  <span className="absolute inset-0 flex items-center justify-center bg-black/5">
-                                    <div className="h-1 w-1 rounded-full bg-white" />
-                                  </span>
-                                )}
-                              </button>
-                            ))}
+                            <HexColorPicker
+                              color={color}
+                              onChange={setColor} // Directly pass setColor
+                              className="!w-full !h-auto"
+                            />
+                            <div className="mt-2 flex items-center justify-between">
+                              <div className="text-xs text-muted-foreground">Hex:</div>
+                              <div className="flex h-5 items-center rounded bg-background px-1.5 font-mono text-xs border border-border text-foreground">
+                                {color}
+                              </div>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
-
-                      {/* Color picker is shown based on expanded state */}
-                      {showExtendedColors && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 rounded-lg border p-4"
-                        >
-                          <HexColorPicker
-                            color={color}
-                            onChange={(newColor) => {
-                              setColor(newColor);
-                              setIconKey((prev) => prev + 1); // Force re-render
-                            }}
-                          />
-                          <div className="mt-2 flex items-center justify-between">
-                            <div className="text-xs text-muted-foreground">
-                              Hex value:
-                            </div>
-                            <div className="flex h-6 items-center rounded bg-muted px-2 font-mono text-xs">
-                              {color}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
+                    </section>
 
                     {/* Size Control */}
-                    <div className="space-y-4">
+                    <section aria-labelledby="size-label" className="space-y-2.5"> {/* Adjusted space-y */}
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">Size</label>
-                        <span className="rounded bg-muted px-2 py-0.5 text-sm font-mono text-muted-foreground">
-                          {size}px
-                        </span>
+                        <label id="size-label" className="text-sm font-medium text-foreground">Size</label>
+                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">{size}px</span>
                       </div>
                       <input
                         type="range"
-                        min="16"
-                        max="64"
+                        min="12"
+                        max="80" // Adjusted max
                         step="1"
                         value={size}
-                        onChange={(e) => {
-                          setSize(Number(e.target.value));
-                          setIconKey((prev) => prev + 1); // Force re-render
-                        }}
-                        className="w-full accent-primary"
+                        onChange={(e) => setSize(Number(e.target.value))}
+                        className="w-full h-2 accent-primary bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary" // Improved light mode visibility
+                        aria-valuenow={size}
+                        aria-valuemin={12}
+                        aria-valuemax={80}
+                        aria-label="Icon size"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>16px</span>
-                        <span>40px</span>
-                        <span>64px</span>
+                        <span>12px</span>
+                        <span>80px</span>
                       </div>
-                    </div>
+                    </section>
 
                     {/* Stroke Width Control */}
-                    <div className="space-y-4">
+                    <section aria-labelledby="stroke-label" className="space-y-2.5"> {/* Adjusted space-y */}
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">
-                          Stroke Width
-                        </label>
-                        <span className="rounded bg-muted px-2 py-0.5 text-sm font-mono text-muted-foreground">
-                          {strokeWidth}
-                        </span>
+                        <label id="stroke-label" className="text-sm font-medium text-foreground">Stroke Width</label>
+                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">{strokeWidth.toFixed(1)}</span>
                       </div>
                       <input
                         type="range"
@@ -572,52 +496,52 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                         max="3"
                         step="0.1"
                         value={strokeWidth}
-                        onChange={(e) => {
-                          setStrokeWidth(Number(e.target.value));
-                          setIconKey((prev) => prev + 1); // Force re-render
-                        }}
-                        className="w-full accent-primary"
+                        onChange={(e) => setStrokeWidth(Number(e.target.value))}
+                        className="w-full h-2 accent-primary bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary" // Improved light mode visibility
+                        aria-valuenow={strokeWidth}
+                        aria-valuemin={0.5}
+                        aria-valuemax={3}
+                        aria-label="Stroke width"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Thin (0.5)</span>
-                        <span>Default (1.5)</span>
-                        <span>Thick (3)</span>
+                        <span>0.5</span>
+                        <span>3.0</span>
                       </div>
-                    </div>
+                    </section>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 pt-1"> {/* Adjusted gap & padding */}
                     <button
                       onClick={downloadSVG}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted size & focus
                     >
-                      <ClientIcon icon={Download} className="h-4 w-4" />
+                      <ClientIcon icon={Download} className="h-4 w-4" /> {/* Adjusted size */}
                       Download
                     </button>
                     <button
                       onClick={copySVG}
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted size & focus
                     >
                       {isCopied ? (
-                        <ClientIcon icon={Check} className="h-4 w-4" />
+                        <ClientIcon icon={Check} className="h-4 w-4 text-green-600 dark:text-green-500" /> // Adjusted size & color
                       ) : (
-                        <ClientIcon icon={Copy} className="h-4 w-4" />
+                        <ClientIcon icon={Copy} className="h-4 w-4" /> // Adjusted size
                       )}
-                      {isCopied ? 'Copied' : 'Copy SVG'}
+                      {isCopied ? 'Copied!' : 'Copy SVG'}
                     </button>
                   </div>
                 </div>
               )}
 
               {activeTab === 'code' && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
+                <div className="space-y-5"> {/* Adjusted space-y */}
+                  <div className="space-y-1.5"> {/* Adjusted space-y */}
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">React</h4>
+                      <h4 className="text-sm font-medium text-foreground">React</h4>
                       <ClientIcon
                         icon={ChevronRight}
-                        className="h-4 w-4 text-muted-foreground"
+                        className="h-3.5 w-3.5 text-muted-foreground" // Adjusted size
                       />
                     </div>
                     <CodeBlock
@@ -629,19 +553,19 @@ export default function MyComponent() {
     <${icon.name}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth}}
+      strokeWidth={${strokeWidth.toFixed(1)}}
     />
   );
 }`}
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">React (Next.js)</h4>
+                      <h4 className="text-sm font-medium text-foreground">React (Next.js)</h4>
                       <ClientIcon
                         icon={ChevronRight}
-                        className="h-4 w-4 text-muted-foreground"
+                        className="h-3.5 w-3.5 text-muted-foreground"
                       />
                     </div>
                     <CodeBlock
@@ -657,7 +581,7 @@ export default function MyComponent() {
       icon={${icon.name}}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth}}
+      strokeWidth={${strokeWidth.toFixed(1)}}
       onClick={() => {/* handle click */}}
     />
   );
@@ -665,12 +589,12 @@ export default function MyComponent() {
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">Vue</h4>
+                      <h4 className="text-sm font-medium text-foreground">Vue</h4>
                       <ClientIcon
                         icon={ChevronRight}
-                        className="h-4 w-4 text-muted-foreground"
+                        className="h-3.5 w-3.5 text-muted-foreground"
                       />
                     </div>
                     <CodeBlock
@@ -683,18 +607,18 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
   <${icon.name}
     :size="${size}"
     color="${color}"
-    :stroke-width="${strokeWidth}"
+    :stroke-width="${strokeWidth.toFixed(1)}"
   />
 </template>`}
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">React Native</h4>
+                      <h4 className="text-sm font-medium text-foreground">React Native</h4>
                       <ClientIcon
                         icon={ChevronRight}
-                        className="h-4 w-4 text-muted-foreground"
+                        className="h-3.5 w-3.5 text-muted-foreground"
                       />
                     </div>
                     <CodeBlock
@@ -706,19 +630,19 @@ export default function MyComponent() {
     <${icon.name}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth}}
+      strokeWidth={${strokeWidth.toFixed(1)}}
     />
   );
 }`}
                     />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium">HTML</h4>
+                      <h4 className="text-sm font-medium text-foreground">HTML</h4>
                       <ClientIcon
                         icon={ChevronRight}
-                        className="h-4 w-4 text-muted-foreground"
+                        className="h-3.5 w-3.5 text-muted-foreground"
                       />
                     </div>
                     <CodeBlock language="html" code={generatedSvgCode} />
@@ -727,30 +651,30 @@ export default function MyComponent() {
               )}
 
               {activeTab === 'usage' && (
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Installation</h3>
-                    <p className="text-sm text-muted-foreground">
+                <div className="space-y-5"> {/* Adjusted space-y */}
+                  <div className="space-y-1.5"> {/* Adjusted space-y */}
+                    <h3 className="text-base font-medium text-foreground">Installation</h3> {/* Adjusted heading size */}
+                    <p className="text-xs text-muted-foreground"> {/* Adjusted text size */}
                       Choose your preferred package manager to install AirQo
                       Icons.
                     </p>
-                    <div className="mt-4 space-y-4">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">npm</h4>
+                    <div className="mt-2.5 space-y-2.5"> {/* Adjusted spacing */}
+                      <div className="space-y-1"> {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">npm</h4> {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="npm install @airqo-icons-min/react"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">yarn</h4>
+                      <div className="space-y-1"> {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">yarn</h4> {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="yarn add @airqo-icons-min/react"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">pnpm</h4>
+                      <div className="space-y-1"> {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">pnpm</h4> {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="pnpm add @airqo-icons-min/react"
@@ -759,14 +683,14 @@ export default function MyComponent() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-medium">Usage Examples</h3>
-                    <p className="text-sm text-muted-foreground">
+                  <div className="space-y-1.5"> {/* Adjusted space-y */}
+                    <h3 className="text-base font-medium text-foreground">Usage Examples</h3> {/* Adjusted heading size */}
+                    <p className="text-xs text-muted-foreground"> {/* Adjusted text size */}
                       Common usage examples for AirQo Icons.
                     </p>
-                    <div className="mt-4 space-y-4">
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Basic Usage</h4>
+                    <div className="mt-2.5 space-y-2.5"> {/* Adjusted spacing */}
+                      <div className="space-y-1"> {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">Basic Usage</h4> {/* Adjusted text size */}
                         <CodeBlock
                           language="tsx"
                           code={`import { ${icon.name} } from '@airqo-icons-min/react';
@@ -777,8 +701,8 @@ function MyComponent() {
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">
+                      <div className="space-y-1"> {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground"> {/* Adjusted text size */}
                           With Custom Props
                         </h4>
                         <CodeBlock
@@ -790,7 +714,7 @@ function MyComponent() {
     <${icon.name} 
       size={${size}} 
       color="${color}" 
-      strokeWidth={${strokeWidth}}
+      strokeWidth={${strokeWidth.toFixed(1)}}
       className="my-icon"
       onClick={() => console.log('Icon clicked!')}
     />
