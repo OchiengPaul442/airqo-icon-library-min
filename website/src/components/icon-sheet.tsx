@@ -332,8 +332,12 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
             className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto border-l border-border bg-background/90 shadow-xl dark:bg-zinc-900/90 backdrop-blur-lg" // Removed rounded-l-2xl, adjusted blur & opacity
           >
             {/* Header */}
-            <div className="sticky top-0 z-20 flex items-center justify-between bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md p-4 border-b border-border"> {/* Adjusted padding */}
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">{icon.name}</h2>
+            <div className="sticky top-0 z-20 flex items-center justify-between bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md p-4 border-b border-border">
+              {' '}
+              {/* Adjusted padding */}
+              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                {icon.name}
+              </h2>
               <button
                 onClick={onClose}
                 className="rounded-md p-2 text-muted-foreground hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted focus ring
@@ -344,7 +348,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
             </div>
 
             {/* Tabs */}
-            <div className="sticky top-[68px] z-20 flex bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-border"> {/* Adjusted top value */}
+            <div className="sticky top-[68px] z-20 flex bg-background/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-border">
+              {' '}
+              {/* Adjusted top value */}
               {['preview', 'code', 'usage'].map((tab) => (
                 <button
                   key={tab}
@@ -362,12 +368,18 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
               ))}
             </div>
 
-            <div className="p-6 space-y-6"> {/* Reduced padding and space-y */}
+            <div className="p-6 space-y-6">
+              {' '}
+              {/* Reduced padding and space-y */}
               {activeTab === 'preview' && (
-                <div className="space-y-6"> {/* Reduced space-y */}
+                <div className="space-y-6">
+                  {' '}
+                  {/* Reduced space-y */}
                   {/* Icon Preview Card */}
                   <div className="flex flex-col items-center justify-center">
-                    <div className="relative flex h-44 w-44 items-center justify-center rounded-lg border border-border bg-gradient-to-br from-white via-zinc-50 to-zinc-100 shadow-md dark:from-zinc-800 dark:via-zinc-700/50 dark:to-zinc-800"> {/* Adjusted size, shadow, gradient */}
+                    <div className="relative flex h-44 w-44 items-center justify-center rounded-lg border border-border bg-gradient-to-br from-white via-zinc-50 to-zinc-100 shadow-md dark:from-zinc-800 dark:via-zinc-700/50 dark:to-zinc-800">
+                      {' '}
+                      {/* Adjusted size, shadow, gradient */}
                       <div className="absolute inset-0 rounded-lg bg-[linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%),linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%)] bg-[length:16px_16px] [background-position:0_0,8px_8px] opacity-40 dark:bg-[linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%),linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%)] pointer-events-none" />
                       <div
                         className="relative transition-transform duration-150 hover:scale-105"
@@ -387,13 +399,25 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       </div>
                     </div>
                   </div>
-
                   {/* Customization Controls */}
-                  <div className="space-y-6"> {/* Reduced space-y */}
+                  <div className="space-y-6">
+                    {' '}
+                    {/* Reduced space-y */}
                     {/* Color Selection */}
-                    <section aria-labelledby="color-label" className="space-y-3"> {/* Reduced space-y */}
+                    <section
+                      aria-labelledby="color-label"
+                      className="space-y-3"
+                    >
+                      {' '}
+                      {/* Reduced space-y */}
                       <div className="flex items-center justify-between">
-                        <label id="color-label" className="text-sm font-medium text-foreground">Color</label> {/* Adjusted font size */}
+                        <label
+                          id="color-label"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          Color
+                        </label>{' '}
+                        {/* Adjusted font size */}
                         <button
                           onClick={() => setShowColorPicker(!showColorPicker)}
                           className="flex items-center gap-1 text-xs text-primary hover:underline focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
@@ -401,17 +425,27 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                         >
                           {showColorPicker ? (
                             <>
-                              Hide Picker <ClientIcon icon={ChevronUp} className="h-3 w-3" />
+                              Hide Picker{' '}
+                              <ClientIcon
+                                icon={ChevronUp}
+                                className="h-3 w-3"
+                              />
                             </>
                           ) : (
                             <>
-                              Custom Color <ClientIcon icon={ChevronDown} className="h-3 w-3" />
+                              Custom Color{' '}
+                              <ClientIcon
+                                icon={ChevronDown}
+                                className="h-3 w-3"
+                              />
                             </>
                           )}
                         </button>
                       </div>
                       {/* Preset Colors */}
-                      <div className="grid grid-cols-4 gap-2"> {/* Adjusted gap */}
+                      <div className="grid grid-cols-4 gap-2">
+                        {' '}
+                        {/* Adjusted gap */}
                         {presetColors.map((presetColor) => (
                           <button
                             key={presetColor}
@@ -449,7 +483,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                               className="!w-full !h-auto"
                             />
                             <div className="mt-2 flex items-center justify-between">
-                              <div className="text-xs text-muted-foreground">Hex:</div>
+                              <div className="text-xs text-muted-foreground">
+                                Hex:
+                              </div>
                               <div className="flex h-5 items-center rounded bg-background px-1.5 font-mono text-xs border border-border text-foreground">
                                 {color}
                               </div>
@@ -458,12 +494,23 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                         )}
                       </AnimatePresence>
                     </section>
-
                     {/* Size Control */}
-                    <section aria-labelledby="size-label" className="space-y-2.5"> {/* Adjusted space-y */}
+                    <section
+                      aria-labelledby="size-label"
+                      className="space-y-2.5"
+                    >
+                      {' '}
+                      {/* Adjusted space-y */}
                       <div className="flex items-center justify-between">
-                        <label id="size-label" className="text-sm font-medium text-foreground">Size</label>
-                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">{size}px</span>
+                        <label
+                          id="size-label"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          Size
+                        </label>
+                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">
+                          {size}px
+                        </span>
                       </div>
                       <input
                         type="range"
@@ -483,12 +530,23 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                         <span>80px</span>
                       </div>
                     </section>
-
                     {/* Stroke Width Control */}
-                    <section aria-labelledby="stroke-label" className="space-y-2.5"> {/* Adjusted space-y */}
+                    <section
+                      aria-labelledby="stroke-label"
+                      className="space-y-2.5"
+                    >
+                      {' '}
+                      {/* Adjusted space-y */}
                       <div className="flex items-center justify-between">
-                        <label id="stroke-label" className="text-sm font-medium text-foreground">Stroke Width</label>
-                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">{strokeWidth.toFixed(1)}</span>
+                        <label
+                          id="stroke-label"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          Stroke Width
+                        </label>
+                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">
+                          {strokeWidth.toFixed(1)}
+                        </span>
                       </div>
                       <input
                         type="range"
@@ -509,14 +567,16 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       </div>
                     </section>
                   </div>
-
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2 pt-1"> {/* Adjusted gap & padding */}
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    {' '}
+                    {/* Adjusted gap & padding */}
                     <button
                       onClick={downloadSVG}
                       className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted size & focus
                     >
-                      <ClientIcon icon={Download} className="h-4 w-4" /> {/* Adjusted size */}
+                      <ClientIcon icon={Download} className="h-4 w-4" />{' '}
+                      {/* Adjusted size */}
                       Download
                     </button>
                     <button
@@ -524,7 +584,10 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background" // Adjusted size & focus
                     >
                       {isCopied ? (
-                        <ClientIcon icon={Check} className="h-4 w-4 text-green-600 dark:text-green-500" /> // Adjusted size & color
+                        <ClientIcon
+                          icon={Check}
+                          className="h-4 w-4 text-green-600 dark:text-green-500"
+                        /> // Adjusted size & color
                       ) : (
                         <ClientIcon icon={Copy} className="h-4 w-4" /> // Adjusted size
                       )}
@@ -533,12 +596,17 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                   </div>
                 </div>
               )}
-
               {activeTab === 'code' && (
-                <div className="space-y-5"> {/* Adjusted space-y */}
-                  <div className="space-y-1.5"> {/* Adjusted space-y */}
+                <div className="space-y-5">
+                  {' '}
+                  {/* Adjusted space-y */}
+                  <div className="space-y-1.5">
+                    {' '}
+                    {/* Adjusted space-y */}
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-foreground">React</h4>
+                      <h4 className="text-sm font-medium text-foreground">
+                        React
+                      </h4>
                       <ClientIcon
                         icon={ChevronRight}
                         className="h-3.5 w-3.5 text-muted-foreground" // Adjusted size
@@ -546,7 +614,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${icon.name} } from '@airqo-icons-min/react';
+                      code={`import { ${
+                        icon.name
+                      } } from '@airqo-icons-min/react';
 
 export default function MyComponent() {
   return (
@@ -559,10 +629,11 @@ export default function MyComponent() {
 }`}
                     />
                   </div>
-
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-foreground">React (Next.js)</h4>
+                      <h4 className="text-sm font-medium text-foreground">
+                        React (Next.js)
+                      </h4>
                       <ClientIcon
                         icon={ChevronRight}
                         className="h-3.5 w-3.5 text-muted-foreground"
@@ -588,10 +659,11 @@ export default function MyComponent() {
 }`}
                     />
                   </div>
-
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-foreground">Vue</h4>
+                      <h4 className="text-sm font-medium text-foreground">
+                        Vue
+                      </h4>
                       <ClientIcon
                         icon={ChevronRight}
                         className="h-3.5 w-3.5 text-muted-foreground"
@@ -612,10 +684,11 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
 </template>`}
                     />
                   </div>
-
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-foreground">React Native</h4>
+                      <h4 className="text-sm font-medium text-foreground">
+                        React Native
+                      </h4>
                       <ClientIcon
                         icon={ChevronRight}
                         className="h-3.5 w-3.5 text-muted-foreground"
@@ -623,7 +696,9 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${icon.name} } from '@airqo-icons-min/react-native';
+                      code={`import { ${
+                        icon.name
+                      } } from '@airqo-icons-min/react-native';
 
 export default function MyComponent() {
   return (
@@ -636,10 +711,11 @@ export default function MyComponent() {
 }`}
                     />
                   </div>
-
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-foreground">HTML</h4>
+                      <h4 className="text-sm font-medium text-foreground">
+                        HTML
+                      </h4>
                       <ClientIcon
                         icon={ChevronRight}
                         className="h-3.5 w-3.5 text-muted-foreground"
@@ -649,32 +725,57 @@ export default function MyComponent() {
                   </div>
                 </div>
               )}
-
               {activeTab === 'usage' && (
-                <div className="space-y-5"> {/* Adjusted space-y */}
-                  <div className="space-y-1.5"> {/* Adjusted space-y */}
-                    <h3 className="text-base font-medium text-foreground">Installation</h3> {/* Adjusted heading size */}
-                    <p className="text-xs text-muted-foreground"> {/* Adjusted text size */}
+                <div className="space-y-5">
+                  {' '}
+                  {/* Adjusted space-y */}
+                  <div className="space-y-1.5">
+                    {' '}
+                    {/* Adjusted space-y */}
+                    <h3 className="text-base font-medium text-foreground">
+                      Installation
+                    </h3>{' '}
+                    {/* Adjusted heading size */}
+                    <p className="text-xs text-muted-foreground">
+                      {' '}
+                      {/* Adjusted text size */}
                       Choose your preferred package manager to install AirQo
                       Icons.
                     </p>
-                    <div className="mt-2.5 space-y-2.5"> {/* Adjusted spacing */}
-                      <div className="space-y-1"> {/* Adjusted spacing */}
-                        <h4 className="text-xs font-medium text-foreground">npm</h4> {/* Adjusted text size */}
+                    <div className="mt-2.5 space-y-2.5">
+                      {' '}
+                      {/* Adjusted spacing */}
+                      <div className="space-y-1">
+                        {' '}
+                        {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">
+                          npm
+                        </h4>{' '}
+                        {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="npm install @airqo-icons-min/react"
                         />
                       </div>
-                      <div className="space-y-1"> {/* Adjusted spacing */}
-                        <h4 className="text-xs font-medium text-foreground">yarn</h4> {/* Adjusted text size */}
+                      <div className="space-y-1">
+                        {' '}
+                        {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">
+                          yarn
+                        </h4>{' '}
+                        {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="yarn add @airqo-icons-min/react"
                         />
                       </div>
-                      <div className="space-y-1"> {/* Adjusted spacing */}
-                        <h4 className="text-xs font-medium text-foreground">pnpm</h4> {/* Adjusted text size */}
+                      <div className="space-y-1">
+                        {' '}
+                        {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">
+                          pnpm
+                        </h4>{' '}
+                        {/* Adjusted text size */}
                         <CodeBlock
                           language="bash"
                           code="pnpm add @airqo-icons-min/react"
@@ -682,15 +783,28 @@ export default function MyComponent() {
                       </div>
                     </div>
                   </div>
-
-                  <div className="space-y-1.5"> {/* Adjusted space-y */}
-                    <h3 className="text-base font-medium text-foreground">Usage Examples</h3> {/* Adjusted heading size */}
-                    <p className="text-xs text-muted-foreground"> {/* Adjusted text size */}
+                  <div className="space-y-1.5">
+                    {' '}
+                    {/* Adjusted space-y */}
+                    <h3 className="text-base font-medium text-foreground">
+                      Usage Examples
+                    </h3>{' '}
+                    {/* Adjusted heading size */}
+                    <p className="text-xs text-muted-foreground">
+                      {' '}
+                      {/* Adjusted text size */}
                       Common usage examples for AirQo Icons.
                     </p>
-                    <div className="mt-2.5 space-y-2.5"> {/* Adjusted spacing */}
-                      <div className="space-y-1"> {/* Adjusted spacing */}
-                        <h4 className="text-xs font-medium text-foreground">Basic Usage</h4> {/* Adjusted text size */}
+                    <div className="mt-2.5 space-y-2.5">
+                      {' '}
+                      {/* Adjusted spacing */}
+                      <div className="space-y-1">
+                        {' '}
+                        {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">
+                          Basic Usage
+                        </h4>{' '}
+                        {/* Adjusted text size */}
                         <CodeBlock
                           language="tsx"
                           code={`import { ${icon.name} } from '@airqo-icons-min/react';
@@ -700,14 +814,19 @@ function MyComponent() {
 }`}
                         />
                       </div>
-
-                      <div className="space-y-1"> {/* Adjusted spacing */}
-                        <h4 className="text-xs font-medium text-foreground"> {/* Adjusted text size */}
+                      <div className="space-y-1">
+                        {' '}
+                        {/* Adjusted spacing */}
+                        <h4 className="text-xs font-medium text-foreground">
+                          {' '}
+                          {/* Adjusted text size */}
                           With Custom Props
                         </h4>
                         <CodeBlock
                           language="tsx"
-                          code={`import { ${icon.name} } from '@airqo-icons-min/react';
+                          code={`import { ${
+                            icon.name
+                          } } from '@airqo-icons-min/react';
 
 function MyComponent() {
   return (
