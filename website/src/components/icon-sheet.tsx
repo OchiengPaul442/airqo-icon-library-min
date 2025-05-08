@@ -96,7 +96,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     ? AirQoIcons[icon.name as keyof typeof AirQoIcons]
     : null;
 
-  // Create a rendered SVG element to use for extraction
+  // Improve the SVG generation mechanism for more reliable downloads and copies
   const renderIconToCanvas = React.useCallback(() => {
     if (!icon || !IconComponent) return null;
 
@@ -137,6 +137,11 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
           // Clone the SVG element
           const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
 
+          // Make sure the SVG has proper viewBox for correct rendering
+          if (!clonedSvg.hasAttribute('viewBox')) {
+            clonedSvg.setAttribute('viewBox', '0 0 24 24');
+          }
+
           // Add/update necessary attributes
           clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
           clonedSvg.setAttribute('width', size.toString());
@@ -147,7 +152,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
           clonedSvg.setAttribute('stroke-linecap', 'round');
           clonedSvg.setAttribute('stroke-linejoin', 'round');
 
-          // Update paths and other elements to have correct stroke width
+          // Ensure all child elements have correct attributes
           const pathElements = clonedSvg.querySelectorAll(
             'path, circle, rect, line, polyline, polygon',
           );
@@ -164,7 +169,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
 
           // Clean up the temporary div after we've cloned the SVG
           document.body.removeChild(tempDiv);
-        }, 50);
+        }, 100); // Increased timeout for better reliability
       });
     } catch (error) {
       console.error('Error rendering icon:', error);
@@ -176,8 +181,14 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   // Helper function to generate SVG code and update state
   const generateAndUpdateSvgCode = async () => {
     if (icon) {
-      const svgCode = await generateSvgString();
-      setGeneratedSvgCode(svgCode);
+      try {
+        const svgCode = await generateSvgString();
+        setGeneratedSvgCode(svgCode);
+      } catch (error) {
+        console.error('Error updating SVG code:', error);
+        // Set fallback in case of error
+        setGeneratedSvgCode(createSvgFallback());
+      }
     }
   };
 
@@ -190,12 +201,22 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       const svgElement = await renderIconToCanvas();
 
       if (!svgElement) {
-        throw new Error('Failed to render SVG');
+        console.error('Failed to render SVG element');
+        return createSvgFallback();
       }
 
       // Convert to string
       const serializer = new XMLSerializer();
-      return serializer.serializeToString(svgElement);
+      let svgString = serializer.serializeToString(svgElement);
+
+      // Ensure proper formatting and indentation
+      svgString = svgString
+        .replace(/></g, '>\n  <')
+        .replace(/<svg/, '\n<svg')
+        .replace('</svg>', '\n</svg>')
+        .replace(/ {2,}/g, '  ');
+
+      return svgString;
     } catch (error) {
       console.error('Error generating SVG:', error);
       return createSvgFallback();
@@ -237,23 +258,34 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     return svgString;
   };
 
+  // Improved download SVG function
   const downloadSVG = async () => {
     if (!icon) return;
 
     try {
-      // Get SVG content
+      // Generate SVG code right before download to ensure it's up to date
       const svgContent = await generateSvgString();
+      if (!svgContent) {
+        throw new Error('Failed to generate SVG content');
+      }
 
-      // Download
+      // Create a Blob with the SVG content
       const blob = new Blob([svgContent], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
+
+      // Create an anchor element to download the file
       const a = document.createElement('a');
       a.href = url;
       a.download = `${icon.name}.svg`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+
       toast.success('Icon downloaded successfully');
     } catch (error) {
       console.error('Error downloading icon:', error);
@@ -261,11 +293,18 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     }
   };
 
+  // Improved copy SVG function
   const copySVG = async () => {
     if (!icon) return;
 
     try {
+      // Generate SVG code right before copying to ensure it's up to date
       const svgContent = await generateSvgString();
+      if (!svgContent) {
+        throw new Error('Failed to generate SVG content');
+      }
+
+      // Use clipboard API to copy text
       await navigator.clipboard.writeText(svgContent);
       setIsCopied(true);
       toast.success('SVG copied to clipboard');
@@ -347,9 +386,11 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                 <div className="space-y-8">
                   {/* Icon Preview */}
                   <div className="flex flex-col items-center justify-center">
-                    <div className="flex h-48 w-48 items-center justify-center rounded-lg border bg-white p-4 shadow-sm dark:bg-zinc-900">
+                    <div className="flex h-48 w-48 items-center justify-center rounded-lg border bg-white p-4 shadow-sm dark:bg-zinc-900 relative">
+                      {/* Grid pattern background for better visibility */}
+                      <div className="absolute inset-0 rounded-lg bg-[linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%),linear-gradient(45deg,#f0f0f0_25%,transparent_25%,transparent_75%,#f0f0f0_75%)] bg-[length:16px_16px] [background-position:0_0,8px_8px] opacity-50 dark:bg-[linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%),linear-gradient(45deg,#333_25%,transparent_25%,transparent_75%,#333_75%)]"></div>
                       <div
-                        className="transition-all duration-200 hover:scale-110"
+                        className="relative transition-all duration-200 hover:scale-110"
                         style={{
                           width: `${Math.max(size, 32)}px`,
                           height: `${Math.max(size, 32)}px`,

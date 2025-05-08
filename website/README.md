@@ -18,34 +18,77 @@ This website provides:
 ### Prerequisites
 
 - Node.js (>=16)
-- pnpm (>=8)
+- pnpm (>=8) - Required as this project uses workspace dependencies
 
-### Development
+### Installation & Development
 
-First, install dependencies from the root of the monorepo:
+The website is configured as part of the monorepo workspace, which simplifies the installation process.
+
+#### Option 1: From the Root Directory (Recommended)
 
 ```bash
-# From the root of the repository
+# From the root of the monorepo
 pnpm install
+
+# Build the core packages (required before running the website)
+pnpm build:core
+
+# Start the development server
+pnpm dev:website
 ```
 
-Then, run the development server:
+#### Option 2: From the Website Directory
 
 ```bash
 # From the website directory
+cd website
+
+# Install dependencies
+pnpm install
+
+# Start the development server
 pnpm dev
-# or from the root of the repository
-pnpm --filter website dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Building for Production
 
-### Building
+To create a production build:
 
 ```bash
-# Build the website
+# From the root directory
+pnpm build:website
+
+# OR from the website directory
 pnpm build
 ```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the website when running the development server.
+
+### Troubleshooting Installation Issues
+
+#### Package Manager Requirements
+
+This project uses pnpm workspace features. Using npm directly in the website directory is not recommended and will result in errors like:
+
+```
+npm error code EUNSUPPORTEDPROTOCOL
+npm error Unsupported URL Type "workspace:": workspace:*
+```
+
+Always use pnpm for this project.
+
+#### Build Permission Errors on Windows
+
+If you encounter permission errors with the `.next/trace` file during builds:
+
+1. Close any programs that might have the files open (VS Code, terminals)
+2. Try running your terminal as administrator
+3. Manually delete the `.next` folder before building:
+   ```bash
+   rm -rf .next
+   # OR on Windows command prompt
+   rd /s /q .next
+   ```
 
 ### Project Structure
 

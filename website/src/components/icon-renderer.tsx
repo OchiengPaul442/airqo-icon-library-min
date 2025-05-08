@@ -1,9 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { SVGProps } from 'react';
 import { IconMeta } from '@airqo-icons-min/core';
 import { cn } from '../lib/utils';
 import * as AirQoIcons from '@airqo-icons-min/react';
+
+interface SVGRProps {
+  title?: string;
+  titleId?: string;
+}
 
 interface IconRendererProps {
   icon: IconMeta;
@@ -72,7 +77,7 @@ export function IconRenderer({
   }, [icon?.name, className, color, onClick, size, strokeWidth]);
 
   // Primary SVG props that will be applied directly
-  const svgProps = {
+  const svgProps: Omit<SVGProps<SVGSVGElement> & SVGRProps, 'ref'> = {
     width: size,
     height: size,
     stroke: color,
