@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AirQo Icon Library Website
+
+This is the documentation website for the AirQo Icon Library, built with [Next.js](https://nextjs.org).
+
+## Overview
+
+This website provides:
+
+- A searchable gallery of all available icons
+- Documentation for using the icons with different frameworks
+- Installation instructions
+- API references
+- Interactive examples
+- Contribution guidelines
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (>=16)
+- pnpm (>=8)
+
+### Development
+
+First, install dependencies from the root of the monorepo:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# From the root of the repository
+pnpm install
+```
+
+Then, run the development server:
+
+```bash
+# From the website directory
 pnpm dev
-# or
-bun dev
+# or from the root of the repository
+pnpm --filter website dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Build the website
+pnpm build
+```
 
-## Learn More
+### Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+website/
+├── public/          # Static assets
+├── src/
+│   ├── app/         # Next.js App Router pages
+│   ├── components/  # React components
+│   ├── lib/         # Utility functions and data
+│   └── styles/      # Global styles and theme
+└── ...              # Configuration files
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The website is automatically deployed to [Vercel](https://vercel.com) when changes are pushed to the main branch.
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+See the [CONTRIBUTING.md](../CONTRIBUTING.md) file in the root of the repository for information on contributing to the website.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+MIT © AirQo
