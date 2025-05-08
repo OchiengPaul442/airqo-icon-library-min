@@ -13,6 +13,18 @@ This website provides:
 - Interactive examples
 - Contribution guidelines
 
+## Deployment to GitHub Pages
+
+The website is automatically deployed to GitHub Pages when changes are pushed to the main branch. The deployment process is managed by the GitHub Actions workflow in `.github/workflows/deploy-pages.yml`.
+
+### Manual Deployment
+
+To manually trigger a deployment, go to the GitHub repository, navigate to the "Actions" tab, select the "Deploy to GitHub Pages" workflow, and click "Run workflow".
+
+### GitHub Pages Configuration
+
+The website is configured to be deployed to GitHub Pages with the proper base path and asset prefix settings. These settings are defined in `next.config.ts`.
+
 ## Getting Started
 
 ### Prerequisites

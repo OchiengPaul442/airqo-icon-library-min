@@ -24,7 +24,8 @@
     "prepare": "husky install",
     "release": "pnpm build && node scripts/publish-packages.js",
     "changelog": "node scripts/generate-changelog.js",
-    "untrack-generated": "node scripts/untrack-generated-files.js"
+    "untrack-generated": "node scripts/untrack-generated-files.js",
+    "deploy:website": "pnpm build:website"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

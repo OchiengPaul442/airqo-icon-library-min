@@ -1,0 +1,8 @@
+# .github/pages.yml
+# GitHub Pages configuration
+
+pages:
+  # Deploy from the gh-pages branch
+  branch: gh-pages
+  # Deploy from the root of the output directory
+  path: /

@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// Set this API route to be statically generated at build time
+export const dynamic = 'force-static';
+// Set revalidation to false for static export
+export const revalidate = false;
+
 export async function GET() {
   try {
     // Go up one level from /website to reach project root,
