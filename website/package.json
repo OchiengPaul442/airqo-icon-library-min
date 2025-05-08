@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "^1.1.0",
-    "@airqo-icons-min/react": "file:../packages/react",
+    "@airqo-icons-min/core": "^1.8.0",
+    "@airqo-icons-min/react": "^1.8.0",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-tabs": "^1.1.9",
     "class-variance-authority": "^0.7.1",

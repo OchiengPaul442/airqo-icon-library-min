@@ -16,7 +16,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@airqo-icons/*": ["packages/*/src"]
+      "@airqo-icons/*": ["packages/*/src"],
+      "@airqo-icons-min/*": ["packages/*/src"]
     },
     "allowJs": false,
     "jsx": "preserve",

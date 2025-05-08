@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { icons, IconMeta } from '@airqo-icons-min/core';
+import { IconMeta } from '@airqo-icons-min/core';
+import { icons } from '@airqo-icons-min/core';
 
 type IconsGroupedByCategory = Record<
   string,
@@ -9,18 +10,6 @@ type IconsGroupedByCategory = Record<
     icons: IconMeta[];
   }
 >;
-
-/**
- * Utility function to get all icon categories
- */
-function getIconCategories(): string[] {
-  // Extract unique categories from icons
-  const categoriesSet = new Set<string>();
-  icons.forEach((icon) => {
-    categoriesSet.add(icon.category);
-  });
-  return Array.from(categoriesSet);
-}
 
 /**
  * Utility function to format a category name for display
@@ -34,28 +23,35 @@ function formatCategoryName(category: string): string {
 }
 
 /**
- * Utility function to get icons grouped by category
+ * Get all icon categories from the icon manifest
  */
-function getIconsByCategory(): Record<string, IconMeta[]> {
-  const categorized: Record<string, IconMeta[]> = {};
-
-  icons.forEach((icon) => {
-    if (!categorized[icon.category]) {
-      categorized[icon.category] = [];
-    }
-    categorized[icon.category].push({ ...icon });
-  });
-
-  return categorized;
+function getIconCategories(): string[] {
+  const categories = new Set<string>();
+  icons.forEach((icon) => categories.add(icon.category));
+  return Array.from(categories);
 }
 
 /**
- * Utility function to get icons for a specific category
+ * Get icons for a specific category
  */
 function getIconsForCategory(category: string): IconMeta[] {
-  return icons
-    .filter((icon) => icon.category === category)
-    .map((icon) => ({ ...icon }));
+  return icons.filter((icon) => icon.category === category);
+}
+
+/**
+ * Group icons by their categories
+ */
+function getIconsByCategory(): Record<string, IconMeta[]> {
+  const categorizedIcons: Record<string, IconMeta[]> = {};
+
+  icons.forEach((icon) => {
+    if (!categorizedIcons[icon.category]) {
+      categorizedIcons[icon.category] = [];
+    }
+    categorizedIcons[icon.category].push(icon);
+  });
+
+  return categorizedIcons;
 }
 
 /**

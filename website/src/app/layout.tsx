@@ -1,10 +1,13 @@
-import type { Metadata } from 'next';
+'use client';
+
 import * as React from 'react';
 import { Inter as FontSans } from 'next/font/google';
 import Link from 'next/link';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ClientThemeToggle } from '@/components/client-theme-toggle';
+import { ClientIcon } from '@airqo-icons-min/react/client';
+import { Github } from 'lucide-react';
 import { Toaster } from 'sonner';
 import './globals.css';
 
@@ -12,11 +15,6 @@ const fontSans = FontSans({
   subsets: ['latin'],
   variable: '--font-sans',
 });
-
-export const metadata: Metadata = {
-  title: 'AirQo Icons - Modern Icon Library',
-  description: 'A modern, customizable icon library for AirQo applications',
-};
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -61,24 +59,32 @@ export default function RootLayout({
                       href="/docs"
                       className="transition-colors hover:text-foreground/80"
                     >
-                      Documentation
+                      Docs
                     </Link>
                   </nav>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center space-x-4">
                   <ClientThemeToggle />
+                  <a
+                    href="https://github.com/airqo-platform/airqo-icon-library-min"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <ClientIcon icon={Github} className="h-5 w-5" />
+                    <span className="sr-only">GitHub</span>
+                  </a>
                 </div>
               </div>
             </header>
 
-            {/* Main Content */}
-            <main className="flex-1">
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </main>
+            <ErrorBoundary>
+              <main className="flex-1">{children}</main>
+            </ErrorBoundary>
 
-            {/* Footer */}
-            <footer className="border-t py-6 md:py-0">
-              <div className="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
+            <footer className="border-t">
+              <div className="container flex items-center justify-between py-6">
                 <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
                   Built by AirQo. The source code is available on{' '}
                   <a

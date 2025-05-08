@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { IconSheet } from './icon-sheet';
 import { motion } from 'framer-motion';
+import { ClientIcon } from '@airqo-icons-min/react/client';
 import { ArrowRight, XCircle } from 'lucide-react';
 import { IconMeta } from '@airqo-icons-min/core';
 import { cn } from '@/lib/utils';
@@ -60,7 +61,10 @@ export function IconGrid({
         className="flex min-h-[400px] flex-col items-center justify-center text-center"
       >
         <div className="flex flex-col items-center rounded-xl border bg-background/60 p-12 shadow-sm backdrop-blur-sm">
-          <XCircle className="mb-4 h-12 w-12 text-muted-foreground" />
+          <ClientIcon
+            icon={XCircle}
+            className="mb-4 h-12 w-12 text-muted-foreground"
+          />
           <h3 className="mb-2 text-xl font-medium">No icons found</h3>
           <p className="max-w-md text-muted-foreground">
             We couldn&apos;t find any icons matching your search criteria. Try
@@ -168,7 +172,7 @@ export function IconGrid({
             className="inline-flex items-center gap-2 rounded-lg border bg-background px-4 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-muted/50"
           >
             Load more icons
-            <ArrowRight className="h-4 w-4" />
+            <ClientIcon icon={ArrowRight} className="h-4 w-4" />
           </motion.button>
         </div>
       )}

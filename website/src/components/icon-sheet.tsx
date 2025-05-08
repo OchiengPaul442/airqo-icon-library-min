@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ClientIcon } from '@airqo-icons-min/react/client';
 import { Download, X, Copy, Check, ChevronRight } from 'lucide-react';
 import { HexColorPicker } from 'react-colorful';
 import { CodeBlock } from './code-block';
@@ -15,6 +16,8 @@ interface IconSheetProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+type TabType = 'preview' | 'code' | 'usage';
 
 const presetColors = [
   '#0174DF', // AirQo Blue
@@ -33,8 +36,6 @@ const presetColors = [
   '#EC4899',
   '#8B5CF6',
 ];
-
-type TabType = 'preview' | 'code' | 'usage';
 
 export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   const [color, setColor] = React.useState('#0174DF'); // Default to AirQo blue
@@ -56,14 +57,18 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   // Generate SVG string for download/copy
   const generateSvgString = () => {
     if (!icon) return '';
-
-    // Create a basic SVG for the icon - this is a placeholder
-    // In a real implementation, you'd want to get the actual SVG path data
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="12" cy="12" r="10" />
-  <text x="12" y="13" text-anchor="middle" dominant-baseline="middle" fill="${color}" font-size="8" font-family="sans-serif" stroke="none">
-    ${icon.name.substring(0, 2).toUpperCase()}
-  </text>
+    return `<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="${size}"
+  height="${size}"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="${color}"
+  stroke-width="${strokeWidth}"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <!-- Icon paths would go here -->
 </svg>`;
   };
 
@@ -95,9 +100,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
 
   if (!icon) return null;
 
-  // Use the icon name directly without formatting
-  const iconName = icon.name;
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -113,28 +115,25 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
 
           {/* Sheet */}
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 z-50 h-screen w-full max-w-md border-l bg-background shadow-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-2xl rounded-t-xl border bg-background p-6 shadow-lg"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b p-4">
-              <div>
-                <h2 className="text-lg font-medium">{iconName}</h2>
-              </div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium">{icon.name}</h2>
               <button
                 onClick={onClose}
-                className="rounded-full p-2 hover:bg-muted"
-                aria-label="Close"
+                className="rounded-lg p-2.5 text-muted-foreground hover:bg-muted"
               >
-                <X className="h-4 w-4" />
+                <ClientIcon icon={X} className="h-5 w-5" />
+                <span className="sr-only">Close</span>
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="flex items-center border-b">
+            <div className="mt-6 flex border-b">
               <button
                 onClick={() => setActiveTab('preview')}
                 className={cn(
@@ -256,7 +255,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       onClick={downloadSVG}
                       className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                      <Download className="h-4 w-4" />
+                      <ClientIcon icon={Download} className="h-4 w-4" />
                       Download
                     </button>
                     <button
@@ -264,9 +263,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       className="inline-flex h-10 items-center justify-center gap-2 rounded-md border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
                     >
                       {isCopied ? (
-                        <Check className="h-4 w-4" />
+                        <ClientIcon icon={Check} className="h-4 w-4" />
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        <ClientIcon icon={Copy} className="h-4 w-4" />
                       )}
                       {isCopied ? 'Copied' : 'Copy SVG'}
                     </button>
@@ -279,7 +278,10 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium">React</h4>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ClientIcon
+                        icon={ChevronRight}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
                     </div>
                     <CodeBlock
                       language="tsx"
@@ -299,8 +301,40 @@ export default function MyComponent() {
 
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">React (Next.js)</h4>
+                      <ClientIcon
+                        icon={ChevronRight}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
+                    </div>
+                    <CodeBlock
+                      language="tsx"
+                      code={`'use client';
+
+import { ClientIcon } from '@airqo-icons-min/react/client';
+import { ${icon.name} } from '@airqo-icons-min/react';
+
+export default function MyComponent() {
+  return (
+    <ClientIcon
+      icon={${icon.name}}
+      color="${color}"
+      size={${size}}
+      strokeWidth={${strokeWidth}}
+      onClick={() => {/* handle click */}}
+    />
+  );
+}`}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium">Vue</h4>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ClientIcon
+                        icon={ChevronRight}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
                     </div>
                     <CodeBlock
                       language="vue"
@@ -321,7 +355,10 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium">React Native</h4>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ClientIcon
+                        icon={ChevronRight}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
                     </div>
                     <CodeBlock
                       language="tsx"
@@ -342,7 +379,10 @@ export default function MyComponent() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-medium">HTML</h4>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <ClientIcon
+                        icon={ChevronRight}
+                        className="h-4 w-4 text-muted-foreground"
+                      />
                     </div>
                     <CodeBlock language="html" code={generateSvgString()} />
                   </div>

@@ -2,18 +2,12 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  LayoutGrid,
-  Repeat,
-  Zap,
-  Download,
-  Database,
-  Settings,
-} from 'lucide-react';
 import { useIconCategories } from '@/hooks/use-icon-categories';
 import { useState, useEffect } from 'react';
 import { IconMeta } from '@airqo-icons-min/core';
+import { ClientIcon } from '@airqo-icons-min/react/client';
+import * as lucideIcons from 'lucide-react';
+import { IconRenderer } from '@/components/icon-renderer';
 
 // Animation variants
 const fadeIn = {
@@ -32,7 +26,7 @@ const stagger = {
 
 export default function Home() {
   const { allIcons } = useIconCategories();
-  const [featuredIcons, setFeaturedIcons] = useState<JSX.Element[]>([]);
+  const [featuredIcons, setFeaturedIcons] = useState<IconMeta[]>([]);
 
   // Prepare featured icons for the showcase grid
   useEffect(() => {
@@ -43,31 +37,7 @@ export default function Home() {
       .sort(() => 0.5 - Math.random()) // Shuffle the icons
       .slice(0, Math.min(40, allIcons.length));
 
-    const iconComponents = selectedIcons.map(
-      (icon: IconMeta, index: number) => {
-        // Create a simple SVG element for each icon as a fallback
-        // This ensures we always have something to display even if the icon component isn't found
-        return (
-          <svg
-            key={index}
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v8" />
-            <path d="M8 12h8" />
-          </svg>
-        );
-      },
-    );
-
-    setFeaturedIcons(iconComponents);
+    setFeaturedIcons(selectedIcons);
   }, [allIcons]);
 
   return (
@@ -105,7 +75,10 @@ export default function Home() {
                 className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-base font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90"
               >
                 Browse Icons
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ClientIcon
+                  icon={lucideIcons.ArrowRight}
+                  className="ml-2 h-4 w-4"
+                />
               </Link>
               <Link
                 href="/docs"
@@ -122,32 +95,19 @@ export default function Home() {
               <div className="relative aspect-[16/9] w-full max-w-5xl overflow-hidden rounded-xl border bg-background/50 shadow-2xl backdrop-blur-sm">
                 <div className="absolute inset-0 flex items-center justify-center p-4">
                   <div className="grid grid-cols-4 gap-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10">
-                    {featuredIcons.length > 0
-                      ? featuredIcons.map((IconComponent, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: i * 0.02, duration: 0.5 }}
-                            className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
-                          >
-                            <div className="text-primary/80">
-                              {IconComponent}
-                            </div>
-                          </motion.div>
-                        ))
-                      : // Show placeholders while loading
-                        Array.from({ length: 40 }).map((_, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: i * 0.02, duration: 0.5 }}
-                            className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm"
-                          >
-                            <div className="h-6 w-6 rounded-md bg-primary/20"></div>
-                          </motion.div>
-                        ))}
+                    {featuredIcons.map((icon, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: i * 0.02, duration: 0.5 }}
+                        className="flex aspect-square items-center justify-center rounded-lg border bg-background/80 p-2 shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
+                      >
+                        <div className="text-primary/80">
+                          <IconRenderer icon={icon} size={24} />
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -157,162 +117,97 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="w-full border-y bg-muted/40 py-20">
-        <div className="container px-4 md:px-6">
+      <section className="container py-24 md:py-32">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+        >
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={stagger}
-            className="mb-12 text-center"
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
           >
-            <motion.h2
-              variants={fadeIn}
-              className="text-3xl font-bold tracking-tight sm:text-4xl"
-            >
-              Designed for developers and designers
-            </motion.h2>
-            <motion.p
-              variants={fadeIn}
-              className="mx-auto mt-4 max-w-[700px] text-muted-foreground"
-            >
-              Powerful features that help you build better products faster
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.1 }}
-            variants={stagger}
-            className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <LayoutGrid className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">Multiple Frameworks</h3>
-              <p className="text-muted-foreground">
-                Supports React, Vue, Flutter, and more frameworks with dedicated
-                packages and APIs.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Repeat className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">Customizable</h3>
-              <p className="text-muted-foreground">
-                Easily customize size, color, and stroke width of any icon to
-                match your design system.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">Optimized SVGs</h3>
-              <p className="text-muted-foreground">
-                Professionally optimized SVGs for the best performance and
-                smallest file size.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Download className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">Easy Integration</h3>
-              <p className="text-muted-foreground">
-                Download individual icons or use our packages for seamless
-                integration into your projects.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Database className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">TypeScript Support</h3>
-              <p className="text-muted-foreground">
-                Full TypeScript type definitions for a better developer
-                experience and autocomplete.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={fadeIn}
-              className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Settings className="h-6 w-6" />
-              </div>
-              <h3 className="mb-2 text-xl font-bold">Consistent Design</h3>
-              <p className="text-muted-foreground">
-                All icons follow a consistent design language for a cohesive
-                look across your application.
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="w-full py-20">
-        <div className="container px-4 md:px-6">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={stagger}
-            className="rounded-3xl bg-gradient-to-br from-primary/80 to-primary p-8 text-primary-foreground md:p-12 lg:p-16"
-          >
-            <div className="mx-auto max-w-3xl text-center">
-              <motion.h2
-                variants={fadeIn}
-                className="text-3xl font-bold sm:text-4xl"
-              >
-                Ready to elevate your next project?
-              </motion.h2>
-              <motion.p
-                variants={fadeIn}
-                className="mx-auto mt-4 max-w-[700px] text-primary-foreground/90"
-              >
-                Browse our extensive collection of professionally designed icons
-                and start using them in your project today.
-              </motion.p>
-              <motion.div
-                variants={fadeIn}
-                className="mt-8 flex flex-wrap justify-center gap-4"
-              >
-                <Link
-                  href="/icons"
-                  className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-8 text-base font-medium text-primary shadow-lg transition-colors hover:bg-white/90"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </motion.div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.LayoutGrid} className="h-6 w-6" />
             </div>
+            <h3 className="mb-2 text-xl font-bold">Multiple Frameworks</h3>
+            <p className="text-muted-foreground">
+              Use the same icons across React, Vue, Flutter, and React Native
+              projects with native support.
+            </p>
           </motion.div>
-        </div>
+
+          <motion.div
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.Repeat} className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Customizable</h3>
+            <p className="text-muted-foreground">
+              Easily customize size, color, and stroke width of any icon to
+              match your design system.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.Zap} className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Optimized SVGs</h3>
+            <p className="text-muted-foreground">
+              Professionally optimized SVGs for the best performance and
+              smallest file size.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.Download} className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Easy Installation</h3>
+            <p className="text-muted-foreground">
+              Simple installation with NPM, Yarn, or PNPM. Start using icons in
+              minutes.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.Database} className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Tree Shakeable</h3>
+            <p className="text-muted-foreground">
+              Only include the icons you use in your final bundle for optimal
+              performance.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={fadeIn}
+            className="group rounded-xl border bg-background p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+          >
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <ClientIcon icon={lucideIcons.Settings} className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">TypeScript Ready</h3>
+            <p className="text-muted-foreground">
+              Full TypeScript support with proper type definitions for all icons
+              and props.
+            </p>
+          </motion.div>
+        </motion.div>
       </section>
     </div>
   );

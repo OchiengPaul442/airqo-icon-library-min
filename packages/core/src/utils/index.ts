@@ -1,2 +1,7 @@
 // Export icon category utilities
-export * from './getIconsByCategory';
+export {
+  getIconsByCategory,
+  getIconCategories,
+  getIconsForCategory,
+  formatCategoryName,
+} from './getIconsByCategory';
