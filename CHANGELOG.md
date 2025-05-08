@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.8.0...v1.9.0) (2025-05-08)
+
+
+### Features
+
+* Enhance icon components and improve user experience ([fb134b3](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/fb134b3ab0d8381b2ee0e439548df5d49cf2b426))
+
 # [1.8.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.7.0...v1.8.0) (2025-05-08)
 
 
