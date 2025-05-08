@@ -25,7 +25,8 @@
     "release": "pnpm build && node scripts/publish-packages.js",
     "changelog": "node scripts/generate-changelog.js",
     "untrack-generated": "node scripts/untrack-generated-files.js",
-    "deploy:website": "pnpm build:website"
+    "deploy:website": "pnpm build:website",
+    "deploy:website-only": "node scripts/deploy-website-only.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

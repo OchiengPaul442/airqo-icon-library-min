@@ -1,8 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
+  # Only run CI on pull requests and manual triggers
+  # For main branch pushes, we use more specialized workflows (release.yml and deploy-pages.yml)
   pull_request:
     branches: [main]
   workflow_dispatch:

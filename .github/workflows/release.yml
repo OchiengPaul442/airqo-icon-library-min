@@ -9,6 +9,14 @@ on:
         default: 'false'
   push:
     branches: [main]
+    paths:
+      - 'packages/**'
+      - 'svgs/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      # Exclude website changes
+      - '!website/**'
 
 permissions:
   contents: write
@@ -19,7 +27,7 @@ jobs:
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') }}
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') && !contains(github.event.head_commit.message, 'website-only') && !contains(github.event.head_commit.message, 'skip-packages') }}
 
     steps:
       - name: Checkout code
