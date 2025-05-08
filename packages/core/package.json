@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/core",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

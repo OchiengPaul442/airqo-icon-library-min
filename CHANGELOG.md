@@ -1,3 +1,11 @@
+# [1.10.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.9.0...v1.10.0) (2025-05-08)
+
+
+### Features
+
+* update core dependency version to ^1.9.0 in React, React Native, and Vue packages ([24bb89f](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/24bb89f08d42cb1e390fd1c032577af5b9f1474a))
+* Update README and add LICENSE files for various packages ([44be6ee](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/44be6ee3f189b21bf9c788190d6f911da189dc4e))
+
 # [1.9.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.8.0...v1.9.0) (2025-05-08)
 
 
