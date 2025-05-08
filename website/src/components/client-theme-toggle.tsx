@@ -7,6 +7,19 @@ import { Moon, Sun } from 'lucide-react';
 
 export function ClientThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="rounded-lg p-2 h-9 w-9 flex items-center justify-center">
+        <div className="h-5 w-5" />
+      </div>
+    );
+  }
 
   return (
     <button

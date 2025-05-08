@@ -27,7 +27,7 @@ function formatCategoryName(category: string): string {
  */
 function getIconCategories(): string[] {
   const categories = new Set<string>();
-  icons.forEach((icon) => categories.add(icon.category));
+  icons.forEach((icon: IconMeta) => categories.add(icon.category));
   return Array.from(categories);
 }
 
@@ -35,7 +35,7 @@ function getIconCategories(): string[] {
  * Get icons for a specific category
  */
 function getIconsForCategory(category: string): IconMeta[] {
-  return icons.filter((icon) => icon.category === category);
+  return icons.filter((icon: IconMeta) => icon.category === category);
 }
 
 /**
@@ -44,7 +44,7 @@ function getIconsForCategory(category: string): IconMeta[] {
 function getIconsByCategory(): Record<string, IconMeta[]> {
   const categorizedIcons: Record<string, IconMeta[]> = {};
 
-  icons.forEach((icon) => {
+  icons.forEach((icon: IconMeta) => {
     if (!categorizedIcons[icon.category]) {
       categorizedIcons[icon.category] = [];
     }
@@ -89,7 +89,7 @@ export function useIconCategories() {
   // Get all icons across all categories
   const allIcons = useMemo<IconMeta[]>(() => {
     // Create a new array with copies of the icons to make it mutable
-    return icons.map((icon) => ({ ...icon }));
+    return icons.map((icon: IconMeta) => ({ ...icon }));
   }, []);
 
   /**
@@ -115,7 +115,7 @@ export function useIconCategories() {
     const iconsToSearch =
       category && category !== 'all' ? getIconsForCategory(category) : allIcons;
 
-    return iconsToSearch.filter((icon) =>
+    return iconsToSearch.filter((icon: IconMeta) =>
       icon.name.toLowerCase().includes(searchString),
     );
   };

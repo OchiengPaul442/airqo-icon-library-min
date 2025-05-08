@@ -67,7 +67,7 @@ export default function RootLayout({
                 <div className="flex items-center space-x-4">
                   <ClientThemeToggle />
                   <a
-                    href="https://github.com/airqo-platform/airqo-icon-library-min"
+                    href="https://github.com/OchiengPaul442/airqo-icon-library-min"
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -88,7 +88,7 @@ export default function RootLayout({
                 <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
                   Built by AirQo. The source code is available on{' '}
                   <a
-                    href="https://github.com/airqo-platform/airqo-icon-library-min"
+                    href="https://github.com/OchiengPaul442/airqo-icon-library-min"
                     target="_blank"
                     rel="noreferrer"
                     className="font-medium underline underline-offset-4"

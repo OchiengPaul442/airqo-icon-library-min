@@ -52,3 +52,43 @@ export function listIconsByCategory(category: string): string[] {
     .filter((icon: IconMeta) => icon.category === category)
     .map((icon: IconMeta) => icon.name);
 }
+
+/**
+ * Get the raw SVG content for an icon
+ * This is useful for downloading or copying SVG content directly
+ * @param iconName - PascalCase icon name (e.g., "AlertCircle")
+ * @returns Raw SVG content as string or null if not found
+ */
+export function getSvgContent(iconName: string): string | null {
+  // Find the icon metadata
+  const iconMeta = icons.find((icon) => icon.name === iconName);
+  if (!iconMeta) {
+    console.error(`Icon not found: ${iconName}`);
+    return null;
+  }
+
+  // Create the filename based on category and convention
+  // Convert PascalCase to kebab-case
+  const kebabName = iconName
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z])([A-Z])(?=[a-z])/g, '$1-$2')
+    .toLowerCase();
+
+  try {
+    // Use built-in raw SVG data mapping
+    // This will be populated during the build process
+    return SVG_DATA[iconMeta.name] || null;
+  } catch (error) {
+    console.error(`Error retrieving SVG content for ${iconName}:`, error);
+    return null;
+  }
+}
+
+// This will be populated during build with all SVG data
+// Map of icon name to raw SVG content
+export const SVG_DATA: Record<string, string> = {};
+
+// Helper function to register SVG content
+export function registerSvgContent(iconName: string, svgContent: string): void {
+  SVG_DATA[iconName] = svgContent;
+}

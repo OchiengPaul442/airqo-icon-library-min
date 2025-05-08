@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { ClientIcon } from '@airqo-icons-min/react/client';
 import { IconMeta } from '@airqo-icons-min/core';
 import { cn } from '../lib/utils';
 import * as AirQoIcons from '@airqo-icons-min/react';
@@ -26,8 +25,13 @@ export function IconRenderer({
   className,
   onClick,
 }: IconRendererProps) {
+  // Get the actual icon component
   const IconComponent = React.useMemo(() => {
     // Get the icon component from the imported icons
+    if (!icon || !icon.name) {
+      return null;
+    }
+
     const Component = AirQoIcons[icon.name as keyof typeof AirQoIcons];
 
     if (!Component) {
@@ -63,18 +67,32 @@ export function IconRenderer({
         );
       };
     }
-    return Component;
-  }, [icon.name]);
 
-  return (
-    <ClientIcon
-      icon={IconComponent}
-      size={size}
-      color={color}
-      strokeWidth={strokeWidth}
-      className={cn(className)}
-      onClick={onClick}
-      aria-label={icon.name}
-    />
-  );
+    return Component;
+  }, [icon?.name, className, color, onClick, size, strokeWidth]);
+
+  // Primary SVG props that will be applied directly
+  const svgProps = {
+    width: size,
+    height: size,
+    stroke: color,
+    strokeWidth: strokeWidth,
+    fill: 'none',
+    className: cn(className),
+    onClick,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    style: {
+      color, // Sets the CSS color property for SVG elements that use currentColor
+      minWidth: size,
+      minHeight: size,
+    },
+    'aria-label': icon?.name,
+  };
+
+  if (!IconComponent) {
+    return null;
+  }
+
+  return <IconComponent {...svgProps} />;
 }

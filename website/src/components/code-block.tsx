@@ -1,30 +1,47 @@
 'use client';
 
-import { Highlight } from 'prism-react-renderer';
+import { useState } from 'react';
 import { ClipboardIcon, ClipboardCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface CodeBlockProps {
   code: string;
-  language: string;
+  language?: string;
 }
 
-export function CodeBlock({ code, language }: CodeBlockProps) {
+export function CodeBlock({ code, language = 'javascript' }: CodeBlockProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(code);
-    setIsCopied(true);
-    toast.success('Code copied to clipboard');
-    setTimeout(() => setIsCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(code);
+      setIsCopied(true);
+      toast.success('Code copied to clipboard');
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy code to clipboard:', error);
+      toast.error('Failed to copy code to clipboard');
+    }
+  };
+
+  // Custom theme to match the dark/light mode
+  const customStyle = {
+    backgroundColor: 'transparent',
+    margin: 0,
+    padding: 0,
+    fontFamily: 'monospace',
+    fontSize: '0.9em',
+    lineHeight: '1.5',
   };
 
   return (
-    <div className="relative">
+    <div className="relative font-mono overflow-x-auto rounded-lg border bg-muted p-4">
       <button
         onClick={copyToClipboard}
-        className="absolute right-4 top-4 p-1 rounded hover:bg-accent"
+        className="absolute right-4 top-4 p-1 rounded hover:bg-accent z-10"
+        aria-label={isCopied ? 'Copied' : 'Copy to clipboard'}
       >
         {isCopied ? (
           <ClipboardCheck className="h-4 w-4" />
@@ -32,100 +49,15 @@ export function CodeBlock({ code, language }: CodeBlockProps) {
           <ClipboardIcon className="h-4 w-4" />
         )}
       </button>
-      <Highlight
-        code={code.trim()}
+
+      <SyntaxHighlighter
         language={language}
-        theme={{
-          plain: {
-            color: 'var(--tw-prose-code)',
-            backgroundColor: 'transparent',
-          },
-          styles: [
-            {
-              types: ['comment', 'prolog', 'doctype', 'cdata'],
-              style: {
-                color: 'var(--tw-prose-comments)',
-                fontStyle: 'italic',
-              },
-            },
-            {
-              types: ['string', 'attr-value'],
-              style: {
-                color: 'var(--tw-prose-strings)',
-              },
-            },
-            {
-              types: ['punctuation', 'operator'],
-              style: {
-                color: 'var(--tw-prose-punctuation)',
-              },
-            },
-            {
-              types: [
-                'entity',
-                'url',
-                'symbol',
-                'number',
-                'boolean',
-                'variable',
-                'constant',
-                'property',
-                'regex',
-                'inserted',
-              ],
-              style: {
-                color: 'var(--tw-prose-variables)',
-              },
-            },
-            {
-              types: ['atrule', 'keyword', 'attr-name'],
-              style: {
-                color: 'var(--tw-prose-keywords)',
-              },
-            },
-            {
-              types: ['function', 'deleted', 'tag'],
-              style: {
-                color: 'var(--tw-prose-functions)',
-              },
-            },
-            {
-              types: ['function-variable'],
-              style: {
-                color: 'var(--tw-prose-functions)',
-              },
-            },
-            {
-              types: ['tag', 'selector'],
-              style: {
-                color: 'var(--tw-prose-tags)',
-              },
-            },
-            {
-              types: ['tag'],
-              languages: ['markup'],
-              style: {
-                color: 'var(--tw-prose-tags)',
-              },
-            },
-          ],
-        }}
+        style={vscDarkPlus}
+        customStyle={customStyle}
+        className="code-block"
       >
-        {({ style, tokens, getLineProps, getTokenProps }) => (
-          <pre
-            className="relative overflow-x-auto rounded-lg border bg-muted p-4 font-mono text-sm"
-            style={style}
-          >
-            {tokens.map((line, i) => (
-              <div key={i} {...getLineProps({ line })}>
-                {line.map((token, key) => (
-                  <span key={key} {...getTokenProps({ token })} />
-                ))}
-              </div>
-            ))}
-          </pre>
-        )}
-      </Highlight>
+        {code.trim()}
+      </SyntaxHighlighter>
     </div>
   );
 }

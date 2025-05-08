@@ -153,10 +153,23 @@ export function IconGrid({
                 </div>
               </div>
 
-              {/* Icon name - show only the name without transforming */}
-              <span className="mt-3 text-center text-xs font-medium tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">
-                {icon.name}
-              </span>
+              {/* Icon name - improve text handling */}
+              <div className="mt-3 w-full text-center">
+                <span
+                  className="block overflow-hidden text-ellipsis px-1 text-xs font-medium tracking-wide text-muted-foreground transition-colors group-hover:text-foreground"
+                  style={{
+                    wordWrap: 'break-word',
+                    maxWidth: '100%',
+                    lineHeight: '1.2em',
+                    maxHeight: '2.4em',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                >
+                  {icon.name}
+                </span>
+              </div>
             </motion.button>
           );
         })}
