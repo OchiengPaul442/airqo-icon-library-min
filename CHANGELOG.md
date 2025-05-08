@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.7.0...v1.8.0) (2025-05-08)
+
+
+### Features
+
+* enhance release workflow to determine next version and update package versions ([c5198e7](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/c5198e701624295e1c5a4db5621fcab8e2a602be))
+
 # [1.7.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.6.0...v1.7.0) (2025-05-07)
 
 
