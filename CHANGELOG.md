@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.11.0...v1.12.0) (2025-05-08)
+
+
+### Features
+
+* enhance deployment workflows and add website-only deployment script ([a1aa8f2](https://github.com/OchiengPaul442/airqo-icon-library-min/commit/a1aa8f24a82cda612c72ea62491bb996ac9c2dc3))
+
 # [1.11.0](https://github.com/OchiengPaul442/airqo-icon-library-min/compare/v1.10.0...v1.11.0) (2025-05-08)
 
 
