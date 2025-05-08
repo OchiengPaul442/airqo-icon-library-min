@@ -13,6 +13,7 @@ interface IconGridProps {
   icons: IconMeta[];
   searchQuery?: string;
   selectedCategory?: string;
+  onResetSearch?: () => void;
 }
 
 const container = {
@@ -35,6 +36,7 @@ export function IconGrid({
   icons,
   searchQuery = '',
   selectedCategory = 'all',
+  onResetSearch,
 }: IconGridProps) {
   const [selectedIcon, setSelectedIcon] = React.useState<IconMeta | null>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
@@ -52,24 +54,53 @@ export function IconGrid({
 
   const displayedIcons = icons.slice(0, displayCount);
   const hasMore = displayCount < icons.length;
-
   if (icons.length === 0) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'tween', duration: 0.4 }}
         className="flex min-h-[400px] flex-col items-center justify-center text-center"
       >
         <div className="flex flex-col items-center rounded-xl border bg-background/60 p-12 shadow-sm backdrop-blur-sm">
-          <ClientIcon
-            icon={XCircle}
-            className="mb-4 h-12 w-12 text-muted-foreground"
-          />
-          <h3 className="mb-2 text-xl font-medium">No icons found</h3>
-          <p className="max-w-md text-muted-foreground">
-            We couldn&apos;t find any icons matching your search criteria. Try
-            adjusting your search terms or filters.
-          </p>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            <ClientIcon
+              icon={XCircle}
+              className="mb-4 h-12 w-12 text-muted-foreground"
+            />
+          </motion.div>
+          <motion.h3
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="mb-2 text-xl font-medium"
+          >
+            No icons found
+          </motion.h3>
+          <motion.p
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-md text-muted-foreground"
+          >
+            We couldn&apos;t find any icons matching &quot;{searchQuery}&quot;.
+            Try adjusting your search terms or filters.
+          </motion.p>{' '}
+          {searchQuery && (
+            <motion.button
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => onResetSearch && onResetSearch()}
+              className="mt-4 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition-all hover:bg-primary/20"
+            >
+              View all icons
+            </motion.button>
+          )}
         </div>
       </motion.div>
     );
@@ -77,32 +108,57 @@ export function IconGrid({
 
   return (
     <>
+      {' '}
       {/* Stats bar - enhanced with gradients and improved visibility */}
       <div className="mb-8 flex items-center justify-between rounded-lg border bg-gradient-to-r from-background/90 to-background via-muted/5 px-4 py-3 shadow-sm dark:from-zinc-900/80 dark:to-zinc-800/50">
         <div className="text-sm text-muted-foreground">
-          Showing{' '}
-          <span className="font-medium text-foreground">
-            {Math.min(displayCount, icons.length)}
-          </span>{' '}
-          of <span className="font-medium text-foreground">{icons.length}</span>{' '}
-          icons
-          {searchQuery && (
-            <span>
-              {' '}
-              matching &quot;
-              <span className="font-medium text-primary">{searchQuery}</span>
-              &quot;
-            </span>
-          )}
-          {selectedCategory !== 'all' && (
-            <span>
-              {' '}
-              in{' '}
-              <span className="font-medium text-primary">
-                {selectedCategory.replace(/_/g, ' ')}
-              </span>
-            </span>
-          )}
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            key={`${searchQuery}-${selectedCategory}-${icons.length}`} // Key to trigger animation on changes
+          >
+            {icons.length > 0 ? (
+              <>
+                Showing{' '}
+                <span className="font-medium text-foreground">
+                  {Math.min(displayCount, icons.length)}
+                </span>{' '}
+                of{' '}
+                <span className="font-medium text-foreground">
+                  {icons.length}
+                </span>{' '}
+                icons
+                {searchQuery && (
+                  <span>
+                    {' '}
+                    matching &quot;
+                    <span className="font-medium text-primary">
+                      {searchQuery}
+                    </span>
+                    &quot;
+                  </span>
+                )}
+                {selectedCategory !== 'all' && (
+                  <span>
+                    {' '}
+                    in{' '}
+                    <span className="font-medium text-primary">
+                      {selectedCategory.replace(/_/g, ' ')}
+                    </span>
+                  </span>
+                )}
+              </>
+            ) : searchQuery ? (
+              <>
+                No icons found matching &quot;
+                <span className="font-medium text-primary">{searchQuery}</span>
+                &quot;
+              </>
+            ) : (
+              <>No icons found in this category</>
+            )}
+          </motion.span>
         </div>
         <div className="rounded-full bg-background/80 px-3 py-1 text-sm font-medium shadow-sm dark:bg-zinc-800">
           {selectedCategory === 'all'
@@ -110,7 +166,6 @@ export function IconGrid({
             : `${selectedCategory.replace(/_/g, ' ')}`}
         </div>
       </div>
-
       <motion.div
         variants={container}
         initial="hidden"
@@ -176,7 +231,7 @@ export function IconGrid({
                   {icon.name}
                 </span>
               </div>
-              
+
               {/* Badge for category - only shown on hover */}
               <div
                 className={cn(
@@ -192,7 +247,6 @@ export function IconGrid({
           );
         })}
       </motion.div>
-
       {/* Improved load more button */}
       {hasMore && (
         <div className="mt-10 flex justify-center">
@@ -207,7 +261,6 @@ export function IconGrid({
           </motion.button>
         </div>
       )}
-
       <IconSheet
         icon={selectedIcon}
         isOpen={isSheetOpen}

@@ -43,10 +43,11 @@ export function SearchBar({ onSearch }: SearchBarProps) {
   return (
     <div className="w-full">
       <div className="relative">
+        {' '}
         <motion.div
           initial={{ scale: 1 }}
           animate={{ scale: focused ? 1.01 : 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          transition={{ type: 'tween', duration: 0.2 }}
           className="relative overflow-hidden"
         >
           {/* Enhanced glass effect container with better visual feedback */}
@@ -61,23 +62,19 @@ export function SearchBar({ onSearch }: SearchBarProps) {
               }
             `}
           >
+            {' '}
             {/* Search icon with animation */}
             <motion.div
               animate={{
-                rotate: focused ? [0, -10, 10, -10, 0] : 0,
                 scale: focused ? 1.1 : 1,
               }}
-              transition={{ duration: 0.5, type: 'spring' }}
-              className="ml-5"
+              transition={{ duration: 0.3, type: 'spring' }}
+              className={`ml-5 ${
+                focused ? 'text-primary' : 'text-muted-foreground'
+              }`}
             >
-              <ClientIcon
-                icon={Search}
-                className={`h-5 w-5 ${
-                  focused ? 'text-primary' : 'text-muted-foreground'
-                } transition-colors`}
-              />
+              <ClientIcon icon={Search} className="h-5 w-5 transition-colors" />
             </motion.div>
-
             {/* Search input with improved styling */}
             <input
               ref={inputRef}
@@ -92,7 +89,6 @@ export function SearchBar({ onSearch }: SearchBarProps) {
               spellCheck="false"
               autoComplete="off"
             />
-
             {/* Filter button with enhanced styling */}
             <div className="flex items-center h-full">
               <AnimatePresence>
@@ -119,7 +115,6 @@ export function SearchBar({ onSearch }: SearchBarProps) {
                 <span className="hidden sm:inline">Filter</span>
               </motion.button>
             </div>
-
             {/* Clear button with enhanced animation */}
             <AnimatePresence>
               {value && (
@@ -138,7 +133,6 @@ export function SearchBar({ onSearch }: SearchBarProps) {
             </AnimatePresence>
           </div>
         </motion.div>
-
         <AnimatePresence>
           {value && (
             <motion.div

@@ -26,11 +26,22 @@ const item = {
 export default function IconsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
   const { allIcons, formattedCategories, getIconsByCategoryName, searchIcons } =
     useIconCategories();
 
+  // Handle search with loading state
+  const handleSearch = (query: string) => {
+    setIsLoading(true);
+    // Short timeout to show loading state for better UX
+    setTimeout(() => {
+      setSearchQuery(query);
+      setIsLoading(false);
+    }, 100);
+  };
+
   // Get filtered icons based on search and category
-  const filteredIcons: IconMeta[] = searchQuery
+  const filteredIcons: IconMeta[] = searchQuery.trim()
     ? searchIcons(searchQuery, selectedCategory)
     : getIconsByCategoryName(selectedCategory);
 
@@ -55,26 +66,36 @@ export default function IconsPage() {
               professionally designed icons.
             </motion.p>
           </div>
-        </div>
-
+        </div>{' '}
         <motion.div variants={item}>
-          <SearchBar onSearch={setSearchQuery} />
+          <SearchBar onSearch={handleSearch} />
         </motion.div>
-
         <motion.div variants={item}>
           <CategoryTabs
             categories={formattedCategories}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
-        </motion.div>
-
+        </motion.div>{' '}
         <motion.div variants={item}>
-          <IconGrid
-            icons={filteredIcons}
-            searchQuery={searchQuery}
-            selectedCategory={selectedCategory}
-          />
+          {isLoading ? (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <div className="flex flex-col items-center">
+                <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                <p className="mt-4 text-muted-foreground">Searching icons...</p>
+              </div>
+            </div>
+          ) : (
+            <IconGrid
+              icons={filteredIcons}
+              searchQuery={searchQuery}
+              selectedCategory={selectedCategory}
+              onResetSearch={() => {
+                setSearchQuery('');
+                setSelectedCategory('all');
+              }}
+            />
+          )}
         </motion.div>
       </motion.div>
     </motion.div>
