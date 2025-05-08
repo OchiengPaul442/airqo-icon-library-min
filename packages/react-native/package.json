@@ -4,21 +4,34 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/index.d.ts"
+      ],
+      "client": [
+        "client.d.ts"
+      ]
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "client.js",
+    "client.d.ts"
   ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --external:react-native --external:react-native-svg --sourcemap",
-    "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --external:react-native --external:react-native-svg --sourcemap",
-    "build:main:cjs": "esbuild src/main.ts --bundle --platform=node --format=cjs --outfile=dist/main.js --external:react --external:react-native --external:react-native-svg --sourcemap",
-    "build:main:esm": "esbuild src/main.ts --bundle --platform=node --format=esm --outfile=dist/main.esm.js --external:react --external:react-native --external:react-native-svg --sourcemap",
-    "build:client:cjs": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=dist/client.js --external:react --external:react-native --external:react-native-svg --sourcemap",
+    "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --external:react-native --sourcemap",
+    "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --external:react-native --sourcemap",
+    "build:main:cjs": "esbuild src/main.ts --bundle --platform=node --format=cjs --outfile=dist/main.js --external:react --external:react-native --sourcemap",
+    "build:main:esm": "esbuild src/main.ts --bundle --platform=node --format=esm --outfile=dist/main.esm.js --external:react --external:react-native --sourcemap",
+    "build:client:cjs": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=dist/client.js --external:react --external:react-native --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
-    "build": "npm run build:cjs && npm run build:esm && npm run build:main:cjs && npm run build:main:esm && npm run build:client:cjs && npm run build:types",
+    "build": "npm run build:cjs && npm run build:esm && npm run build:main:cjs && npm run build:main:esm && npm run build:client:cjs && npm run build:types && npm run verify-types",
+    "verify-types": "node scripts/verify-types.js",
     "clean": "rimraf dist"
   },
   "dependencies": {

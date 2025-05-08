@@ -13,7 +13,7 @@
   },
   "scripts": {
     "prebuild": "rimraf dist && pnpm run generate-icons",
-    "build": "tsc --emitDeclarationOnly && pnpm run build:esm",
+    "build": "tsc --emitDeclarationOnly --declaration --declarationDir dist && pnpm run build:esm",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "clean": "rimraf dist",
     "generate-icons": "cd ../.. && node scripts/generate-icons.js"
