@@ -1,0 +1,145 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        type: choice
+        description: 'Release type'
+        options:
+          - patch
+          - minor
+          - major
+        required: true
+        default: 'patch'
+      reset_version:
+        type: boolean
+        description: 'Reset version to 1.0.0'
+        required: false
+        default: false
+      dry_run:
+        type: boolean
+        description: 'Dry run (no actual publishing)'
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Manual Release Process
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup PNPM cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate Icons
+        run: pnpm generate
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Set custom version if reset requested
+        if: ${{ github.event.inputs.reset_version == 'true' }}
+        run: |
+          echo "NEXT_VERSION=1.0.0" >> $GITHUB_ENV
+          echo "Setting version to 1.0.0"
+
+      - name: Set version based on input type
+        if: ${{ github.event.inputs.reset_version != 'true' }}
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          if [[ "${{ github.event.inputs.version_type }}" == "major" ]]; then
+            NEXT_VERSION="$((MAJOR + 1)).0.0"
+          elif [[ "${{ github.event.inputs.version_type }}" == "minor" ]]; then
+            NEXT_VERSION="$MAJOR.$((MINOR + 1)).0"
+          else # patch
+            NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+          fi
+
+          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
+          echo "Next version will be: $NEXT_VERSION"
+
+      - name: Update package versions
+        run: node scripts/update-versions.js ${{ env.NEXT_VERSION }}
+
+      - name: Create release notes
+        run: |
+          node scripts/generate-changelog.js
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add CHANGELOG.md package.json packages/*/package.json
+          git commit -m "chore(release): ${{ env.NEXT_VERSION }}"
+
+          if [[ "${{ github.event.inputs.dry_run }}" != "true" ]]; then
+            git tag -a "v${{ env.NEXT_VERSION }}" -m "Release v${{ env.NEXT_VERSION }}"
+          fi
+
+      - name: Publish to NPM (dry run)
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Running in DRY RUN mode - packages will not be published"
+          node scripts/publish-packages.js --dry-run
+
+      - name: Publish to NPM
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing packages to NPM with version ${{ env.NEXT_VERSION }}"
+          node scripts/publish-packages.js
+
+          # Push tag and changes to GitHub
+          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --follow-tags
+
+      - name: Release Summary
+        run: |
+          echo "### Release Summary ✅" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "🔄 Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+            echo "⚠️ **DRY RUN** - No packages published" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Published to NPM" >> $GITHUB_STEP_SUMMARY
+          fi

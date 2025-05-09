@@ -16,9 +16,18 @@ const PACKAGES = [
   'packages/vue',
 ];
 
+// Check if running in dry-run mode
+const isDryRun = process.argv.includes('--dry-run');
+
 // Run a command and return its output
 function runCommand(command, cwd = process.cwd()) {
   try {
+    console.log(`Running: ${command} in ${cwd}`);
+    if (isDryRun && command.includes('npm publish')) {
+      console.log('DRY RUN: Would execute the command above');
+      return 'dry-run-output';
+    }
+
     return execSync(command, {
       cwd,
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -42,21 +51,37 @@ function getPackageVersion(packagePath) {
 
 // Publishing function with better error handling
 async function publishPackages() {
-  console.log('🚀 Publishing packages...');
+  const mode = isDryRun ? '🧪 DRY RUN' : '🚀 PRODUCTION';
+  console.log(`${mode}: Publishing packages...`);
 
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);
     const pkgVersion = getPackageVersion(pkgPath);
 
-    console.log(`\n📦 Publishing ${pkgName}@${pkgVersion}...`);
+    console.log(
+      `\n📦 ${
+        isDryRun ? 'Would publish' : 'Publishing'
+      } ${pkgName}@${pkgVersion}...`,
+    );
 
     try {
       // Use npm directly with force and access flags to handle Node.js v20 issues
-      runCommand('npm publish --access public', pkgPath);
-      console.log(`✅ Successfully published ${pkgName}@${pkgVersion}`);
+      const publishCommand = isDryRun
+        ? 'npm publish --access public --dry-run'
+        : 'npm publish --access public';
+
+      runCommand(publishCommand, pkgPath);
+      console.log(
+        `✅ ${
+          isDryRun ? 'Would have published' : 'Successfully published'
+        } ${pkgName}@${pkgVersion}`,
+      );
     } catch (error) {
-      console.error(`❌ Failed to publish ${pkgName}:`, error.message);
+      console.error(
+        `❌ Failed to ${isDryRun ? 'dry run' : 'publish'} ${pkgName}:`,
+        error.message,
+      );
 
       if (
         error.message.includes('EBUSY') ||
@@ -70,7 +95,7 @@ async function publishPackages() {
     }
   }
 
-  console.log('\n🎉 Publishing complete!');
+  console.log(`\n🎉 ${isDryRun ? 'Dry run' : 'Publishing'} complete!`);
 }
 
 // Run the function

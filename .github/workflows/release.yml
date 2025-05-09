@@ -1,14 +1,27 @@
-name: Release
+name: Manual Release
 
 on:
   workflow_dispatch:
     inputs:
-      force:
-        description: 'Force release'
+      version_type:
+        type: choice
+        description: 'Release type'
+        options:
+          - patch
+          - minor
+          - major
+        required: true
+        default: 'patch'
+      reset_version:
+        type: boolean
+        description: 'Reset version to 1.0.0'
         required: false
-        default: 'false'
-  push:
-    branches: [main]
+        default: false
+      dry_run:
+        type: boolean
+        description: 'Dry run (no actual publishing)'
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -17,9 +30,8 @@ permissions:
 
 jobs:
   release:
-    name: Semantic Release
+    name: Manual Release Process
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci') }}
 
     steps:
       - name: Checkout code

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ClientIcon } from '@airqo-icons-min/react/client';
 import { Package, Code, Boxes } from 'lucide-react';
 import { CodeBlock } from '@/components/code-block';
-import { cn } from '@/lib/utils';
+import { cn } from '@/libs/utils';
 
 type Framework = 'react' | 'vue' | 'flutter';
 

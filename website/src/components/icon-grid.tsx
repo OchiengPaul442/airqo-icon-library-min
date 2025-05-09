@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { ClientIcon } from '@airqo-icons-min/react/client';
 import { ArrowRight, XCircle } from 'lucide-react';
 import { IconMeta } from '@airqo-icons-min/core';
-import { cn } from '@/lib/utils';
+import { cn } from '@/libs/utils';
 import { IconRenderer } from './icon-renderer';
 
 interface IconGridProps {

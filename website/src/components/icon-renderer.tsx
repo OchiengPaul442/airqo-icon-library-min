@@ -2,7 +2,7 @@
 
 import React, { SVGProps } from 'react';
 import { IconMeta } from '@airqo-icons-min/core';
-import { cn } from '../lib/utils';
+import { cn } from '../libs/utils';
 import * as AirQoIcons from '@airqo-icons-min/react';
 
 interface SVGRProps {

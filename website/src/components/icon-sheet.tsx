@@ -17,7 +17,7 @@ import { HexColorPicker } from 'react-colorful';
 import { CodeBlock } from './code-block';
 import { toast } from 'sonner';
 import { IconMeta } from '@airqo-icons-min/core';
-import { cn } from '@/lib/utils';
+import { cn } from '@/libs/utils';
 import { IconRenderer } from './icon-renderer';
 import * as AirQoIcons from '@airqo-icons-min/react';
 
