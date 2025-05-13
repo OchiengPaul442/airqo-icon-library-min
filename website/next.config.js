@@ -9,6 +9,10 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  eslint: {
+    ignoreDuringBuilds: false,
+    dirs: ['src'],
+  },
   transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'], // Ensure packages are transpiled
   env: {
     NEXT_TELEMETRY_DISABLED: '1',

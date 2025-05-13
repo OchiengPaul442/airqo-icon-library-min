@@ -1,12 +1,20 @@
 import React from 'react';
 
+import { LucideProps } from 'lucide-react';
+
+type IconComponentProps = Omit<LucideProps, 'ref'>;
+
 interface ClientIconProps {
-  icon: React.FC<any>;
+  icon:
+    | React.FC<IconComponentProps>
+    | React.ForwardRefExoticComponent<
+        IconComponentProps & React.RefAttributes<SVGSVGElement>
+      >;
   className?: string;
   size?: number;
   color?: string;
   strokeWidth?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

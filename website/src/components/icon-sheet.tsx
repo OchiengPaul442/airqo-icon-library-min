@@ -29,16 +29,12 @@ interface IconSheetProps {
 
 type TabType = 'preview' | 'code' | 'usage';
 
-// Main preset colors with AirQo brand color first
+// All colors to use in the color picker, starting with AirQo brand colors
 const presetColors = [
   '#0174DF', // AirQo Blue
   '#000000',
   '#374151',
   '#EF4444',
-];
-
-// Extended colors for the expanded palette
-const extendedColors = [
   '#1C1D20',
   '#4B5563',
   '#6B7280',

@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd website && npm run build",
+  "buildCommand": "cd website && pnpm run build",
   "outputDirectory": "website/.next",
-  "installCommand": "cd website && npm install --ignore-scripts --legacy-peer-deps",
+  "installCommand": "cd website && pnpm install --ignore-scripts --legacy-peer-deps",
   "framework": "nextjs"
 }
