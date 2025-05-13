@@ -264,18 +264,91 @@ jobs:
               echo "📦 Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
               
               # Check if version already exists in npm registry
-              if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version &>/dev/null; then
-                echo "⚠️ Version ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} already exists in npm registry"
+              if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version &>/dev/null; then                echo "⚠️ Version ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} already exists in npm registry"
                 handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
-                  # Try publishing with incremented version
+                
+                # Process any workspace: references before publishing
+                echo "🔧 Pre-processing package.json to resolve workspace references..."
+                node -e "
+                  const fs = require('fs');
+                  const path = require('path');
+                  const pkgPath = path.join('${PKG_DIR}', 'package.json');
+                  const pkg = require(pkgPath);
+                  let hasChanges = false;
+                  
+                  if (pkg.dependencies) {
+                    Object.keys(pkg.dependencies).forEach(dep => {
+                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
+                        pkg.dependencies[dep] = '${NEW_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (pkg.peerDependencies) {
+                    Object.keys(pkg.peerDependencies).forEach(dep => {
+                      if (typeof pkg.peerDependencies[dep] === 'string' && 
+                          pkg.peerDependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
+                        pkg.peerDependencies[dep] = '${NEW_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (hasChanges) {
+                    console.log('📝 Writing updated package.json without workspace references');
+                    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
+                  }
+                "
+                  
+                # Try publishing with incremented version
                 echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                if (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
+                if (cd "${PKG_DIR}" && npm publish --access public); then
                   echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
                 else
                   echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
                   PUBLISH_SUCCESS=false
-                fi              # Version doesn't exist, try to publish
-              elif (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
+                fi              # Version doesn't exist, try to publish              elif (cd "${PKG_DIR}" && (
+                # Process any workspace: references before publishing
+                echo "🔧 Pre-processing package.json to resolve workspace references..." &&
+                node -e "
+                  const fs = require('fs');
+                  const path = require('path');
+                  const pkgPath = path.join(process.cwd(), 'package.json');
+                  const pkg = require(pkgPath);
+                  let hasChanges = false;
+                  
+                  if (pkg.dependencies) {
+                    Object.keys(pkg.dependencies).forEach(dep => {
+                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
+                        pkg.dependencies[dep] = '${CURRENT_PKG_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (pkg.peerDependencies) {
+                    Object.keys(pkg.peerDependencies).forEach(dep => {
+                      if (typeof pkg.peerDependencies[dep] === 'string' && 
+                          pkg.peerDependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
+                        pkg.peerDependencies[dep] = '${CURRENT_PKG_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (hasChanges) {
+                    console.log('📝 Writing updated package.json without workspace references');
+                    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
+                  }
+                " &&
+                # Use npm to publish
+                npm publish --access public
+              )); then
                 echo "✅ Successfully published ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
                 
                 # Verify package was published
@@ -286,16 +359,51 @@ jobs:
                   echo "⚠️ Warning: Could not verify ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} in npm registry"
                   echo "This may be due to npm registry propagation delay and not necessarily an error"
                 fi
-              else
-                # Try different error handling approaches
-                ERROR_OUTPUT=$(cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks 2>&1 || true)
+              else                # Try different error handling approaches
+                # First process workspace references
+                (cd "${PKG_DIR}" && echo "🔧 Pre-processing package.json to resolve workspace references..." && 
+                node -e "
+                  const fs = require('fs');
+                  const pkg = require('./package.json');
+                  let hasChanges = false;
+                  
+                  if (pkg.dependencies) {
+                    Object.keys(pkg.dependencies).forEach(dep => {
+                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
+                        pkg.dependencies[dep] = '${CURRENT_PKG_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (pkg.peerDependencies) {
+                    Object.keys(pkg.peerDependencies).forEach(dep => {
+                      if (typeof pkg.peerDependencies[dep] === 'string' && 
+                          pkg.peerDependencies[dep].startsWith('workspace:')) {
+                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
+                        pkg.peerDependencies[dep] = '${CURRENT_PKG_VERSION}';
+                        hasChanges = true;
+                      }
+                    });
+                  }
+                  
+                  if (hasChanges) {
+                    console.log('📝 Writing updated package.json without workspace references');
+                    fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\\n');
+                  }
+                ")
                 
-                if echo "$ERROR_OUTPUT" | grep -q "You cannot publish over the previously published versions"; then
+                ERROR_OUTPUT=$(cd "${PKG_DIR}" && npm publish --access public 2>&1 || true)
+                
+                if echo "$ERROR_OUTPUT" | grep -q "You cannot publish over the previously published versions" || \
+                   echo "$ERROR_OUTPUT" | grep -q "EPUBLISHCONFLICT" || \
+                   echo "$ERROR_OUTPUT" | grep -q "already exists"; then
                   # Handle version conflict by incrementing patch version
                   handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
                     # Try publishing again with incremented version
                   echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                  if (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
+                  if (cd "${PKG_DIR}" && npm publish --access public); then
                     echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
                   else
                     echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
