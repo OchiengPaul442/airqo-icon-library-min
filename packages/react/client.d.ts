@@ -1,19 +1,22 @@
-// Type definitions for @airqo-icons-min/react/client
 import React from 'react';
-import type { IconProps } from '@airqo-icons-min/core';
 
-// Export all icons
-export * from './dist';
+// Import IconProps from the local definition
+interface IconBaseProps {
+  size?: string | number;
+  color?: string;
+  stroke?: string;
+  fill?: string;
+  strokeWidth?: string | number;
+}
 
-// Client-specific exports
-export declare const ClientIcon: React.FC<
-  {
-    icon: React.ComponentType<IconProps>;
-  } & IconProps
->;
+// Props for SVG icon components with proper TypeScript support
+export type IconProps = IconBaseProps & React.SVGProps<SVGSVGElement>;
 
-export declare const icons: Record<string, React.FC<IconProps>>;
+// Export the ClientIcon component
+export declare const ClientIcon: React.FC<{
+  icon: React.ComponentType<IconProps>;
+  [key: string]: any;
+}>;
 
-// Default export for convenience
-declare const EnhancedIcons: Record<string, React.FC<IconProps>>;
-export default EnhancedIcons;
+// Re-export all icons
+export * from './dist/index';

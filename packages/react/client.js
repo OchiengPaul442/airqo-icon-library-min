@@ -1,7 +1,4 @@
-'use strict';
+'use client';
 
-if (process.env.NODE_ENV === 'production') {
-  module.exports = require('./dist/client.js');
-} else {
-  module.exports = require('./dist/client.development.js');
-}
+// Export directly from the source
+module.exports = require('./src/client');

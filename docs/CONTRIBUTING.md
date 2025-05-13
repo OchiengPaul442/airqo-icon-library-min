@@ -165,6 +165,8 @@ Releases are managed by repository maintainers:
 3. The version number is automatically incremented based on conventional commits
 4. Packages are automatically published to npm
 
+For detailed instructions, see the [Release and Deployment Guide](./RELEASE_AND_DEPLOYMENT.md).
+
 ## Getting Help
 
 If you need help, please:

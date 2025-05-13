@@ -13,10 +13,8 @@ Visit our [Documentation Website](https://ochiengpaul442.github.io/airqo-icon-li
 
 - [Contributing Guidelines](./docs/CONTRIBUTING.md)
 - [Security Policy](./docs/SECURITY.md)
-- [Release Guide](./docs/RELEASING.md)
-- [Release and Deployment Guide](./docs/RELEASE_AND_DEPLOYMENT.md)
+- [Release and Deployment Guide](./docs/RELEASE_AND_DEPLOYMENT.md) (includes website deployment)
 - [Administrator Deployments](./docs/ADMIN_DEPLOYMENTS.md)
-- [Website Deployment](./docs/WEBSITE_DEPLOYMENT.md)
 
 ## Features
 

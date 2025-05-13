@@ -19,6 +19,8 @@ Please include the following information:
 - GitHub Actions workflows that handle releases are protected to require administrator approval
 - Authentication is managed through GitHub's permissions system with strict role-based access control
 
+For detailed instructions on configuring administrator-only deployments, see [Administrator Deployments](./ADMIN_DEPLOYMENTS.md).
+
 ### NPM Publishing
 
 - NPM publishing is done via GitHub Actions with protected secrets

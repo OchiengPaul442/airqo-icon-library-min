@@ -7,9 +7,7 @@ This directory contains comprehensive documentation for the AirQo Icon Library.
 - [Administrator Deployments](./ADMIN_DEPLOYMENTS.md) - Instructions for setting up secure administrator-only deployments
 - [Contributing Guidelines](./CONTRIBUTING.md) - Guidelines for contributing to the project
 - [Security Policy](./SECURITY.md) - Security practices and vulnerability reporting procedures
-- [Releasing Guide](./RELEASING.md) - Detailed instructions for releasing packages
-- [Release and Deployment Guide](./RELEASE_AND_DEPLOYMENT.md) - Comprehensive guide for releases and deployments
-- [Website Deployment](./WEBSITE_DEPLOYMENT.md) - Guide for deploying the documentation website
+- [Release and Deployment Guide](./RELEASE_AND_DEPLOYMENT.md) - Comprehensive guide for releases and deployments (includes website deployment)
 
 ## Quick Links
 

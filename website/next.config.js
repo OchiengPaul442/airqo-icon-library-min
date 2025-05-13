@@ -9,6 +9,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'],
   // Disable telemetry to avoid permission issues
   env: {
     NEXT_TELEMETRY_DISABLED: '1',
@@ -31,6 +32,12 @@ const nextConfig = {
       '@airqo-icons-min/core': path.resolve(__dirname, '../packages/core'),
       '@airqo-icons-min/react': path.resolve(__dirname, '../packages/react'),
     };
+
+    // Also add a specific alias for the client module
+    config.resolve.alias['@airqo-icons-min/react/client'] = path.resolve(
+      __dirname,
+      '../packages/react/src/client',
+    );
 
     return config;
   },

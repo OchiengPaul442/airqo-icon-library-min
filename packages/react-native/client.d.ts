@@ -1,9 +1,21 @@
 // Type definitions for @airqo-icons-min/react-native/client
 import React from 'react';
-import type { IconNativeProps } from '@airqo-icons-min/core';
+import { ViewProps } from 'react-native';
+import { SvgProps } from 'react-native-svg';
+
+// Define IconNativeProps directly here to avoid dependency issues
+export interface IconBaseProps {
+  size?: string | number;
+  color?: string;
+  stroke?: string;
+  fill?: string;
+  strokeWidth?: string | number;
+}
+
+export type IconNativeProps = IconBaseProps & SvgProps & ViewProps;
 
 // Export all icons
-export * from './dist';
+export * from './dist/index';
 
 // Client-specific exports
 export declare const ClientIcon: React.FC<
