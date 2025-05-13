@@ -1,10 +1,12 @@
 # Changelog
 
-## v1.0.1 (2025-05-13)
+## v1.0.2 (2025-05-13)
 
 ### 🚀 Features and Improvements
 
-- New release of 1.0.1
+- Fresh start with version 1.0.2
+- Fixed deployment issues with Husky in CI environments
+- Improved publishing script for NPM packages
 
 ## [1.0.0] - 2025-05-13
 
