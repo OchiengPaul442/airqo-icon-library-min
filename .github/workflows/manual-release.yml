@@ -80,6 +80,44 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
+      # Initialize Lerna if needed
+      - name: Initialize Lerna
+        run: |
+          if [ ! -f "lerna.json" ]; then
+            echo "lerna.json does not exist, initializing Lerna..."
+            npx lerna@latest init
+            # Update lerna.json with proper configuration
+            cat > lerna.json << 'EOL'
+{
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "version": "1.1.0",
+  "packages": [
+    "packages/*"
+  ],
+  "npmClient": "pnpm",
+  "useWorkspaces": true,
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "changelogPreset": "angular",
+      "message": "chore(release): publish %s",
+      "private": false,
+      "push": false,
+      "gitTagVersion": true,
+      "exact": true
+    },
+    "publish": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish %s",
+      "registry": "https://registry.npmjs.org/"
+    }
+  }
+}
+EOL
+          else
+            echo "lerna.json already exists, skipping initialization"
+          fi
+
       # Check if version reset is requested
       - name: Reset versions to 1.0.0 if requested
         if: ${{ github.event.inputs.reset_version == 'true' }}
@@ -178,10 +216,10 @@ jobs:
           # If version was manually reset, we skip bumping the version
           if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
             echo "Version was manually reset to 1.0.0, skipping automatic version bump"
-            npx lerna version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
+            npx lerna@latest version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
           else
             # Regular version bump based on selected type
-            npx lerna version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
+            npx lerna@latest version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
           fi
 
           # Get the new version number
@@ -207,7 +245,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "Publishing packages to npm"
-          npx lerna publish from-package --yes --no-verify-access
+          npx lerna@latest publish from-package --yes --no-verify-access
 
       # Create GitHub release
       - name: Create GitHub Release
@@ -226,15 +264,15 @@ jobs:
           echo "### Release Summary âœ…" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "ï¿½ï¿½ï¿½ **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
+            echo "í´¬ **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
-            echo "ï¿½ï¿½ï¿½ Successfully published packages" >> $GITHUB_STEP_SUMMARY
+            echo "ï¿½ï¿½ Successfully published packages" >> $GITHUB_STEP_SUMMARY
           fi
 
-          echo "ï¿½ï¿½ï¿½ Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "ï¿½ï¿½ï¿½ Version: ${{ steps.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "ï¿½ï¿½ï¿½ Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "í³… Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "í¿·ï¸ Version: ${{ steps.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "í´¢ Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
-            echo "ï¿½ï¿½ï¿½ **Version was reset to 1.0.0**" >> $GITHUB_STEP_SUMMARY
+            echo "âš ï¸ **Version was reset to 1.0.0**" >> $GITHUB_STEP_SUMMARY
           fi

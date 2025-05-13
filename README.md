@@ -7,10 +7,16 @@ A comprehensive, optimized SVG icon library for AirQo projects with support for 
 
 ## 📖 Documentation
 
+Visit our [Documentation Website](https://ochiengpaul442.github.io/airqo-icon-library-min) to browse all available icons and get detailed usage instructions.
+
+### Project Docs
+
 - [Contributing Guidelines](./docs/CONTRIBUTING.md)
 - [Security Policy](./docs/SECURITY.md)
-- [Release Process](./docs/RELEASE_PROCESS.md)
+- [Release Guide](./docs/RELEASING.md)
+- [Release and Deployment Guide](./docs/RELEASE_AND_DEPLOYMENT.md)
 - [Administrator Deployments](./docs/ADMIN_DEPLOYMENTS.md)
+- [Website Deployment](./docs/WEBSITE_DEPLOYMENT.md)
 
 ## Features
 
