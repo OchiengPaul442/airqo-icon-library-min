@@ -7,6 +7,11 @@ on:
         description: 'Deployment note (optional)'
         required: false
         default: ''
+      production:
+        description: 'Deploy to production?'
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: read
@@ -68,14 +73,13 @@ jobs:
         run: pnpm fix-component-types
 
       - name: Enhance React Native Icons
-        # Use cross-env to ensure SHELL is set
         run: pnpm enhance-rn
 
-      - name: Make build script executable
-        run: chmod +x ./scripts/build-website.js
-
       - name: Build website
-        run: pnpm build:website
+        working-directory: ./website
+        run: |
+          echo "Building website..."
+          pnpm build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -100,4 +104,10 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "### Website Deployment Completed ✅" >> $GITHUB_STEP_SUMMARY
-          echo "��� Deployed on: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "📅 Deployed on: $(date)" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ github.event.inputs.deploy_note }}" != "" ]]; then
+            echo "📝 Deployment note: ${{ github.event.inputs.deploy_note }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "🔗 Website URL: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY

@@ -149,9 +149,12 @@ For more information on secure deployment practices, see [docs/ADMIN_DEPLOYMENTS
 
 See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for details on how to contribute.
 
-## Security
+## Documentation & Resources
 
-For information about security practices and policies, see [SECURITY.md](./docs/SECURITY.md).
+- **Documentation Website**: [AirQo Icon Library Docs](https://ochiengpaul442.github.io/airqo-icon-library-min/)
+- **Security Policy**: [SECURITY.md](./docs/SECURITY.md)
+- **Website Deployment**: [WEBSITE_DEPLOYMENT.md](./docs/WEBSITE_DEPLOYMENT.md)
+- **Release Process**: [RELEASE_PROCESS.md](./docs/RELEASE_PROCESS.md)
 
 ## License
 
