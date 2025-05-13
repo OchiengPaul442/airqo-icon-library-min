@@ -27,7 +27,7 @@ There are two main ways to release:
 The workflow will:
 
 1. Generate icon components
-2. Update version numbers
+2. Update version numbers in all packages
 3. Publish packages to npm
 4. Create tags and a GitHub release
 

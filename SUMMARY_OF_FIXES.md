@@ -2,11 +2,11 @@
 
 ## Fixed Issues
 
-1. **Fixed Lerna Configuration Issue**
+1. **Removed Lerna Dependency**
 
-   - Created `lerna.json` file with appropriate configuration
-   - Updated GitHub Actions workflow to initialize Lerna if needed
-   - Added specific version specifications using `lerna@latest` to avoid potential compatibility issues
+   - Removed `lerna.json` file as it's no longer needed
+   - Updated GitHub Actions workflows to use direct npm commands
+   - Simplified release scripts to avoid using external tools
 
 2. **Fixed Next.js Static Export Issues**
 
@@ -20,10 +20,10 @@
    - Added 404.html page for GitHub Pages routing
    - Added proper CNAME file for custom domain support
 
-4. **Fixed Release Process**
-   - Added initialization for Lerna in release workflows
-   - Created a manual release script for local releases
-   - Updated scripts to handle different release types
+4. **Fixed and Simplified Release Process**
+   - Removed Lerna dependency for a simpler release workflow
+   - Created a manual release script for local releases that uses direct npm commands
+   - Updated scripts to handle different release types (patch, minor, major)
 
 ## Added Features
 

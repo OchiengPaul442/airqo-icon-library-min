@@ -40,41 +40,7 @@ function runCommand(command) {
   }
 }
 
-// Initialize lerna if needed
-if (!fs.existsSync(path.join(process.cwd(), 'lerna.json'))) {
-  console.log('\n# Initializing Lerna configuration');
-
-  // Create lerna.json
-  const lernaConfig = {
-    $schema: 'node_modules/lerna/schemas/lerna-schema.json',
-    version: '1.1.0',
-    packages: ['packages/*'],
-    npmClient: 'pnpm',
-    useWorkspaces: true,
-    command: {
-      version: {
-        conventionalCommits: true,
-        changelogPreset: 'angular',
-        message: 'chore(release): publish %s',
-        private: false,
-        push: false,
-        gitTagVersion: true,
-        exact: true,
-      },
-      publish: {
-        conventionalCommits: true,
-        message: 'chore(release): publish %s',
-        registry: 'https://registry.npmjs.org/',
-      },
-    },
-  };
-
-  fs.writeFileSync(
-    path.join(process.cwd(), 'lerna.json'),
-    JSON.stringify(lernaConfig, null, 2),
-  );
-  console.log('Created lerna.json file');
-}
+// Lerna has been removed, so we no longer need to initialize lerna.json
 
 // Reset versions if requested
 if (resetVersion) {
@@ -111,7 +77,7 @@ if (resetVersion) {
   }
 }
 
-// Step 1: Install lerna if needed
+// Step 1: Install dependencies
 console.log('\n# Installing dependencies');
 runCommand('pnpm install');
 
@@ -131,12 +97,64 @@ runCommand('pnpm enhance-rn');
 console.log('\n# Cleaning up generated files');
 runCommand('rm -rf packages/*/dist');
 
-// Step 6: Version and create release
+// Step 6: Update versions in each package
 console.log('\n# Creating release version');
 const dryRunFlag = isDryRun ? '--dry-run' : '';
-runCommand(
-  `npx lerna@latest version ${releaseType} --yes --exact --no-push --include-merged-tags ${dryRunFlag}`,
-);
+
+// Update root package.json
+console.log('\n## Updating root package version');
+if (!isDryRun) {
+  runCommand(`npm version ${releaseType} --no-git-tag-version`);
+} else {
+  console.log('(dry run) Would update root package version');
+}
+
+// Get the new version from the root package.json
+const rootPkgPath = path.join(process.cwd(), 'package.json');
+const rootPkg = require(rootPkgPath);
+const newVersion = rootPkg.version;
+console.log(`New version: ${newVersion}`);
+
+// Update all packages
+const packagesDir = path.join(process.cwd(), 'packages');
+const packages = fs.readdirSync(packagesDir);
+
+for (const pkg of packages) {
+  const pkgJsonPath = path.join(packagesDir, pkg, 'package.json');
+  if (fs.existsSync(pkgJsonPath)) {
+    console.log(`\n## Updating ${pkg} version to ${newVersion}`);
+    if (!isDryRun) {
+      // Read the package.json
+      const pkgJson = require(pkgJsonPath);
+      pkgJson.version = newVersion;
+
+      // Update dependencies to reference the new version
+      if (pkgJson.dependencies) {
+        Object.keys(pkgJson.dependencies).forEach((dep) => {
+          if (dep.startsWith('@airqo/')) {
+            pkgJson.dependencies[dep] = newVersion;
+          }
+        });
+      }
+
+      // Write back the updated package.json
+      fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+      console.log(`Updated ${pkg} to version ${newVersion}`);
+    } else {
+      console.log(`(dry run) Would update ${pkg} to version ${newVersion}`);
+    }
+  }
+}
+
+// Create git tag
+if (!isDryRun) {
+  console.log('\n## Creating git tag');
+  runCommand(`git add .`);
+  runCommand(`git commit -m "chore(release): publish v${newVersion}"`);
+  runCommand(`git tag -a v${newVersion} -m "Release v${newVersion}"`);
+} else {
+  console.log(`(dry run) Would create git tag v${newVersion}`);
+}
 
 // Step 7: Build packages
 console.log('\n# Building packages');
@@ -148,9 +166,17 @@ if (!isDryRun) {
   console.log('\n# Pushing changes and tags');
   runCommand('git push --follow-tags');
 
-  // Step 9: Publish packages
+  // Step 9: Publish packages to npm
   console.log('\n# Publishing packages to npm');
-  runCommand('npx lerna@latest publish from-package --yes --no-verify-access');
+
+  // Loop through each package and publish it
+  for (const pkg of packages) {
+    const pkgPath = path.join(packagesDir, pkg);
+    if (fs.existsSync(path.join(pkgPath, 'package.json'))) {
+      console.log(`\n## Publishing ${pkg}`);
+      runCommand(`cd ${pkgPath} && npm publish --access public`);
+    }
+  }
 } else {
   console.log('\n# Skipping publish steps (dry run)');
 }
