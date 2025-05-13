@@ -76,4 +76,4 @@ jobs:
         if: success()
         run: |
           echo "### Build successful ✅" >> $GITHUB_STEP_SUMMARY
-          echo "All packages and website successfully built and validated." >> $GITHUB_STEP_SUMMARY
+          echo "All packages successfully built and validated." >> $GITHUB_STEP_SUMMARY

@@ -57,4 +57,4 @@ After configuring all settings:
 3. The deployment process will have a wait time before executing
 4. All changes to workflows require administrator approval
 
-This setup ensures that package publishing and website deployments are secure and only performed by authorized administrators.
+This setup ensures that package publishing is secure and only performed by authorized administrators.

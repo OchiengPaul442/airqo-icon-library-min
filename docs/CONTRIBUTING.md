@@ -4,20 +4,22 @@ Thank you for your interest in contributing to the AirQo Icon Library! This docu
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-- [Development Workflow](#development-workflow)
-  - [Adding New Icons](#adding-new-icons)
-  - [Making Changes](#making-changes)
-  - [Testing Your Changes](#testing-your-changes)
-- [Submitting Changes](#submitting-changes)
-  - [Pull Request Process](#pull-request-process)
-  - [Commit Message Guidelines](#commit-message-guidelines)
-- [Icon Design Guidelines](#icon-design-guidelines)
-- [Release Process](#release-process)
-- [Getting Help](#getting-help)
+- [Contributing to AirQo Icon Library](#contributing-to-airqo-icon-library)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Setup](#setup)
+  - [Development Workflow](#development-workflow)
+    - [Adding New Icons](#adding-new-icons)
+    - [Making Changes](#making-changes)
+    - [Testing Your Changes](#testing-your-changes)
+  - [Submitting Changes](#submitting-changes)
+    - [Pull Request Process](#pull-request-process)
+    - [Commit Message Guidelines](#commit-message-guidelines)
+  - [Icon Design Guidelines](#icon-design-guidelines)
+  - [Release Process](#release-process)
+  - [Getting Help](#getting-help)
 
 ## Code of Conduct
 
@@ -108,13 +110,6 @@ By participating in this project, you are expected to uphold our Code of Conduct
    cd examples/react-demo
    pnpm install
    pnpm start
-   ```
-
-   Or use the documentation website:
-
-   ```bash
-   cd website
-   pnpm dev
    ```
 
 ## Submitting Changes

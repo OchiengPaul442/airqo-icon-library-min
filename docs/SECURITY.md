@@ -15,7 +15,7 @@ Please include the following information:
 
 ### Authentication & Authorization
 
-- All package releases and website deployments are restricted to repository administrators only
+- All package releases are restricted to repository administrators only
 - GitHub Actions workflows that handle releases are protected to require administrator approval
 - Authentication is managed through GitHub's permissions system with strict role-based access control
 

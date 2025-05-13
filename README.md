@@ -138,13 +138,6 @@ Package releases are manually triggered by repository maintainers through GitHub
 
 For more details on the release process, see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md).
 
-### Website Deployment
-
-The documentation website is also manually deployed:
-
-- **Only repository administrators** can deploy the website
-- All deployments require explicit administrator approval through protected environments
-
 For more information on secure deployment practices, see [docs/ADMIN_DEPLOYMENTS.md](./docs/ADMIN_DEPLOYMENTS.md)
 
 ## Contributing
@@ -153,10 +146,8 @@ See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for details on how to contribute.
 
 ## Documentation & Resources
 
-- **Documentation Website**: [AirQo Icon Library Docs](https://ochiengpaul442.github.io/airqo-icon-library-min/)
 - **Security Policy**: [SECURITY.md](./docs/SECURITY.md)
-- **Website Deployment**: [WEBSITE_DEPLOYMENT.md](./docs/WEBSITE_DEPLOYMENT.md)
-- **Release Process**: [RELEASE_PROCESS.md](./docs/RELEASE_PROCESS.md)
+- **Release Process**: [RELEASE_AND_DEPLOYMENT.md](./docs/RELEASE_AND_DEPLOYMENT.md)
 
 ## License
 

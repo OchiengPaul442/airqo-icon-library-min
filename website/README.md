@@ -103,10 +103,6 @@ website/
 └── ...              # Configuration files
 ```
 
-## Deployment
-
-The website is automatically deployed to [Vercel](https://vercel.com) when changes are pushed to the main branch.
-
 ## Contributing
 
 See the [CONTRIBUTING.md](../docs/CONTRIBUTING.md) file for information on contributing to the website.

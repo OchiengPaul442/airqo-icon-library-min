@@ -1,6 +1,6 @@
-# Release and Deployment Guide
+# Release Guide
 
-This document provides comprehensive instructions for releasing packages and deploying the documentation website for the AirQo Icon Library.
+This document provides comprehensive instructions for releasing packages for the AirQo Icon Library.
 
 ## Package Release Process
 
@@ -69,37 +69,6 @@ If the GitHub Actions workflow fails or you prefer to release locally:
     - `--dry-run` to simulate without publishing
     - `--reset-version` to reset all versions to 1.0.0
 
-## Website Development
-
-### Running the Website Locally
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/OchiengPaul442/airqo-icon-library-min.git
-   cd airqo-icon-library-min
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-
-3. Generate icons and start the development server:
-
-   ```bash
-   pnpm generate
-   pnpm dev:website
-   ```
-
-   This will:
-
-   - Generate all the icons
-   - Start the Next.js development server
-
-4. View the website at http://localhost:3000
-
 ## Troubleshooting
 
 ### Package Release Issues
@@ -113,10 +82,3 @@ If the GitHub Actions workflow fails or you prefer to release locally:
 2. **Version conflicts**:
    - Use `--reset-version` to start from a clean version
    - Ensure versions across packages are consistent
-
-### Website Development Issues
-
-1. **Build failures**:
-   - Ensure all dependencies are properly installed
-   - Check that Next.js is configured correctly
-   - Verify that environment variables are set properly if needed
