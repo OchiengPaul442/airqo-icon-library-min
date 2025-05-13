@@ -249,7 +249,7 @@ jobs:
             echo "🔄 Auto-incrementing to version ${incremented_version}"
             
             # Update package.json with incremented version
-            (cd "${pkg_dir}" && npm version ${incremented_version} --no-git-tag-version --allow-same-version)
+            (cd "${pkg_dir}" && pnpm version ${incremented_version} --no-git-tag-version --allow-same-version)
             
             # Mark as auto-incremented so we know to update all packages later
             AUTO_INCREMENTED=true
@@ -267,17 +267,15 @@ jobs:
               if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version &>/dev/null; then
                 echo "⚠️ Version ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} already exists in npm registry"
                 handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
-                
-                # Try publishing with incremented version
+                  # Try publishing with incremented version
                 echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                if (cd "${PKG_DIR}" && npm publish --access public); then
+                if (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
                   echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
                 else
                   echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
                   PUBLISH_SUCCESS=false
-                fi
-              # Version doesn't exist, try to publish
-              elif (cd "${PKG_DIR}" && npm publish --access public); then
+                fi              # Version doesn't exist, try to publish
+              elif (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
                 echo "✅ Successfully published ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
                 
                 # Verify package was published
@@ -290,15 +288,14 @@ jobs:
                 fi
               else
                 # Try different error handling approaches
-                ERROR_OUTPUT=$(cd "${PKG_DIR}" && npm publish --access public 2>&1 || true)
+                ERROR_OUTPUT=$(cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks 2>&1 || true)
                 
                 if echo "$ERROR_OUTPUT" | grep -q "You cannot publish over the previously published versions"; then
                   # Handle version conflict by incrementing patch version
                   handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
-                  
-                  # Try publishing again with incremented version
+                    # Try publishing again with incremented version
                   echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                  if (cd "${PKG_DIR}" && npm publish --access public); then
+                  if (cd "${PKG_DIR}" && pnpm publish --access public --no-git-checks); then
                     echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
                   else
                     echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
@@ -325,12 +322,11 @@ jobs:
             for PKG_DIR in packages/*/; do
               if [ -f "${PKG_DIR}package.json" ]; then
                 echo "Updating ${PKG_DIR}package.json to version ${NEW_VERSION}"
-                (cd "${PKG_DIR}" && npm version ${NEW_VERSION} --no-git-tag-version --allow-same-version)
+                (cd "${PKG_DIR}" && pnpm version ${NEW_VERSION} --no-git-tag-version --allow-same-version)
               fi
             done
-            
-            # Update root package.json
-            npm version ${NEW_VERSION} --no-git-tag-version --allow-same-version
+              # Update root package.json
+            pnpm version ${NEW_VERSION} --no-git-tag-version --allow-same-version
             
             # Update Git commit and tag
             git add package.json packages/*/package.json

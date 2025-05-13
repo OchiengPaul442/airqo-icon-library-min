@@ -126,6 +126,10 @@ function updatePackageVersion(packagePath, releaseType, newVersion = null) {
       if (dep.startsWith('@airqo-icons-min/')) {
         packageJson.dependencies[dep] = newVersion;
       }
+      // Replace workspace: references with actual versions
+      if (packageJson.dependencies[dep].startsWith('workspace:')) {
+        packageJson.dependencies[dep] = newVersion;
+      }
     });
   }
 
@@ -133,6 +137,13 @@ function updatePackageVersion(packagePath, releaseType, newVersion = null) {
   if (packageJson.peerDependencies) {
     Object.keys(packageJson.peerDependencies).forEach((dep) => {
       if (dep.startsWith('@airqo-icons-min/')) {
+        packageJson.peerDependencies[dep] = newVersion;
+      }
+      // Replace workspace: references with actual versions
+      if (
+        typeof packageJson.peerDependencies[dep] === 'string' &&
+        packageJson.peerDependencies[dep].startsWith('workspace:')
+      ) {
         packageJson.peerDependencies[dep] = newVersion;
       }
     });
@@ -199,10 +210,10 @@ async function publishPackages() {
     }
 
     try {
-      // Use npm directly with force and access flags to handle Node.js v20 issues
+      // Use pnpm for publishing to handle workspace protocol properly
       const publishCommand = isDryRun
-        ? 'npm publish --access public --dry-run'
-        : 'npm publish --access public';
+        ? 'pnpm publish --access public --no-git-checks --dry-run'
+        : 'pnpm publish --access public --no-git-checks';
 
       runCommand(publishCommand, pkgPath);
       console.log(

@@ -59,12 +59,17 @@ function updateVersionDependencies(version) {
     if (!fs.existsSync(pkgJsonPath)) continue;
 
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
-    pkgJson.version = version;
-
-    // Update any internal dependencies
+    pkgJson.version = version; // Update any internal dependencies
     if (pkgJson.dependencies) {
       Object.keys(pkgJson.dependencies).forEach((dep) => {
         if (dep.startsWith('@airqo-icons-min/')) {
+          pkgJson.dependencies[dep] = version;
+        }
+        // Replace workspace: references with actual versions
+        if (
+          typeof pkgJson.dependencies[dep] === 'string' &&
+          pkgJson.dependencies[dep].startsWith('workspace:')
+        ) {
           pkgJson.dependencies[dep] = version;
         }
       });
@@ -74,6 +79,13 @@ function updateVersionDependencies(version) {
     if (pkgJson.peerDependencies) {
       Object.keys(pkgJson.peerDependencies).forEach((dep) => {
         if (dep.startsWith('@airqo-icons-min/')) {
+          pkgJson.peerDependencies[dep] = version;
+        }
+        // Replace workspace: references with actual versions
+        if (
+          typeof pkgJson.peerDependencies[dep] === 'string' &&
+          pkgJson.peerDependencies[dep].startsWith('workspace:')
+        ) {
           pkgJson.peerDependencies[dep] = version;
         }
       });
@@ -165,8 +177,8 @@ async function manualRelease() {
 
     try {
       const publishCommand = isDryRun
-        ? 'npm publish --access public --dry-run'
-        : 'npm publish --access public';
+        ? 'pnpm publish --access public --no-git-checks --dry-run'
+        : 'pnpm publish --access public --no-git-checks';
 
       runCommand(publishCommand, pkgPath);
       log(
