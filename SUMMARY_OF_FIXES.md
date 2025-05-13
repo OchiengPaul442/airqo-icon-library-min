@@ -2,7 +2,16 @@
 
 ## Fixed Issues
 
-1. **Removed Lerna Dependency**
+1. **Fixed npm Version and Release Process**
+
+   - Replaced `npm version` command calls with direct file editing to avoid the error "Cannot read properties of null (reading 'name')"
+   - Added robust error handling for package version updates 
+   - Improved file operations with safer JSON parsing and error recovery
+   - Fixed variable scoping issues that could cause null reference errors
+   - Modified both `publish-packages.js` and `manual-release.js` scripts
+   - Successfully tested version updating in dry-run mode
+
+2. **Removed Lerna Dependency**
 
    - Removed `lerna.json` file as it's no longer needed
    - Updated GitHub Actions workflows to use direct npm commands

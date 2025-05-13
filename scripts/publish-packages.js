@@ -47,12 +47,84 @@ function runCommand(command, cwd = process.cwd()) {
   }
 }
 
-// Get package version from package.json
+// Get and set package version from package.json
 function getPackageVersion(packagePath) {
-  const packageJson = JSON.parse(
-    fs.readFileSync(path.join(packagePath, 'package.json'), 'utf-8'),
+  const packageJsonPath = path.join(packagePath, 'package.json');
+  if (!fs.existsSync(packageJsonPath)) {
+    throw new Error(`Package.json not found at ${packageJsonPath}`);
+  }
+
+  const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+  try {
+    const packageJson = JSON.parse(packageJsonContent);
+    return packageJson.version;
+  } catch (err) {
+    throw new Error(
+      `Error parsing package.json at ${packageJsonPath}: ${err.message}`,
+    );
+  }
+}
+
+// Update version in package.json
+function updatePackageVersion(packagePath, releaseType) {
+  const packageJsonPath = path.join(packagePath, 'package.json');
+  if (!fs.existsSync(packageJsonPath)) {
+    throw new Error(`Package.json not found at ${packageJsonPath}`);
+  }
+
+  // Read the package.json
+  const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+  let packageJson;
+
+  try {
+    packageJson = JSON.parse(packageJsonContent);
+  } catch (err) {
+    throw new Error(
+      `Error parsing package.json at ${packageJsonPath}: ${err.message}`,
+    );
+  }
+
+  if (!packageJson.version) {
+    throw new Error(`No version field in package.json at ${packageJsonPath}`);
+  }
+
+  // Parse current version
+  const currentVersion = packageJson.version;
+  const versionParts = currentVersion
+    .split('.')
+    .map((part) => parseInt(part, 10));
+
+  if (versionParts.length !== 3) {
+    throw new Error(
+      `Invalid version format in ${packageJsonPath}: ${currentVersion}`,
+    );
+  }
+
+  // Update version based on release type
+  let [major, minor, patch] = versionParts;
+
+  if (releaseType === 'major') {
+    major++;
+    minor = 0;
+    patch = 0;
+  } else if (releaseType === 'minor') {
+    minor++;
+    patch = 0;
+  } else {
+    // patch
+    patch++;
+  }
+
+  const newVersion = `${major}.${minor}.${patch}`;
+  packageJson.version = newVersion;
+
+  // Write back to package.json
+  fs.writeFileSync(
+    packageJsonPath,
+    JSON.stringify(packageJson, null, 2) + '\n',
   );
-  return packageJson.version;
+
+  return newVersion;
 }
 
 // Publishing function with better error handling
@@ -63,6 +135,8 @@ async function publishPackages() {
   // First, bump versions in all packages
   console.log(`\n📈 Updating version for all packages (${npmReleaseType})...`);
 
+  let newVersion = null;
+
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);
@@ -70,35 +144,39 @@ async function publishPackages() {
     try {
       // Update the version
       if (!isDryRun) {
-        runCommand(
-          `npm version ${npmReleaseType} --no-git-tag-version`,
-          pkgPath,
-        );
+        newVersion = updatePackageVersion(pkgPath, npmReleaseType);
+        console.log(`Updated ${pkgName} to version ${newVersion}`);
       } else {
         console.log(
           `DRY RUN: Would bump version of ${pkgName} (${npmReleaseType})`,
         );
+        const currentVersion = getPackageVersion(pkgPath);
+        console.log(`Version for ${pkgName}: ${currentVersion}`);
       }
-
-      const pkgVersion = getPackageVersion(pkgPath);
-      console.log(`Version for ${pkgName}: ${pkgVersion}`);
     } catch (error) {
-      console.error(`Failed to update version for ${pkgName}`);
+      console.error(
+        `Failed to update version for ${pkgName}: ${error.message}`,
+      );
       throw error;
     }
-  }
-
-  // Then publish each package
+  }  // Then publish each package
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);
-    const pkgVersion = getPackageVersion(pkgPath);
-
-    console.log(
-      `\n📦 ${
-        isDryRun ? 'Would publish' : 'Publishing'
-      } ${pkgName}@${pkgVersion}...`,
-    );
+    
+    let pkgVersion;
+    try {
+      pkgVersion = getPackageVersion(pkgPath);
+      console.log(
+        `\n📦 ${
+          isDryRun ? 'Would publish' : 'Publishing'
+        } ${pkgName}@${pkgVersion}...`,
+      );
+    } catch (error) {
+      console.error(`Error getting version for ${pkgName}: ${error.message}`);
+      console.log(`Skipping publication of ${pkgName} due to version error`);
+      continue;
+    }
 
     try {
       // Use npm directly with force and access flags to handle Node.js v20 issues

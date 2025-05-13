@@ -4,7 +4,24 @@ This document summarizes the changes made to clean up and improve the release pr
 
 ## Changes Made
 
-### 1. Removed Lerna Dependency
+### 1. Fixed npm Version Command Issues
+
+The release process was encountering the error "Cannot read properties of null (reading 'name')" when running `npm version` commands. To fix this:
+
+- Replaced `npm version` command calls with direct package.json file editing
+- Implemented robust version parsing and incrementing following SemVer rules
+- Added better error handling around file operations
+- Fixed variable scoping issues that could cause null reference errors
+- Modified both `publish-packages.js` and `manual-release.js` scripts
+- Successfully tested version updating in dry-run mode
+
+The detailed implementation includes:
+- Reading package.json files directly with proper error handling
+- Parsing version strings and incrementing based on release type
+- Writing files back with updated versions
+- Continuing with the rest of the packages even if one fails
+
+### 2. Removed Lerna Dependency
 
 Lerna was previously used for managing the release of multiple packages. However, to simplify the setup:
 
