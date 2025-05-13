@@ -39,7 +39,13 @@ export default function RootLayout({
               <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <Link href="/" className="flex items-center space-x-2">
-                    <span className="text-lg font-bold">AirQo Icons</span>
+                    {' '}
+                    <img
+                      src="/airqoLogo.png"
+                      alt="AirQo Logo"
+                      className="h-6 w-auto"
+                    />
+                    <span className="text-lg font-bold">AQ Icons</span>
                   </Link>
                   <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
                     <Link
