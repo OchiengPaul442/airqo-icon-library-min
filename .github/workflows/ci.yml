@@ -72,9 +72,6 @@ jobs:
       - name: Check TypeScript
         run: pnpm type-check
 
-      - name: Build website
-        run: pnpm static:website
-
       - name: Build Status
         if: success()
         run: |

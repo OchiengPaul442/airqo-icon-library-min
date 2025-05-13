@@ -144,8 +144,6 @@ The documentation website is also manually deployed:
 
 - **Only repository administrators** can deploy the website
 - All deployments require explicit administrator approval through protected environments
-- Deployments are triggered via the "Deploy Documentation Website" GitHub Action
-- The website is hosted on GitHub Pages
 
 For more information on secure deployment practices, see [docs/ADMIN_DEPLOYMENTS.md](./docs/ADMIN_DEPLOYMENTS.md)
 

@@ -9,15 +9,10 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
-  transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'],
-  // Disable telemetry to avoid permission issues
+  transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'], // Disable telemetry to avoid permission issues
   env: {
     NEXT_TELEMETRY_DISABLED: '1',
   },
-  // Enable static export for GitHub Pages
-  output: 'export',
-  // Base path for GitHub Pages deployment (uncomment if using a custom domain or subdirectory)
-  // basePath: '/airqo-icon-library-min',
   // Configure webpack to handle local dependencies correctly
   webpack: (config, { isServer }) => {
     // Add SVG handling

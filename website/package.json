@@ -6,9 +6,7 @@
     "dev": "next dev",
     "prebuild": "cd ../packages/react && npm run build",
     "build": "next build",
-    "export": "echo \"Export is now automatic with 'next build' when using 'output: export' in config\"",
-    "static": "next build",
-    "start": "serve out",
+    "start": "next start",
     "lint": "next lint",
     "clean": "rimraf .next out"
   },

@@ -69,22 +69,9 @@ If the GitHub Actions workflow fails or you prefer to release locally:
     - `--dry-run` to simulate without publishing
     - `--reset-version` to reset all versions to 1.0.0
 
-## Website Deployment
+## Website Development
 
-### Automatic Deployment via GitHub Actions
-
-This is the recommended approach:
-
-1. Go to the GitHub repository
-2. Click on "Actions" in the top navigation bar
-3. Select the "Deploy Documentation Website" workflow
-4. Click on "Run workflow"
-5. Add an optional deployment note
-6. Click "Run workflow" to start the deployment
-
-### Manual Local Deployment
-
-To deploy the website manually:
+### Running the Website Locally
 
 1. Clone the repository:
 
@@ -99,37 +86,19 @@ To deploy the website manually:
    pnpm install
    ```
 
-3. Generate icons and build the website:
+3. Generate icons and start the development server:
 
    ```bash
-   pnpm static:website
+   pnpm generate
+   pnpm dev:website
    ```
 
    This will:
 
    - Generate all the icons
-   - Build the core package
-   - Build the website with static export
+   - Start the Next.js development server
 
-4. The static website will be in the `website/out` directory
-
-5. Preview locally before deployment:
-
-   ```bash
-   cd website
-   npx serve out
-   ```
-
-6. Deploy to GitHub Pages manually:
-
-   ```bash
-   git checkout -b gh-pages
-   rm -rf ./* !(.git)
-   cp -r website/out/* .
-   git add .
-   git commit -m "Manual website deployment"
-   git push -f origin gh-pages
-   ```
+4. View the website at http://localhost:3000
 
 ## Troubleshooting
 
@@ -145,20 +114,9 @@ To deploy the website manually:
    - Use `--reset-version` to start from a clean version
    - Ensure versions across packages are consistent
 
-### Website Deployment Issues
+### Website Development Issues
 
 1. **Build failures**:
-
-   - Check that Next.js is configured correctly with `output: 'export'`
-   - Ensure the `next export` command is not being used (it's deprecated)
-   - Use `next build` instead which handles the static export automatically
-
-2. **GitHub Pages issues**:
-
-   - Verify that GitHub Pages is enabled in repository settings
-   - Check that the correct source branch is selected
-   - Ensure the workflow has appropriate permissions
-
-3. **404 errors after deployment**:
-   - Make sure the `basePath` in next.config.js is set correctly if using a subdirectory
-   - Verify the 404.html page exists for client-side routing support
+   - Ensure all dependencies are properly installed
+   - Check that Next.js is configured correctly
+   - Verify that environment variables are set properly if needed

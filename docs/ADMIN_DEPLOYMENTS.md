@@ -17,20 +17,13 @@ To restrict the manual deployment workflows to administrators only, follow these
    - Under "Required approvals", select "Require approvals for all outside collaborators"
    - Set "Required reviewers/approvers" to include only repository administrators
 
-6. Next, go to "Environments" in the left sidebar
-7. Create the "github-pages" environment
-8. Configure the environment:
-   - Click on the environment name
-   - Enable "Required reviewers" and add repository administrators
-   - Enable "Wait timer" and set it to 10 minutes to provide time to cancel accidental deployments
-   - Enable "Deployment branches" and select "Protected branches only"
+6. Next, go to "Environments" in the left sidebar if needed for other deployment environments
 
 ## Workflow Security Configuration
 
 The GitHub Actions workflows have been updated with appropriate security settings:
 
 1. The Manual Release workflow is restricted to administrators through repository settings
-2. The Deploy Documentation Website workflow uses the "github-pages" environment for deploying to GitHub Pages
 
 With these settings in place, only administrators can approve and run the manual deployment workflows.
 
