@@ -75,28 +75,28 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      - name: Set custom version if reset requested
-        if: ${{ github.event.inputs.reset_version == 'true' }}
+      - name: Set version
+        id: set_version
         run: |
-          echo "NEXT_VERSION=1.0.0" >> $GITHUB_ENV
-          echo "Setting version to 1.0.0"
-
-      - name: Set version based on input type
-        if: ${{ github.event.inputs.reset_version != 'true' }}
-        run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-
-          if [[ "${{ github.event.inputs.version_type }}" == "major" ]]; then
-            NEXT_VERSION="$((MAJOR + 1)).0.0"
-          elif [[ "${{ github.event.inputs.version_type }}" == "minor" ]]; then
-            NEXT_VERSION="$MAJOR.$((MINOR + 1)).0"
-          else # patch
-            NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+          if [[ "${{ github.event.inputs.reset_version }}" == "true" ]]; then
+            echo "NEXT_VERSION=1.0.0" >> "$GITHUB_ENV"
+            echo "Setting version to 1.0.0"
+          else
+            CURRENT_VERSION=$(node -p "require('./package.json').version")
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+            
+            if [[ "${{ github.event.inputs.version_type }}" == "major" ]]; then
+              NEXT_VERSION="$((MAJOR + 1)).0.0"
+            elif [[ "${{ github.event.inputs.version_type }}" == "minor" ]]; then
+              NEXT_VERSION="$MAJOR.$((MINOR + 1)).0"
+            else # patch
+              NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
+            fi
+            
+            echo "NEXT_VERSION=${NEXT_VERSION}" >> "$GITHUB_ENV"
+            echo "Next version will be: ${NEXT_VERSION}"
           fi
-
-          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
-          echo "Next version will be: $NEXT_VERSION"
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Update package versions
         run: node scripts/update-versions.js ${{ env.NEXT_VERSION }}
@@ -125,6 +125,7 @@ jobs:
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Publishing packages to NPM with version ${{ env.NEXT_VERSION }}"
           node scripts/publish-packages.js
@@ -132,6 +133,55 @@ jobs:
           # Push tag and changes to GitHub
           git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push --follow-tags
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            try {
+              const changelogContent = fs.readFileSync('CHANGELOG.md', 'utf8');
+              const version = process.env.NEXT_VERSION;
+              const versionHeading = `## [${version}]`;
+              
+              // Extract release notes for this version
+              let releaseNotes = '';
+              const lines = changelogContent.split('\n');
+              let isCurrentVersion = false;
+              
+              for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith(versionHeading)) {
+                  isCurrentVersion = true;
+                  continue;
+                }
+                
+                if (isCurrentVersion) {
+                  if (lines[i].startsWith('## [')) {
+                    break;
+                  }
+                  releaseNotes += lines[i] + '\n';
+                }
+              }
+              
+              // Create a GitHub release
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: `v${version}`,
+                name: `v${version}`,
+                body: releaseNotes.trim() || `Release version ${version}`,
+                draft: false,
+                prerelease: false
+              });
+              
+              console.log(`GitHub Release created for v${version}`);
+            } catch (error) {
+              console.error('Error creating GitHub release:', error);
+              core.setFailed('Failed to create GitHub release');
+            }
 
       - name: Release Summary
         run: |
@@ -142,4 +192,5 @@ jobs:
             echo "⚠️ **DRY RUN** - No packages published" >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ Published to NPM" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️ GitHub Release created" >> $GITHUB_STEP_SUMMARY
           fi
