@@ -6,12 +6,9 @@ on:
       version_type:
         type: choice
         description: 'Release type'
-        options:
-          - patch
-          - minor
-          - major
+        options: [patch, minor, major]
         required: true
-        default: 'patch'
+        default: patch
       dry_run:
         type: boolean
         description: 'Dry run (no actual publishing)'
@@ -20,531 +17,69 @@ on:
 
 permissions:
   contents: write
-  issues: write
-  pull-requests: write
   packages: write
+  pull-requests: write
   id-token: write
+
+concurrency:
+  group: manual-release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
-    name: Release and Publish
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-          registry-url: https://registry.npmjs.org/
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.10.0
-          run_install: false
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      # Explicitly set shell environment variable
-      - name: Set shell environment
-        run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
+      - name: Build & Generate Artifacts
+        run: pnpm run release:prepare
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Configure Git user
+      - name: Bump Version
+        id: bump
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "GitHub Action"
+          pnpm version ${{ github.event.inputs.version_type }} --workspace --no-git-tag-version
+          echo "new_version=$(node -p \"require('./package.json').version\")" >> $GITHUB_OUTPUT
 
-      - name: Generate Icons
-        run: pnpm generate
-
-      - name: Fix component types
-        run: pnpm fix-component-types
-
-      - name: Enhance React Native Icons
-        run: pnpm enhance-rn
-
-      - name: Clean up generated files
-        run: rm -rf packages/*/dist
-
-      - name: Build packages
-        run: pnpm build
-
-      - name: Determine New Version
-        id: version
+      - name: Commit & Tag Release
+        if: ${{ !github.event.inputs.dry_run }}
         run: |
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: $CURRENT_VERSION"
-
-          # Use node to calculate the new version
-          if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
-            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${Number(v[0])+1}.0.0\`)");
-          elif [ "${{ github.event.inputs.version_type }}" = "minor" ]; then
-            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${v[0]}.\${Number(v[1])+1}.0\`)");
-          else
-            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${v[0]}.\${v[1]}.\${Number(v[2])+1}\`)");
-          fi
-
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "New version will be: $NEW_VERSION"
-
-      - name: Update Package Versions
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          echo "Updating all packages to version $NEW_VERSION"
-
-          # Update root package.json
-          node -e "const pkg=require('./package.json'); pkg.version='$NEW_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n')"
-
-          # Update all package versions in packages directory
-          for PKG_DIR in packages/*/; do
-            if [ -f "${PKG_DIR}package.json" ]; then
-              echo "Updating ${PKG_DIR}package.json to version $NEW_VERSION"
-              node -e "const pkg=require('./${PKG_DIR}package.json'); pkg.version='$NEW_VERSION'; if(pkg.dependencies) { Object.keys(pkg.dependencies).forEach(dep => { if(dep.startsWith('@airqo-icons-min/')) { pkg.dependencies[dep]='$NEW_VERSION'; }}); }; if(pkg.peerDependencies) { Object.keys(pkg.peerDependencies).forEach(dep => { if(dep.startsWith('@airqo-icons-min/')) { pkg.peerDependencies[dep]='$NEW_VERSION'; }}); }; fs.writeFileSync('./${PKG_DIR}package.json', JSON.stringify(pkg, null, 2) + '\n')"
-            fi
-          done
-
-      - name: Update CHANGELOG
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          TODAY=$(date +"%Y-%m-%d")
-
-          # Create or update CHANGELOG.md
-          if [ ! -f CHANGELOG.md ]; then
-            echo "# Changelog" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          # Create entry for new version
-          TEMP_FILE=$(mktemp)
-          echo "# Changelog" > $TEMP_FILE
-          echo "" >> $TEMP_FILE
-          echo "## v$NEW_VERSION ($TODAY)" >> $TEMP_FILE
-          echo "" >> $TEMP_FILE
-
-          if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
-            echo "### 💥 Breaking Changes" >> $TEMP_FILE
-            echo "" >> $TEMP_FILE
-            echo "- Major version upgrade" >> $TEMP_FILE
-            echo "" >> $TEMP_FILE
-          fi
-
-          echo "### 🚀 Features and Improvements" >> $TEMP_FILE
-          echo "" >> $TEMP_FILE
-          echo "- New release of $NEW_VERSION" >> $TEMP_FILE
-          echo "" >> $TEMP_FILE
-
-          # Append existing changelog content
-          if [ -f CHANGELOG.md ]; then
-            tail -n +3 CHANGELOG.md >> $TEMP_FILE
-          fi
-
-          # Replace changelog file
-          mv $TEMP_FILE CHANGELOG.md
-
-      - name: Commit Version Updates
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-          git add package.json packages/*/package.json CHANGELOG.md
-          git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
-
-          # Check if tag exists and delete it locally
-          if git tag -l "v$NEW_VERSION" | grep -q "v$NEW_VERSION"; then
-            echo "Tag v$NEW_VERSION already exists locally, deleting it"
-            git tag -d "v$NEW_VERSION"
-          fi
-
-          # Create the new tag
-          git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
-
-      - name: Validate NPM Token
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          # Clear any existing npmrc files to avoid conflicts
-          rm -f ~/.npmrc
-
-          # Create a fresh npmrc file with the token
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
-
-          echo "🔑 Verifying NPM token..."
-
-          # Verify npm token works by checking authentication status
-          if npm whoami; then
-            NPM_USER=$(npm whoami)
-            echo "✅ NPM token is valid. Authenticated as: $NPM_USER"
-            
-            # Check if the user has permission to publish to airqo-icons-min scope
-            echo "🔍 Checking permissions for @airqo-icons-min scope..."
-            if npm org ls @airqo-icons-min 2>/dev/null | grep -q "$NPM_USER"; then
-              echo "✅ User $NPM_USER has access to @airqo-icons-min organization"
-            else
-              echo "⚠️ Warning: Could not verify if $NPM_USER has access to @airqo-icons-min organization"
-              echo "This may be due to permissions or the organization setup"
-            fi
-          else 
-            echo "❌ NPM token is invalid or expired. Please check your NPM_TOKEN secret."
-            echo "Make sure the token has publish access to the @airqo-icons-min scope."
-            exit 1
-          fi
-
-      - name: Publish Packages to NPM
-        id: publish
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          # Ensure .npmrc exists and has the right content
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
-
-          # Show npm config for debugging (hide secrets)
-          npm config list | grep -v _authToken
-
-          # Track if all packages published successfully
-          PUBLISH_SUCCESS=true
-          AUTO_INCREMENTED=false
-          NEW_VERSION="${{ steps.version.outputs.new_version }}"
-
-          # Check if this version already exists before we start
-          echo "🔍 Checking if version ${NEW_VERSION} already exists in npm registry..."
-          CORE_PKG_NAME="@airqo-icons-min/core"
-          if npm view ${CORE_PKG_NAME}@${NEW_VERSION} version &>/dev/null; then
-            echo "⚠️ Warning: Version ${NEW_VERSION} already exists for ${CORE_PKG_NAME} in npm registry"
-            echo "🔄 Will auto-increment during publishing"
-          fi
-
-          # Function to handle version conflict by incrementing patch version
-          handle_version_conflict() {
-            local pkg_dir=$1
-            local pkg_name=$2
-            local current_version=$3
-            
-            echo "⚠️ Version conflict detected for ${pkg_name}@${current_version}"
-            
-            # Split the version into components
-            IFS='.' read -r -a ver_parts <<< "$current_version"
-            local major=${ver_parts[0]}
-            local minor=${ver_parts[1]}
-            local patch=${ver_parts[2]}
-            
-            # Increment patch version
-            local new_patch_version=$((patch + 1))
-            local incremented_version="${major}.${minor}.${new_patch_version}"
-            echo "🔄 Auto-incrementing to version ${incremented_version}"
-            
-            # Update package.json with incremented version
-            (cd "${pkg_dir}" && pnpm version ${incremented_version} --no-git-tag-version --allow-same-version)
-            
-            # Mark as auto-incremented so we know to update all packages later
-            AUTO_INCREMENTED=true
-            NEW_VERSION="${incremented_version}"
-            return 0
-          }
-
-          for PKG_DIR in packages/core packages/react packages/react-native packages/vue; do
-            if [ -f "${PKG_DIR}/package.json" ]; then
-              PACKAGE_NAME=$(node -p "require('./${PKG_DIR}/package.json').name")
-              CURRENT_PKG_VERSION=$(node -p "require('./${PKG_DIR}/package.json').version")
-              echo "📦 Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
-              
-              # Check if version already exists in npm registry
-              if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version &>/dev/null; then                echo "⚠️ Version ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} already exists in npm registry"
-                handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
-                
-                # Process any workspace: references before publishing
-                echo "🔧 Pre-processing package.json to resolve workspace references..."
-                node -e "
-                  const fs = require('fs');
-                  const path = require('path');
-                  const pkgPath = path.join('${PKG_DIR}', 'package.json');
-                  const pkg = require(pkgPath);
-                  let hasChanges = false;
-                  
-                  if (pkg.dependencies) {
-                    Object.keys(pkg.dependencies).forEach(dep => {
-                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
-                        pkg.dependencies[dep] = '${NEW_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (pkg.peerDependencies) {
-                    Object.keys(pkg.peerDependencies).forEach(dep => {
-                      if (typeof pkg.peerDependencies[dep] === 'string' && 
-                          pkg.peerDependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
-                        pkg.peerDependencies[dep] = '${NEW_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (hasChanges) {
-                    console.log('📝 Writing updated package.json without workspace references');
-                    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
-                  }
-                "
-                  
-                # Try publishing with incremented version
-                echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                if (cd "${PKG_DIR}" && npm publish --access public); then
-                  echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
-                else
-                  echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
-                  PUBLISH_SUCCESS=false
-                fi              # Version doesn't exist, try to publish              elif (cd "${PKG_DIR}" && (
-                # Process any workspace: references before publishing
-                echo "🔧 Pre-processing package.json to resolve workspace references..." &&
-                node -e "
-                  const fs = require('fs');
-                  const path = require('path');
-                  const pkgPath = path.join(process.cwd(), 'package.json');
-                  const pkg = require(pkgPath);
-                  let hasChanges = false;
-                  
-                  if (pkg.dependencies) {
-                    Object.keys(pkg.dependencies).forEach(dep => {
-                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
-                        pkg.dependencies[dep] = '${CURRENT_PKG_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (pkg.peerDependencies) {
-                    Object.keys(pkg.peerDependencies).forEach(dep => {
-                      if (typeof pkg.peerDependencies[dep] === 'string' && 
-                          pkg.peerDependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
-                        pkg.peerDependencies[dep] = '${CURRENT_PKG_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (hasChanges) {
-                    console.log('📝 Writing updated package.json without workspace references');
-                    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\\n');
-                  }
-                " &&
-                # Use npm to publish
-                npm publish --access public
-              )); then
-                echo "✅ Successfully published ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
-                
-                # Verify package was published
-                echo "🔍 Verifying package was published to npm..."
-                if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version --json; then
-                  echo "✅ Verified ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} is available in npm registry"
-                else
-                  echo "⚠️ Warning: Could not verify ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} in npm registry"
-                  echo "This may be due to npm registry propagation delay and not necessarily an error"
-                fi
-              else                # Try different error handling approaches
-                # First process workspace references
-                (cd "${PKG_DIR}" && echo "🔧 Pre-processing package.json to resolve workspace references..." && 
-                node -e "
-                  const fs = require('fs');
-                  const pkg = require('./package.json');
-                  let hasChanges = false;
-                  
-                  if (pkg.dependencies) {
-                    Object.keys(pkg.dependencies).forEach(dep => {
-                      if (typeof pkg.dependencies[dep] === 'string' && pkg.dependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for dependency ' + dep);
-                        pkg.dependencies[dep] = '${CURRENT_PKG_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (pkg.peerDependencies) {
-                    Object.keys(pkg.peerDependencies).forEach(dep => {
-                      if (typeof pkg.peerDependencies[dep] === 'string' && 
-                          pkg.peerDependencies[dep].startsWith('workspace:')) {
-                        console.log('🔄 Replacing workspace reference for peerDependency ' + dep);
-                        pkg.peerDependencies[dep] = '${CURRENT_PKG_VERSION}';
-                        hasChanges = true;
-                      }
-                    });
-                  }
-                  
-                  if (hasChanges) {
-                    console.log('📝 Writing updated package.json without workspace references');
-                    fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\\n');
-                  }
-                ")
-                
-                ERROR_OUTPUT=$(cd "${PKG_DIR}" && npm publish --access public 2>&1 || true)
-                
-                if echo "$ERROR_OUTPUT" | grep -q "You cannot publish over the previously published versions" || \
-                   echo "$ERROR_OUTPUT" | grep -q "EPUBLISHCONFLICT" || \
-                   echo "$ERROR_OUTPUT" | grep -q "already exists"; then
-                  # Handle version conflict by incrementing patch version
-                  handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
-                    # Try publishing again with incremented version
-                  echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
-                  if (cd "${PKG_DIR}" && npm publish --access public); then
-                    echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
-                  else
-                    echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
-                    PUBLISH_SUCCESS=false
-                  fi
-                else
-                  echo "❌ Failed to publish ${PACKAGE_NAME} due to an unexpected error:"
-                  echo "$ERROR_OUTPUT"
-                  PUBLISH_SUCCESS=false
-                fi
-              fi
-            fi
-          done
-
-          # Always output the final version used, whether auto-incremented or not
-          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
-          echo "Final version used for publishing: ${NEW_VERSION}"
-
-          # If we auto-incremented any package version, we need to update all packages to match
-          if [ "$AUTO_INCREMENTED" = true ]; then
-            echo "🔄 Auto-incremented version to ${NEW_VERSION}. Updating all packages to match..."
-            
-            # Update all packages to the new version
-            for PKG_DIR in packages/*/; do
-              if [ -f "${PKG_DIR}package.json" ]; then
-                echo "Updating ${PKG_DIR}package.json to version ${NEW_VERSION}"
-                (cd "${PKG_DIR}" && pnpm version ${NEW_VERSION} --no-git-tag-version --allow-same-version)
-              fi
-            done
-              # Update root package.json
-            pnpm version ${NEW_VERSION} --no-git-tag-version --allow-same-version
-            
-            # Update Git commit and tag
-            git add package.json packages/*/package.json
-            git commit -m "chore(release): auto-increment version to ${NEW_VERSION} [skip ci]"
-            git tag -d "v${{ steps.version.outputs.new_version }}" || true
-            git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
-          fi
-
-          # If any package failed to publish, mark the step as failed
-          if [ "$PUBLISH_SUCCESS" = false ]; then
-            echo "❌ At least one package failed to publish"
-            exit 1
-          fi
-
-      - name: Push changes to GitHub
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          # Delete remote tag if it exists
-          NEW_VERSION=${{ steps.version.outputs.new_version }}
-
-          # If we auto-incremented the version, use that instead
-          if [ -n "${{ steps.publish.outputs.new_version }}" ]; then
-            NEW_VERSION="${{ steps.publish.outputs.new_version }}"
-            echo "Using auto-incremented version for tags: $NEW_VERSION" 
-          fi
-
-          if git ls-remote --tags origin | grep -q "refs/tags/v$NEW_VERSION"; then
-            echo "Tag v$NEW_VERSION already exists remotely, deleting it"
-            git push --delete origin "v$NEW_VERSION" || echo "Could not delete remote tag (it may not exist)"
-          fi
-
-          # Push the commits
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
-
-          # Push new tags
-          git push --tags
-
-      - name: Delete existing GitHub Release
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        id: delete_release
-        run: |
-          # Use the version from the Publish step which may have been auto-incremented
-          if [ -n "${{ steps.publish.outputs.new_version }}" ]; then
-            NEW_VERSION="${{ steps.publish.outputs.new_version }}"
-          else
-            NEW_VERSION="${{ steps.version.outputs.new_version }}"
-          fi
-
-          echo "final_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-
-          # Ensure jq is installed
-          if ! command -v jq &> /dev/null; then
-            echo "Installing jq for JSON processing"
-            sudo apt-get update && sudo apt-get install -y jq
-          fi
-
-          # Check if release exists and delete it using GitHub API
-          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$NEW_VERSION" | \
-            jq -r '.id // empty')
-
-          if [ ! -z "$RELEASE_ID" ]; then
-            echo "Deleting existing release with ID $RELEASE_ID"
-            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
-          else
-            echo "No existing release found for tag v$NEW_VERSION"
-          fi
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add .
+          git commit -m "chore(release): v${{ steps.bump.outputs.new_version }} [skip ci]"
+          git tag v${{ steps.bump.outputs.new_version }}
+          git push && git push --tags
 
       - name: Create GitHub Release
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: softprops/action-gh-release@v1
+        if: ${{ !github.event.inputs.dry_run }}
+        uses: actions/create-release@v1
         with:
-          name: v${{ steps.delete_release.outputs.final_version }}
-          tag_name: v${{ steps.delete_release.outputs.final_version }}
-          generate_release_notes: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ steps.bump.outputs.new_version }}
+          release_name: Release v${{ steps.bump.outputs.new_version }}
+          draft: false
+          prerelease: false
+          body: |
+            - Version: ${{ steps.bump.outputs.new_version }}
+            - Release Type: ${{ github.event.inputs.version_type }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run in Dry Run Mode
-        if: ${{ github.event.inputs.dry_run == 'true' }}
+      - name: Dry Run Summary
+        if: ${{ github.event.inputs.dry_run }}
         run: |
-          echo "DRY RUN Mode - No changes were made"
-          echo "Would publish version ${{ steps.version.outputs.new_version }}"
-
-          for PKG_DIR in packages/core packages/react packages/react-native packages/vue; do
-            if [ -f "${PKG_DIR}/package.json" ]; then
-              echo "Would publish ${PKG_DIR}"
-            fi
-          done
-
-      # Add release summary
-      - name: Release Summary
-        run: |
-          echo "### Release Summary ✅" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "🧪 **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
-          else
-            # Use the final version (which may have been auto-incremented)
-            FINAL_VERSION="${{ steps.version.outputs.new_version }}"
-            if [ -n "${{ steps.delete_release.outputs.final_version }}" ]; then
-              FINAL_VERSION="${{ steps.delete_release.outputs.final_version }}"
-            fi
-            
-            echo "🚀 Successfully published packages to npm" >> $GITHUB_STEP_SUMMARY
-            echo "📦 Published version: v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
-            echo "🔗 NPM package: https://www.npmjs.com/package/@airqo-icons-min/core" >> $GITHUB_STEP_SUMMARY
-            REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
-            echo "🏷️ GitHub release: ${REPO_URL}/releases/tag/v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "📅 Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "🚧 Dry run: version would be v${{ steps.bump.outputs.new_version }}"
