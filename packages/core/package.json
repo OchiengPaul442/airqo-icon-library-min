@@ -12,7 +12,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "prebuild": "rimraf dist && pnpm run generate-icons",
+    "ensure-dist": "node scripts/ensure-dist.js",
+    "prebuild": "rimraf dist && pnpm run generate-icons && npm run ensure-dist",
     "build": "tsc --emitDeclarationOnly --declaration --declarationDir dist && pnpm run build:esm",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "clean": "rimraf dist",

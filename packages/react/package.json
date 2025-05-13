@@ -24,6 +24,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
+    "prebuild": "node scripts/ensure-dist.js",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:main:cjs": "esbuild src/main.ts --bundle --platform=node --format=cjs --outfile=dist/main.js --external:react --sourcemap",
@@ -31,7 +32,7 @@
     "build:client:cjs": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=dist/client.js --external:react --sourcemap",
     "build:client:dev": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=dist/client.development.js --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
-    "build": "npm run build:cjs && npm run build:esm && npm run build:main:cjs && npm run build:main:esm && npm run build:client:cjs && npm run build:client:dev && npm run build:types && npm run verify-types && cp src/client.tsx dist/client.src.tsx",
+    "build": "npm run prebuild && npm run build:cjs && npm run build:esm && npm run build:main:cjs && npm run build:main:esm && npm run build:client:cjs && npm run build:client:dev && npm run build:types && npm run verify-types && node -e \"require('fs').copyFileSync('src/client.tsx', 'dist/client.src.tsx')\"",
     "verify-types": "node scripts/verify-types.js",
     "clean": "rimraf dist"
   },
