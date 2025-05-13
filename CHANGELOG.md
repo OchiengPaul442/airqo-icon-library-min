@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.3 (2025-05-13)
+
+### ��� Features and Improvements
+
+- New release of 1.0.3
+
 ## v1.0.2 (2025-05-13)
 
 ### 🚀 Features and Improvements
