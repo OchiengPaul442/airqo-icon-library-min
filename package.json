@@ -20,7 +20,7 @@
     "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "pnpm build && tsc --noEmit",
-    "prepare": "husky install",
+    "prepare": "node -e \"if (process.env.CI !== 'true') require('husky').install()\"",
     "release": "node scripts/publish-packages.js",
     "release:dry": "node scripts/publish-packages.js --dry-run",
     "release:manual": "node scripts/manual-release.js",

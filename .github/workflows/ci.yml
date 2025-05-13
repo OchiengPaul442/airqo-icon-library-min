@@ -30,9 +30,11 @@ jobs:
           version: 8.10.0
           run_install: false
 
-      # Explicitly set shell environment variable
-      - name: Set shell environment
-        run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
+      # Explicitly set shell environment variable and CI flag
+      - name: Set environment variables
+        run: |
+          echo "SHELL=/bin/bash" >> $GITHUB_ENV
+          echo "CI=true" >> $GITHUB_ENV
 
       - name: Get pnpm store directory
         id: pnpm-cache
