@@ -1,6 +1,0 @@
-{
-  "buildCommand": "pnpm install && pnpm --filter \"@airqo-icons-min/core\" build && pnpm --filter \"@airqo-icons-min/react\" build && pnpm --filter \"website\" build",
-  "outputDirectory": "website/.next",
-  "installCommand": "pnpm install --ignore-scripts --strict-peer-dependencies=false",
-  "framework": "nextjs"
-}
