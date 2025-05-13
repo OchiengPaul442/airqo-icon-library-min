@@ -40,6 +40,10 @@ jobs:
           version: 8.10.0
           run_install: false
 
+      # Explicitly set shell environment variable
+      - name: Set shell environment
+        run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -64,6 +68,7 @@ jobs:
         run: pnpm fix-component-types
 
       - name: Enhance React Native Icons
+        # Use cross-env to ensure SHELL is set
         run: pnpm enhance-rn
 
       - name: Make build script executable
@@ -92,8 +97,4 @@ jobs:
       - name: Deployment Summary
         run: |
           echo "### Website Deployment Completed ✅" >> $GITHUB_STEP_SUMMARY
-          echo "��� Deployed on: $(date)" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ github.event.inputs.deploy_note }}" ]; then
-            echo "��� Note: ${{ github.event.inputs.deploy_note }}" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "��� Deployment URL: https://$(echo ${{ github.repository_owner }}).github.io/$(echo ${{ github.event.repository.name }} | sed 's/.*\///')" >> $GITHUB_STEP_SUMMARY
+          echo "�� Deployed on: $(date)" >> $GITHUB_STEP_SUMMARY

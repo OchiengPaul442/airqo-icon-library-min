@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "pnpm -r run clean",
     "generate": "node scripts/generate-icons.js",
-    "enhance-rn": "node scripts/enhance-rn-icons.js",
+    "enhance-rn": "cross-env SHELL=/bin/bash node scripts/enhance-rn-icons.js",
     "optimize": "node scripts/optimize-svgs.js",
     "setup": "node scripts/setup-missing-files.js",
     "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn && pnpm setup",
@@ -44,6 +44,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^7.0.3",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.10.0",
     "husky": "^8.0.0",

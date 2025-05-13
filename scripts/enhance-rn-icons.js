@@ -4,6 +4,7 @@
  *
  * This script wraps all React Native icon components with the withIconProps HOC
  * to add size prop support and converts file imports to use the IconComponent type.
+ * Enhanced to work in any shell environment.
  */
 const fs = require('fs');
 const path = require('path');
@@ -115,31 +116,27 @@ async function enhanceAllIconComponents() {
     for (let i = 0; i < tsxFiles.length; i += batchSize) {
       const batch = tsxFiles.slice(i, i + batchSize);
 
-      await Promise.all(
-        batch.map(async (file) => {
-          try {
-            const content = await readFile(file, 'utf8');
-            const componentName = path.basename(file, '.tsx');
-            const updatedContent = enhanceIconComponent(
-              content,
-              componentName,
-              file,
-            );
+      // Use sequential processing instead of parallel to avoid potential issues
+      for (const file of batch) {
+        try {
+          const content = await readFile(file, 'utf8');
+          const componentName = path.basename(file, '.tsx');
+          const updatedContent = enhanceIconComponent(
+            content,
+            componentName,
+            file,
+          );
 
-            if (content !== updatedContent) {
-              await writeFile(file, updatedContent);
-              updatedCount++;
-            } else {
-              skippedCount++;
-            }
-          } catch (fileError) {
-            console.error(
-              `❌ Error processing file ${file}:`,
-              fileError.message,
-            );
+          if (content !== updatedContent) {
+            await writeFile(file, updatedContent);
+            updatedCount++;
+          } else {
+            skippedCount++;
           }
-        }),
-      );
+        } catch (fileError) {
+          console.error(`❌ Error processing file ${file}:`, fileError.message);
+        }
+      }
 
       // Show progress update for each batch
       console.log(

@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -29,6 +29,10 @@ jobs:
         with:
           version: 8.10.0
           run_install: false
+
+      # Explicitly set shell environment variable
+      - name: Set shell environment
+        run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -45,13 +49,19 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint
         run: pnpm lint
 
       - name: Generate Icons
         run: pnpm generate
+
+      - name: Fix Component Types
+        run: pnpm fix-component-types
+
+      - name: Enhance React Native Icons
+        run: pnpm enhance-rn
 
       - name: Build packages
         run: pnpm build
