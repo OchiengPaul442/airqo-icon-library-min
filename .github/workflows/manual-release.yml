@@ -221,6 +221,14 @@ jobs:
           AUTO_INCREMENTED=false
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
 
+          # Check if this version already exists before we start
+          echo "🔍 Checking if version ${NEW_VERSION} already exists in npm registry..."
+          CORE_PKG_NAME="@airqo-icons-min/core"
+          if npm view ${CORE_PKG_NAME}@${NEW_VERSION} version &>/dev/null; then
+            echo "⚠️ Warning: Version ${NEW_VERSION} already exists for ${CORE_PKG_NAME} in npm registry"
+            echo "🔄 Will auto-increment during publishing"
+          fi
+
           # Function to handle version conflict by incrementing patch version
           handle_version_conflict() {
             local pkg_dir=$1
@@ -255,8 +263,21 @@ jobs:
               CURRENT_PKG_VERSION=$(node -p "require('./${PKG_DIR}/package.json').version")
               echo "📦 Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
               
-              # Try to publish
-              if (cd "${PKG_DIR}" && npm publish --access public); then
+              # Check if version already exists in npm registry
+              if npm view ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} version &>/dev/null; then
+                echo "⚠️ Version ${PACKAGE_NAME}@${CURRENT_PKG_VERSION} already exists in npm registry"
+                handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
+                
+                # Try publishing with incremented version
+                echo "🔄 Attempting to publish with incremented version ${NEW_VERSION}..."
+                if (cd "${PKG_DIR}" && npm publish --access public); then
+                  echo "✅ Successfully published ${PACKAGE_NAME}@${NEW_VERSION}"
+                else
+                  echo "❌ Failed to publish ${PACKAGE_NAME} even with incremented version"
+                  PUBLISH_SUCCESS=false
+                fi
+              # Version doesn't exist, try to publish
+              elif (cd "${PKG_DIR}" && npm publish --access public); then
                 echo "✅ Successfully published ${PACKAGE_NAME}@${CURRENT_PKG_VERSION}"
                 
                 # Verify package was published
@@ -268,8 +289,10 @@ jobs:
                   echo "This may be due to npm registry propagation delay and not necessarily an error"
                 fi
               else
-                # Check if the error is due to version conflict
-                if (cd "${PKG_DIR}" && npm publish --access public 2>&1) | grep -q "You cannot publish over the previously published versions"; then
+                # Try different error handling approaches
+                ERROR_OUTPUT=$(cd "${PKG_DIR}" && npm publish --access public 2>&1 || true)
+                
+                if echo "$ERROR_OUTPUT" | grep -q "You cannot publish over the previously published versions"; then
                   # Handle version conflict by incrementing patch version
                   handle_version_conflict "${PKG_DIR}" "${PACKAGE_NAME}" "${CURRENT_PKG_VERSION}"
                   
@@ -282,17 +305,21 @@ jobs:
                     PUBLISH_SUCCESS=false
                   fi
                 else
-                  echo "❌ Failed to publish ${PACKAGE_NAME} due to an unexpected error"
+                  echo "❌ Failed to publish ${PACKAGE_NAME} due to an unexpected error:"
+                  echo "$ERROR_OUTPUT"
                   PUBLISH_SUCCESS=false
                 fi
               fi
             fi
           done
 
+          # Always output the final version used, whether auto-incremented or not
+          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "Final version used for publishing: ${NEW_VERSION}"
+
           # If we auto-incremented any package version, we need to update all packages to match
           if [ "$AUTO_INCREMENTED" = true ]; then
             echo "🔄 Auto-incremented version to ${NEW_VERSION}. Updating all packages to match..."
-            echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
             
             # Update all packages to the new version
             for PKG_DIR in packages/*/; do
