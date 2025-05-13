@@ -200,26 +200,18 @@ jobs:
             echo "❌ NPM token is invalid or expired. Please check your NPM_TOKEN secret."
             echo "Make sure the token has publish access to the @airqo-icons-min scope."
             exit 1
-          fi
-
-      - name: Publish Packages to NPM
+          fi      - name: Publish Packages to NPM
         id: publish
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Ensure .npmrc exists and has the right content
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
-
-          # Show npm config for debugging (hide secrets)
-          npm config list | grep -v _authToken
-
-          # Track if all packages published successfully
-          PUBLISH_SUCCESS=true
-          AUTO_INCREMENTED=false
+          # Source the fixed publishing script
+          chmod +x ./scripts/publish-fix.sh
           NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          export NEW_VERSION
+          export NODE_AUTH_TOKEN
+          ./scripts/publish-fix.sh
 
           # Check if this version already exists before we start
           echo "🔍 Checking if version ${NEW_VERSION} already exists in npm registry..."
