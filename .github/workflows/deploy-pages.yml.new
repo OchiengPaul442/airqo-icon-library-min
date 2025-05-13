@@ -1,0 +1,99 @@
+name: Deploy Documentation Website
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_note:
+        description: 'Deployment note (optional)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.10.0
+          run_install: false
+          
+      # Explicitly set shell environment variable
+      - name: Set shell environment
+        run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup PNPM cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate Icons
+        run: pnpm generate
+
+      - name: Fix component types
+        run: pnpm fix-component-types
+
+      - name: Enhance React Native Icons
+        run: pnpm enhance-rn
+
+      - name: Make build script executable
+        run: chmod +x ./scripts/build-website.js
+
+      - name: Build website
+        run: pnpm build:website
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./website/out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v3
+
+      - name: Deployment Summary
+        run: |
+          echo "### Website Deployment Completed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "��� Deployed on: $(date)" >> $GITHUB_STEP_SUMMARY
