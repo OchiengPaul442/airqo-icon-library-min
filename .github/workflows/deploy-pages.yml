@@ -76,10 +76,9 @@ jobs:
         run: pnpm enhance-rn
 
       - name: Build website
-        working-directory: ./website
         run: |
-          echo "Building website..."
-          pnpm build
+          echo "Building website with static export..."
+          NODE_ENV=production pnpm static:website
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

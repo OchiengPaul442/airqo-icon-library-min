@@ -20,8 +20,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,10 +64,9 @@ jobs:
         run: pnpm enhance-rn
 
       - name: Build website
-        working-directory: ./website
         run: |
-          echo "Building website preview..."
-          pnpm build
+          echo "Building website preview with static export..."
+          NODE_ENV=production pnpm static:website
 
       - name: Upload website build artifact
         uses: actions/upload-artifact@v3
@@ -79,27 +76,27 @@ jobs:
           retention-days: 7
 
       - name: Add PR comment with preview info
-        uses: actions/github-script@v6
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue_number = context.issue.number;
+          header: preview-website
+          message: |
+            # ��� Website Preview
 
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: `🚀 **Website Preview Build Complete**
+            A preview of the documentation website has been generated for this pull request.
 
-            The website preview for this PR has been built successfully! 
+            ��� **Preview Build**: You can download the preview build from the artifacts section of this workflow.
 
-            You can download the preview artifact from the GitHub Actions tab to test the changes locally.
+            ## How to View the Preview
 
-            *This is an automated message from the Preview Website workflow.*`
-            });
+            1. Go to the Actions tab of this PR
+            2. Click on this workflow ("Preview Documentation Website")
+            3. Scroll down to "Artifacts" and download the "website-preview" zip file
+            4. Extract the files and open index.html in your browser
 
-      - name: PR Summary
+            _This preview will be available for 7 days or until a new commit is pushed to this PR._
+
+      - name: Preview Build Status
+        if: success()
         run: |
-          echo "### Website Preview Build Complete ✅" >> $GITHUB_STEP_SUMMARY
-          echo "📦 Preview artifact has been uploaded and can be downloaded from the GitHub Actions tab." >> $GITHUB_STEP_SUMMARY
-          echo "📡 PR #${{ github.event.pull_request.number }} by @${{ github.event.pull_request.user.login }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Website Preview Build successful ✅" >> $GITHUB_STEP_SUMMARY
+          echo "The preview website was successfully built and is available as an artifact." >> $GITHUB_STEP_SUMMARY

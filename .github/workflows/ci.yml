@@ -73,7 +73,7 @@ jobs:
         run: pnpm type-check
 
       - name: Build website
-        run: pnpm build:website
+        run: pnpm static:website
 
       - name: Build Status
         if: success()
