@@ -1,4 +1,4 @@
-name: Manual Release
+name: Manual Release and Publish
 
 on:
   workflow_dispatch:
@@ -27,7 +27,7 @@ permissions:
 
 jobs:
   release:
-    name: Release Process
+    name: Release and Publish
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -37,14 +37,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-          scope: '@airqo-icons-min'
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
@@ -56,33 +55,13 @@ jobs:
       - name: Set shell environment
         run: echo "SHELL=/bin/bash" >> $GITHUB_ENV
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup PNPM cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
       - name: Configure Git user
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-
-      - name: Setup .npmrc for publishing
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
+          git config --local user.name "GitHub Action"
 
       - name: Generate Icons
         run: pnpm generate
@@ -96,35 +75,155 @@ jobs:
       - name: Clean up generated files
         run: rm -rf packages/*/dist
 
-      - name: Run release script
-        id: release
-        run: |
-          # Determine release type from input
-          RELEASE_TYPE="${{ github.event.inputs.version_type }}"
-          echo "Release type: $RELEASE_TYPE"
-
-          # Determine if this is a dry run
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "Running in DRY RUN mode - no actual publishing will occur"
-            pnpm release:manual:dry -- --$RELEASE_TYPE
-          else
-            echo "Running in PRODUCTION mode - changes will be published"
-            NODE_AUTH_TOKEN=${{ secrets.NPM_TOKEN }} pnpm release:manual -- --$RELEASE_TYPE
-          fi
-
       - name: Build packages
         run: pnpm build
 
-      # Use GitHub's built-in token to push changes and tags
-      - name: Push tags and changes
+      - name: Determine New Version
+        id: version
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
+
+          # Use node to calculate the new version
+          if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
+            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${Number(v[0])+1}.0.0\`)");
+          elif [ "${{ github.event.inputs.version_type }}" = "minor" ]; then
+            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${v[0]}.\${Number(v[1])+1}.0\`)");
+          else
+            NEW_VERSION=$(node -e "const v='$CURRENT_VERSION'.split('.'); console.log(\`\${v[0]}.\${v[1]}.\${Number(v[2])+1}\`)");
+          fi
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version will be: $NEW_VERSION"
+
+      - name: Update Package Versions
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
-          # Ensure we have proper authentication
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          echo "Updating all packages to version $NEW_VERSION"
 
-          # Push changes and tags
+          # Update root package.json
+          node -e "const pkg=require('./package.json'); pkg.version='$NEW_VERSION'; fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n')"
+
+          # Update all package versions in packages directory
+          for PKG_DIR in packages/*/; do
+            if [ -f "${PKG_DIR}package.json" ]; then
+              echo "Updating ${PKG_DIR}package.json to version $NEW_VERSION"
+              node -e "const pkg=require('./${PKG_DIR}package.json'); pkg.version='$NEW_VERSION'; if(pkg.dependencies) { Object.keys(pkg.dependencies).forEach(dep => { if(dep.startsWith('@airqo-icons-min/')) { pkg.dependencies[dep]='$NEW_VERSION'; }}); }; if(pkg.peerDependencies) { Object.keys(pkg.peerDependencies).forEach(dep => { if(dep.startsWith('@airqo-icons-min/')) { pkg.peerDependencies[dep]='$NEW_VERSION'; }}); }; fs.writeFileSync('./${PKG_DIR}package.json', JSON.stringify(pkg, null, 2) + '\n')"
+            fi
+          done
+
+      - name: Update CHANGELOG
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          TODAY=$(date +"%Y-%m-%d")
+
+          # Create or update CHANGELOG.md
+          if [ ! -f CHANGELOG.md ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Create entry for new version
+          TEMP_FILE=$(mktemp)
+          echo "# Changelog" > $TEMP_FILE
+          echo "" >> $TEMP_FILE
+          echo "## v$NEW_VERSION ($TODAY)" >> $TEMP_FILE
+          echo "" >> $TEMP_FILE
+
+          if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
+            echo "### 💥 Breaking Changes" >> $TEMP_FILE
+            echo "" >> $TEMP_FILE
+            echo "- Major version upgrade" >> $TEMP_FILE
+            echo "" >> $TEMP_FILE
+          fi
+
+          echo "### 🚀 Features and Improvements" >> $TEMP_FILE
+          echo "" >> $TEMP_FILE
+          echo "- New release of $NEW_VERSION" >> $TEMP_FILE
+          echo "" >> $TEMP_FILE
+
+          # Append existing changelog content
+          if [ -f CHANGELOG.md ]; then
+            tail -n +3 CHANGELOG.md >> $TEMP_FILE
+          fi
+
+          # Replace changelog file
+          mv $TEMP_FILE CHANGELOG.md
+
+      - name: Commit Version Updates
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          git add package.json packages/*/package.json CHANGELOG.md
+          git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
+          git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
+
+      - name: Validate NPM Token
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+
+          # Verify npm token works by checking authentication status
+          npm whoami || { echo "NPM token is invalid or missing. Please check your NPM_TOKEN secret."; exit 1; }
+          echo "✅ NPM token is valid"
+
+      - name: Publish Packages to NPM
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # Ensure .npmrc exists and has the right content
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+
+          # Show npm config for debugging
+          npm config list
+
+          for PKG_DIR in packages/core packages/react packages/react-native packages/vue; do
+            if [ -f "${PKG_DIR}/package.json" ]; then
+              PACKAGE_NAME=$(node -p "require('./${PKG_DIR}/package.json').name")
+              echo "Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
+              
+              # Publish with verbose output for debugging
+              (cd "${PKG_DIR}" && npm publish --access public)
+              
+              echo "✅ Published ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
+            fi
+          done
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ steps.version.outputs.new_version }}
+          tag_name: v${{ steps.version.outputs.new_version }}
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push changes to GitHub
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
           git push origin HEAD:${GITHUB_REF#refs/heads/}
           git push --tags
+
+      - name: Run in Dry Run Mode
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          echo "DRY RUN Mode - No changes were made"
+          echo "Would publish version ${{ steps.version.outputs.new_version }}"
+
+          for PKG_DIR in packages/core packages/react packages/react-native packages/vue; do
+            if [ -f "${PKG_DIR}/package.json" ]; then
+              echo "Would publish ${PKG_DIR}"
+            fi
+          done
 
       # Add release summary
       - name: Release Summary
@@ -132,10 +231,14 @@ jobs:
           echo "### Release Summary ✅" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "��� **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
+            echo "🧪 **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
-            echo "��� Successfully published packages" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 Successfully published packages to npm" >> $GITHUB_STEP_SUMMARY
+            echo "📦 Published version: v${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+            echo "🔗 NPM package: https://www.npmjs.com/package/@airqo-icons-min/core" >> $GITHUB_STEP_SUMMARY
+            REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+            echo "🏷️ GitHub release: ${REPO_URL}/releases/tag/v${{ steps.version.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
           fi
 
-          echo "��� Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "��� Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "📅 Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
