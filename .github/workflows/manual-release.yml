@@ -129,14 +129,17 @@ jobs:
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Publishing packages to NPM with version ${{ env.NEXT_VERSION }}"
           node scripts/publish-packages.js
 
-          # Push tag and changes to GitHub
-          git remote set-url origin https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push --follow-tags
+      # Use dedicated action for pushing to GitHub
+      - name: Push tags and changes
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tags: true
 
       - name: Create GitHub Release
         if: ${{ github.event.inputs.dry_run != 'true' }}
@@ -190,11 +193,11 @@ jobs:
       - name: Release Summary
         run: |
           echo "### Release Summary âœ…" >> $GITHUB_STEP_SUMMARY
-          echo "ðŸ“¦ Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "ðŸ”„ Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "í³¦ Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "í´„ Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
           if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
             echo "âš ï¸ **DRY RUN** - No packages published" >> $GITHUB_STEP_SUMMARY
           else
             echo "âœ… Published to NPM" >> $GITHUB_STEP_SUMMARY
-            echo "ðŸ·ï¸ GitHub Release created" >> $GITHUB_STEP_SUMMARY
+            echo "í¿·ï¸ GitHub Release created" >> $GITHUB_STEP_SUMMARY
           fi
