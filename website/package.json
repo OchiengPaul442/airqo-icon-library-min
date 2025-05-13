@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next export",
-    "static": "next build && next export",
-    "start": "next start",
+    "export": "echo \"Export is now automatic with 'next build' when using 'output: export' in config\"",
+    "static": "next build",
+    "start": "serve out",
     "lint": "next lint",
     "clean": "rimraf .next out"
   },
@@ -45,6 +45,7 @@
     "eslint-config-next": "15.3.1",
     "postcss": "^8.4.35",
     "rimraf": "^5.0.10",
+    "serve": "^14.2.4",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

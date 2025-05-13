@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+// Force static generation for Next.js export
+export const dynamic = 'force-static';
+
 export async function GET() {
   try {
     // Go up one level from /website to reach project root,

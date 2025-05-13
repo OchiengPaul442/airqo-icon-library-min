@@ -9,6 +9,27 @@ The website can be deployed using the following methods:
 1. **Automatic Deployment**: Using GitHub Actions workflow
 2. **Manual Deployment**: Using local build and GitHub Pages settings
 
+## Running the Website Locally
+
+To run the website locally:
+
+1. Build the website first:
+
+   ```bash
+   pnpm build:website
+   ```
+
+2. Start the local server to view the static export:
+
+   ```bash
+   pnpm start:website
+   ```
+
+   This will serve the static files from the `website/out` directory using the `serve` package.
+
+   > **Note**: Since the website uses static export configuration (`output: 'export'` in next.config.js),
+   > you cannot use `next start` to run it. Instead, we use a static file server.
+
 ## Automatic Deployment via GitHub Actions
 
 This is the recommended approach for deploying the website.
