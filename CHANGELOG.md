@@ -4,6 +4,16 @@
 
 ### Other Changes
 
+- Merge branch 'main' of https://github.com/OchiengPaul442/airqo-icon-library-min ([b7eb567](https://github.com/airqo-platform/airqo-icon-library-min/commit/b7eb567))
+
+### 🐛 Bug Fixes
+
+- correct formatting in release summary output ([8612acc](https://github.com/airqo-platform/airqo-icon-library-min/commit/8612acc))
+
+## [1.0.0] - 2025-05-13
+
+### Other Changes
+
 - Merge branch 'main' of https://github.com/OchiengPaul442/airqo-icon-library-min ([a35ccd5](https://github.com/airqo-platform/airqo-icon-library-min/commit/a35ccd5))
 - Refactor code structure for improved readability and maintainability ([094b9e4](https://github.com/airqo-platform/airqo-icon-library-min/commit/094b9e4))
 - Merge branch 'main' of https://github.com/OchiengPaul442/airqo-icon-library-min ([f8c4b6e](https://github.com/airqo-platform/airqo-icon-library-min/commit/f8c4b6e))
