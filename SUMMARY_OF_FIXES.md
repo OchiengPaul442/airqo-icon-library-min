@@ -5,7 +5,7 @@
 1. **Fixed npm Version and Release Process**
 
    - Replaced `npm version` command calls with direct file editing to avoid the error "Cannot read properties of null (reading 'name')"
-   - Added robust error handling for package version updates 
+   - Added robust error handling for package version updates
    - Improved file operations with safer JSON parsing and error recovery
    - Fixed variable scoping issues that could cause null reference errors
    - Modified both `publish-packages.js` and `manual-release.js` scripts
@@ -17,19 +17,19 @@
    - Updated GitHub Actions workflows to use direct npm commands
    - Simplified release scripts to avoid using external tools
 
-2. **Fixed Next.js Static Export Issues**
+3. **Fixed Next.js Static Export Issues**
 
    - Replaced TypeScript config with JavaScript in `next.config.js`
    - Updated website scripts to use proper commands for static export
    - Fixed workflows to use the correct static export commands
 
-3. **Fixed Website Deployment Issues**
+4. **Fixed Website Deployment Issues**
 
    - Updated GitHub Actions workflow to properly build and deploy the website
    - Added 404.html page for GitHub Pages routing
    - Added proper CNAME file for custom domain support
 
-4. **Fixed and Simplified Release Process**
+5. **Fixed and Simplified Release Process**
    - Removed Lerna dependency for a simpler release workflow
    - Created a manual release script for local releases that uses direct npm commands
    - Updated scripts to handle different release types (patch, minor, major)

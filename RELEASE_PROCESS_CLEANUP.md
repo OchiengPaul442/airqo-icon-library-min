@@ -16,6 +16,7 @@ The release process was encountering the error "Cannot read properties of null (
 - Successfully tested version updating in dry-run mode
 
 The detailed implementation includes:
+
 - Reading package.json files directly with proper error handling
 - Parsing version strings and incrementing based on release type
 - Writing files back with updated versions

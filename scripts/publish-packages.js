@@ -159,11 +159,11 @@ async function publishPackages() {
       );
       throw error;
     }
-  }  // Then publish each package
+  } // Then publish each package
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);
-    
+
     let pkgVersion;
     try {
       pkgVersion = getPackageVersion(pkgPath);
