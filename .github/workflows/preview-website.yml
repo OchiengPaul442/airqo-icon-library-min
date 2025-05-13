@@ -1,4 +1,3 @@
-# .github/workflows/preview-website.yml
 name: Preview Documentation Website
 
 on:
@@ -80,11 +79,11 @@ jobs:
         with:
           header: preview-website
           message: |
-            # ÔøΩÔøΩÔøΩ Website Preview
+            # Ì∫Ä Website Preview
 
             A preview of the documentation website has been generated for this pull request.
 
-            ÔøΩÔøΩÔøΩ **Preview Build**: You can download the preview build from the artifacts section of this workflow.
+            Ì¥ç **Preview Build**: You can download the preview build from the artifacts section of this workflow.
 
             ## How to View the Preview
 

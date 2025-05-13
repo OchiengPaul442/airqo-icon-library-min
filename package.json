@@ -28,7 +28,6 @@
     "prepare": "husky install",
     "release": "node scripts/publish-packages.js",
     "release:dry": "node scripts/publish-packages.js --dry-run",
-    "release:manual": "node scripts/manual-release.js",
     "release:manual:dry": "node scripts/manual-release.js --dry-run",
     "version:update": "node scripts/update-versions.js",
     "changelog": "node scripts/generate-changelog.js",

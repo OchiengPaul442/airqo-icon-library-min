@@ -16,8 +16,14 @@ const PACKAGES = [
   'packages/vue',
 ];
 
-// Check if running in dry-run mode
+// Check for command line arguments
 const isDryRun = process.argv.includes('--dry-run');
+const releaseType = ['--patch', '--minor', '--major'].find((type) =>
+  process.argv.includes(type),
+);
+
+// Normalize the release type for npm version command
+const npmReleaseType = releaseType ? releaseType.replace('--', '') : 'patch';
 
 // Run a command and return its output
 function runCommand(command, cwd = process.cwd()) {
@@ -52,8 +58,37 @@ function getPackageVersion(packagePath) {
 // Publishing function with better error handling
 async function publishPackages() {
   const mode = isDryRun ? '🧪 DRY RUN' : '🚀 PRODUCTION';
-  console.log(`${mode}: Publishing packages...`);
+  console.log(`${mode}: Publishing packages with ${npmReleaseType} release...`);
 
+  // First, bump versions in all packages
+  console.log(`\n📈 Updating version for all packages (${npmReleaseType})...`);
+
+  for (const pkg of PACKAGES) {
+    const pkgPath = path.resolve(__dirname, '..', pkg);
+    const pkgName = path.basename(pkg);
+
+    try {
+      // Update the version
+      if (!isDryRun) {
+        runCommand(
+          `npm version ${npmReleaseType} --no-git-tag-version`,
+          pkgPath,
+        );
+      } else {
+        console.log(
+          `DRY RUN: Would bump version of ${pkgName} (${npmReleaseType})`,
+        );
+      }
+
+      const pkgVersion = getPackageVersion(pkgPath);
+      console.log(`Version for ${pkgName}: ${pkgVersion}`);
+    } catch (error) {
+      console.error(`Failed to update version for ${pkgName}`);
+      throw error;
+    }
+  }
+
+  // Then publish each package
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);

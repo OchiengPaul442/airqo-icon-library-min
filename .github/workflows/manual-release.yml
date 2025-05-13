@@ -12,11 +12,6 @@ on:
           - major
         required: true
         default: 'patch'
-      reset_version:
-        type: boolean
-        description: 'Reset version to 1.0.0'
-        required: false
-        default: false
       dry_run:
         type: boolean
         description: 'Dry run (no actual publishing)'
@@ -30,10 +25,8 @@ permissions:
 
 jobs:
   release:
-    name: Manual Release Process
+    name: Release Process
     runs-on: ubuntu-latest
-    # Remove environment specification as it's causing validation errors
-    # We'll handle permissions through repository settings instead
 
     steps:
       - name: Checkout code
@@ -80,110 +73,6 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
-      # Initialize Lerna if needed
-      - name: Initialize Lerna
-        run: |
-          if [ ! -f "lerna.json" ]; then
-            echo "lerna.json does not exist, initializing Lerna..."
-            npx lerna@latest init
-            # Update lerna.json with proper configuration
-            cat > lerna.json << 'EOL'
-{
-  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "version": "1.1.0",
-  "packages": [
-    "packages/*"
-  ],
-  "npmClient": "pnpm",
-  "useWorkspaces": true,
-  "command": {
-    "version": {
-      "conventionalCommits": true,
-      "changelogPreset": "angular",
-      "message": "chore(release): publish %s",
-      "private": false,
-      "push": false,
-      "gitTagVersion": true,
-      "exact": true
-    },
-    "publish": {
-      "conventionalCommits": true,
-      "message": "chore(release): publish %s",
-      "registry": "https://registry.npmjs.org/"
-    }
-  }
-}
-EOL
-          else
-            echo "lerna.json already exists, skipping initialization"
-          fi
-
-      # Check if version reset is requested
-      - name: Reset versions to 1.0.0 if requested
-        if: ${{ github.event.inputs.reset_version == 'true' }}
-        run: |
-          echo "Resetting all packages to version 1.0.0"
-          node -e "
-            const fs = require('fs');
-            const path = require('path');
-            
-            // Update root package.json
-            const rootPkgPath = path.resolve('./package.json');
-            const rootPkg = require(rootPkgPath);
-            rootPkg.version = '1.0.0';
-            fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
-            
-            // Update all packages in the packages directory
-            const packagesDir = path.resolve('./packages');
-            const packages = fs.readdirSync(packagesDir);
-            
-            for (const pkg of packages) {
-              const pkgJsonPath = path.resolve(packagesDir, pkg, 'package.json');
-              if (fs.existsSync(pkgJsonPath)) {
-                const pkgJson = require(pkgJsonPath);
-                pkgJson.version = '1.0.0';
-                
-                // Update dependencies to other local packages
-                if (pkgJson.dependencies) {
-                  for (const dep in pkgJson.dependencies) {
-                    if (dep.startsWith('@airqo/')) {
-                      pkgJson.dependencies[dep] = '1.0.0';
-                    }
-                  }
-                }
-                
-                // Update peerDependencies to other local packages
-                if (pkgJson.peerDependencies) {
-                  for (const dep in pkgJson.peerDependencies) {
-                    if (dep.startsWith('@airqo/')) {
-                      pkgJson.peerDependencies[dep] = '1.0.0';
-                    }
-                  }
-                }
-                
-                fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
-              }
-            }
-            
-            // Update website package.json
-            const websitePkgPath = path.resolve('./website/package.json');
-            if (fs.existsSync(websitePkgPath)) {
-              const websitePkg = require(websitePkgPath);
-              websitePkg.version = '1.0.0';
-              
-              // Update dependencies to local packages
-              for (const dep in websitePkg.dependencies) {
-                if (dep.startsWith('@airqo/')) {
-                  websitePkg.dependencies[dep] = '1.0.0';
-                }
-              }
-              
-              fs.writeFileSync(websitePkgPath, JSON.stringify(websitePkg, null, 2) + '\n');
-            }
-          "
-
-          echo "All packages have been reset to version 1.0.0"
-
       - name: Generate Icons
         run: pnpm generate
 
@@ -191,41 +80,26 @@ EOL
         run: pnpm fix-component-types
 
       - name: Enhance React Native Icons
-        # Use cross-env to ensure SHELL is set
         run: pnpm enhance-rn
 
-      - name: Cleanup generated files
+      - name: Clean up generated files
         run: rm -rf packages/*/dist
 
-      - name: Set version and create release
+      - name: Run release script
         id: release
         run: |
+          # Determine release type from input
+          RELEASE_TYPE="${{ github.event.inputs.version_type }}"
+          echo "Release type: $RELEASE_TYPE"
+          
           # Determine if this is a dry run
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "Running in DRY RUN mode - no actual publishing will occur"
-            DRY_RUN_FLAG="--dry-run"
+            pnpm release:dry -- --$RELEASE_TYPE
           else
             echo "Running in PRODUCTION mode - changes will be published"
-            DRY_RUN_FLAG=""
+            pnpm release -- --$RELEASE_TYPE
           fi
-
-          # Release type from input
-          RELEASE_TYPE="${{ github.event.inputs.version_type }}"
-          echo "Release type: $RELEASE_TYPE"
-
-          # If version was manually reset, we skip bumping the version
-          if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
-            echo "Version was manually reset to 1.0.0, skipping automatic version bump"
-            npx lerna@latest version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
-          else
-            # Regular version bump based on selected type
-            npx lerna@latest version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
-          fi
-
-          # Get the new version number
-          NEW_VERSION=$(node -p "require('./lerna.json').version")
-          echo "New version: $NEW_VERSION"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Build packages
         run: pnpm build
@@ -238,41 +112,16 @@ EOL
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
 
-      # Publish packages if not a dry run
-      - name: Publish packages to npm
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "Publishing packages to npm"
-          npx lerna@latest publish from-package --yes --no-verify-access
-
-      # Create GitHub release
-      - name: Create GitHub Release
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.release.outputs.version }}
-          name: Release v${{ steps.release.outputs.version }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # Add release summary
       - name: Release Summary
         run: |
           echo "### Release Summary âœ…" >> $GITHUB_STEP_SUMMARY
-
+          
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "í´¬ **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
-            echo "ï¿½ï¿½ Successfully published packages" >> $GITHUB_STEP_SUMMARY
+            echo "í³¦ Successfully published packages" >> $GITHUB_STEP_SUMMARY
           fi
-
+          
           echo "í³… Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "í¿·ï¸ Version: ${{ steps.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
           echo "í´¢ Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
-            echo "âš ï¸ **Version was reset to 1.0.0**" >> $GITHUB_STEP_SUMMARY
-          fi

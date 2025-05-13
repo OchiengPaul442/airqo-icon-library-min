@@ -1,101 +1,79 @@
 # Release Process
 
-This document outlines the detailed release process for the AirQo Icon Library packages.
+This document provides a guide on how to release new versions of the AirQo Icon Library.
 
-## Release Types
+## Release Methods
 
-The AirQo Icon Library follows semantic versioning (SemVer) with three types of releases:
+There are two main ways to release:
 
-- **Patch**: Bug fixes and minor updates (`1.0.0` → `1.0.1`)
-- **Minor**: New features that don't break existing functionality (`1.0.0` → `1.1.0`)
-- **Major**: Breaking changes that require users to modify their code (`1.0.0` → `2.0.0`)
+1. **Automated Release** (Recommended): Using GitHub Actions workflow
+2. **Manual Release**: Using command-line scripts
 
-## Release Workflow
+## Automated Release via GitHub Actions
 
-### 1. Preparation
+### Steps
 
-Before initiating a release:
-
-1. Ensure all tests pass in the CI pipeline
-2. Verify the documentation is up-to-date
-3. Make sure all intended changes are merged into the main branch
-
-### 2. Manual Release Workflow
-
-Releases are triggered manually through GitHub Actions:
-
-1. Navigate to the repository on GitHub
-2. Go to the "Actions" tab
+1. Go to the GitHub repository
+2. Click on "Actions" in the top navigation bar
 3. Select the "Manual Release" workflow
 4. Click "Run workflow"
-5. Select the release type (patch, minor, or major)
-6. Optionally check "Reset version to 1.0.0" for complete version resets
-7. Optionally check "Dry run" to test the release process without publishing
-8. Click "Run workflow" to start the release process
+5. Configure the release:
+   - Select release type: `patch`, `minor`, or `major`
+   - Choose whether to run in dry-run mode (no actual publishing)
+6. Click "Run workflow" to start the release process
 
-### 3. Release Process Steps
+### What Happens During Release
 
-The release workflow performs these steps:
+The workflow will:
 
-1. **Build Verification**:
+1. Generate icon components
+2. Update version numbers
+3. Publish packages to npm
+4. Create tags and a GitHub release
 
-   - Checks out the code
-   - Sets up Node.js and PNPM
-   - Installs dependencies
-   - Generates icon components
-   - Builds all packages
+## Manual Release
 
-2. **Version Management**:
+If you need to release manually:
 
-   - Determines the next version based on the selected release type
-   - Updates version numbers in all package.json files
-   - Creates git tags for the new version
+### Prerequisites
 
-3. **Publishing to npm**:
+1. Make sure you have npm access to publish packages
+2. Run `npm login` to authenticate with npm
 
-   - If not a dry run, publishes all packages to npm
-   - Uses the NPM_TOKEN stored in GitHub Secrets
+### Command Line Release
 
-4. **GitHub Release Creation**:
-   - Creates a GitHub release with automatically generated release notes
-   - Links to the git tag for the version
+Use the package.json script:
 
-### 4. Environment Requirements
+```bash
+# For a dry run (no actual publishing)
+pnpm release:dry
 
-For successful releases, the following must be configured:
+# For an actual release
+pnpm release -- --patch  # For patch version
+pnpm release -- --minor  # For minor version
+pnpm release -- --major  # For major version
+```
 
-- GitHub repository secret: `NPM_TOKEN` with publish permissions
-- GitHub Actions workflow permissions to create releases
-- Optional: Protected environments for controlled releases
+## Versioning Guidelines
 
-## Special Version Reset
+We follow semantic versioning:
 
-In some cases, it may be necessary to reset all package versions to `1.0.0`:
+- **Patch (1.0.x)**: Bug fixes, minor improvements
+- **Minor (1.x.0)**: New features, non-breaking changes
+- **Major (x.0.0)**: Breaking changes
 
-- Use this option when completely refactoring the package structure
-- This will reset the version in all package.json files
-- All dependencies between packages will be updated to reference `1.0.0`
+## After Release
 
-## Post-Release
+After releasing:
 
-After a successful release:
-
-1. Verify all packages appear on npm with the correct version
-2. Check that the GitHub release was created correctly
-3. Ensure the documentation website reflects the latest version
+1. Verify the packages are available on npm
+2. Deploy the documentation website
+3. Notify users about the new release
 
 ## Troubleshooting
 
-If a release fails:
+If issues occur during release:
 
-1. Check the GitHub Actions log for specific error messages
-2. Verify that the NPM_TOKEN is valid and has publish permissions
-3. For git push issues, ensure the workflow has proper permissions
-4. For npm authentication issues, check registry URLs in package.json files
-
-## Manual Recovery
-
-In rare cases where the automatic process fails:
-
-1. Reset any partial git tags: `git tag -d v<version> && git push origin :refs/tags/v<version>`
-2. Manually publish using: `npx lerna publish from-package`
+1. Check the npm authentication status
+2. Verify package.json versions are correct
+3. Check for any build errors
