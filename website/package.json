@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "vercel-build": "cd .. && npm run build && cd website && next build",
+    "vercel-build": "next build",
     "start": "next start",
     "lint": "next lint",
     "clean": "rimraf .next out"

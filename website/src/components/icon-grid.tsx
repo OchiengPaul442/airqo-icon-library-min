@@ -172,80 +172,78 @@ export function IconGrid({
         animate="show"
         className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8"
       >
-        {displayedIcons.map((icon) => {
-          return (
-            <motion.button
-              key={icon.name}
-              variants={itemVariants}
-              onClick={() => handleIconClick(icon)}
-              onMouseEnter={() => setHoveredIcon(icon.name)}
-              onMouseLeave={() => setHoveredIcon(null)}
-              className={cn(
-                'group relative flex flex-col items-center justify-center rounded-xl border transition-all',
-                'hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg',
-                'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm',
-                'p-4 hover:bg-white dark:hover:bg-zinc-900',
-                hoveredIcon === icon.name &&
-                  'border-primary/50 bg-white dark:bg-zinc-900 shadow-lg',
-              )}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="relative">
-                {/* Improved glow effect with better visibility in both light/dark modes */}
-                <div
-                  className={cn(
-                    'absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-xl transition-all duration-300',
-                    hoveredIcon === icon.name ? 'opacity-80' : 'opacity-0',
-                  )}
-                />
-
-                {/* Icon container with improved styling for better visibility */}
-                <div
-                  className={cn(
-                    'relative flex h-14 w-14 transform-gpu items-center justify-center rounded-lg transition-all duration-200 group-hover:scale-110',
-                    hoveredIcon === icon.name && 'scale-110',
-                    'bg-gradient-to-br from-background/30 to-background/10 p-1.5',
-                    'dark:from-zinc-800/50 dark:to-zinc-900/30',
-                  )}
-                >
-                  <IconRenderer icon={icon} size={32} />
-                </div>
-              </div>
-
-              {/* Icon name - improved text handling and visibility */}
-              <div className="mt-3 w-full text-center px-1">
-                <span
-                  className="block overflow-hidden text-ellipsis text-xs font-medium tracking-wide transition-colors group-hover:text-foreground"
-                  style={{
-                    wordWrap: 'break-word',
-                    maxWidth: '100%',
-                    lineHeight: '1.2em',
-                    maxHeight: '2.4em',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    color: 'inherit',
-                  }}
-                >
-                  {icon.name}
-                </span>
-              </div>
-
-              {/* Badge for category - only shown on hover */}
+        {displayedIcons.map((icon) => (
+          <motion.button
+            key={icon.name}
+            variants={itemVariants}
+            onClick={() => handleIconClick(icon)}
+            onMouseEnter={() => setHoveredIcon(icon.name)}
+            onMouseLeave={() => setHoveredIcon(null)}
+            className={cn(
+              'group relative flex flex-col items-center justify-center rounded-xl border transition-all duration-200',
+              'hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg',
+              'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm',
+              'p-4 hover:bg-white dark:hover:bg-zinc-900',
+              hoveredIcon === icon.name &&
+                'border-primary/50 bg-white dark:bg-zinc-900 shadow-lg',
+            )}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="relative">
+              {/* Glow effect */}
               <div
                 className={cn(
-                  'absolute -bottom-1 opacity-0 transition-all duration-200',
-                  'group-hover:opacity-100 group-hover:bottom-1',
+                  'absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-xl transition-all duration-200',
+                  hoveredIcon === icon.name ? 'opacity-80' : 'opacity-0',
+                )}
+              />
+
+              {/* Icon container */}
+              <div
+                className={cn(
+                  'relative flex h-14 w-14 transform-gpu items-center justify-center rounded-lg transition-all duration-200',
+                  hoveredIcon === icon.name && 'scale-110',
+                  'bg-gradient-to-br from-background/30 to-background/10 p-1.5',
+                  'dark:from-zinc-800/50 dark:to-zinc-900/30',
                 )}
               >
-                <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                  {icon.category}
-                </span>
+                <IconRenderer icon={icon} size={32} />
               </div>
-            </motion.button>
-          );
-        })}
+            </div>
+
+            {/* Icon name */}
+            <div className="mt-3 w-full text-center px-1">
+              <span
+                className="block overflow-hidden text-ellipsis text-xs font-medium tracking-wide transition-colors group-hover:text-foreground"
+                style={{
+                  wordWrap: 'break-word',
+                  maxWidth: '100%',
+                  lineHeight: '1.2em',
+                  maxHeight: '2.4em',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  color: 'inherit',
+                }}
+              >
+                {icon.name}
+              </span>
+            </div>
+
+            {/* Category badge */}
+            <div
+              className={cn(
+                'absolute -top-1 right-0 opacity-0 transition-all duration-200',
+                'group-hover:opacity-100 group-hover:top-1 group-hover:right-1',
+              )}
+            >
+              <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary shadow-sm">
+                {icon.category}
+              </span>
+            </div>
+          </motion.button>
+        ))}
       </motion.div>
       {/* Improved load more button */}
       {hasMore && (

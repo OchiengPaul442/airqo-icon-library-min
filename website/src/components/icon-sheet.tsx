@@ -3,7 +3,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ClientIcon } from '@airqo-icons-min/react/client';
+import { ClientIcon } from '@/components/client-icon';
 import {
   Download,
   X,
@@ -55,10 +55,9 @@ const extendedColors = [
 export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   const [color, setColor] = React.useState('#0174DF'); // Default to AirQo blue
   const [size, setSize] = React.useState(24);
-  const [strokeWidth, setStrokeWidth] = React.useState(1.5);
   const [activeTab, setActiveTab] = React.useState<TabType>('preview');
   const [isCopied, setIsCopied] = React.useState(false);
-  const [showColorPicker, setShowColorPicker] = React.useState(false); // Renamed from showExtendedColors
+  const [showColorPicker, setShowColorPicker] = React.useState(false);
   const [iconKey, setIconKey] = React.useState(0);
   const [generatedSvgCode, setGeneratedSvgCode] = React.useState('');
 
@@ -67,10 +66,8 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     if (icon) {
       setColor('#0174DF');
       setSize(24);
-      setStrokeWidth(1.5);
       setActiveTab('preview');
       setShowColorPicker(false);
-      // iconKey will be updated by the effect below, which depends on icon
     }
   }, [icon]);
 
@@ -81,7 +78,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     if (icon) {
       generateAndUpdateSvgCode(); // Update SVG code for the 'Code' tab
     }
-  }, [size, strokeWidth, color, icon, activeTab]); // Dependencies that trigger preview/code update
+  }, [size, color, icon, activeTab]); // Dependencies that trigger preview/code update
 
   // Get the actual icon component to extract SVG path data
   const IconComponent = icon
@@ -102,12 +99,12 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     try {
       // Use React DOM to render the icon to our temporary div
       const root = ReactDOM.createRoot(tempDiv);
+
       root.render(
         <IconComponent
           width={size}
           height={size}
           stroke={color}
-          strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -140,7 +137,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
           clonedSvg.setAttribute('height', size.toString());
           clonedSvg.setAttribute('fill', 'none');
           clonedSvg.setAttribute('stroke', color);
-          clonedSvg.setAttribute('stroke-width', strokeWidth.toString());
           clonedSvg.setAttribute('stroke-linecap', 'round');
           clonedSvg.setAttribute('stroke-linejoin', 'round');
 
@@ -153,7 +149,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
             const fill = el.getAttribute('fill');
             if (!fill || fill === 'none') {
               el.setAttribute('stroke', color);
-              el.setAttribute('stroke-width', strokeWidth.toString());
             }
           });
 
@@ -168,7 +163,7 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       document.body.removeChild(tempDiv);
       return null;
     }
-  }, [icon?.name, IconComponent, size, color, strokeWidth]);
+  }, [icon?.name, IconComponent, size, color]);
 
   // Helper function to generate SVG code and update state
   const generateAndUpdateSvgCode = async () => {
@@ -219,7 +214,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
   // Create a fallback SVG string
   const createSvgFallback = () => {
     if (!icon) return '';
-
     const svgString = `<svg 
       xmlns="http://www.w3.org/2000/svg" 
       width="${size}" 
@@ -227,7 +221,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       viewBox="0 0 24 24" 
       fill="none" 
       stroke="${color}" 
-      stroke-width="${strokeWidth}" 
       stroke-linecap="round" 
       stroke-linejoin="round"
     >
@@ -297,8 +290,34 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
         throw new Error('Failed to generate SVG content');
       }
 
-      // Use clipboard API to copy text
-      await navigator.clipboard.writeText(svgContent);
+      // Try using the clipboard API with fallback methods
+      try {
+        // First try using the modern clipboard API
+        await navigator.clipboard.writeText(svgContent);
+      } catch (clipboardError) {
+        console.warn(
+          'Clipboard API failed, using fallback method:',
+          clipboardError,
+        );
+
+        // Create a temporary textarea element for fallback copying
+        const textArea = document.createElement('textarea');
+        textArea.value = svgContent;
+        textArea.style.position = 'fixed'; // Avoid scrolling to bottom
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        // Execute copy command and remove the temporary element
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        if (!successful) {
+          throw new Error('Fallback clipboard method failed');
+        }
+      }
+
       setIsCopied(true);
       toast.success('SVG copied to clipboard');
       setTimeout(() => setIsCopied(false), 2000);
@@ -388,12 +407,12 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                           height: `${Math.max(size, 32)}px`,
                         }}
                       >
+                        {' '}
                         <IconRenderer
                           key={iconKey} // This key is crucial for re-rendering
                           icon={icon}
                           size={size}
                           color={color}
-                          strokeWidth={strokeWidth}
                           className="drop-shadow-sm" // Adjusted shadow
                         />
                       </div>
@@ -499,8 +518,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       aria-labelledby="size-label"
                       className="space-y-2.5"
                     >
-                      {' '}
-                      {/* Adjusted space-y */}
                       <div className="flex items-center justify-between">
                         <label
                           id="size-label"
@@ -515,11 +532,11 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       <input
                         type="range"
                         min="12"
-                        max="80" // Adjusted max
+                        max="80"
                         step="1"
                         value={size}
                         onChange={(e) => setSize(Number(e.target.value))}
-                        className="w-full h-2 accent-primary bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary" // Improved light mode visibility
+                        className="w-full h-2 accent-primary bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
                         aria-valuenow={size}
                         aria-valuemin={12}
                         aria-valuemax={80}
@@ -528,42 +545,6 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>12px</span>
                         <span>80px</span>
-                      </div>
-                    </section>
-                    {/* Stroke Width Control */}
-                    <section
-                      aria-labelledby="stroke-label"
-                      className="space-y-2.5"
-                    >
-                      {' '}
-                      {/* Adjusted space-y */}
-                      <div className="flex items-center justify-between">
-                        <label
-                          id="stroke-label"
-                          className="text-sm font-medium text-foreground"
-                        >
-                          Stroke Width
-                        </label>
-                        <span className="rounded bg-muted/50 px-1.5 py-0.5 text-xs font-mono text-muted-foreground border border-border">
-                          {strokeWidth.toFixed(1)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="3"
-                        step="0.1"
-                        value={strokeWidth}
-                        onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                        className="w-full h-2 accent-primary bg-slate-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary" // Improved light mode visibility
-                        aria-valuenow={strokeWidth}
-                        aria-valuemin={0.5}
-                        aria-valuemax={3}
-                        aria-label="Stroke width"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>0.5</span>
-                        <span>3.0</span>
                       </div>
                     </section>
                   </div>
@@ -614,16 +595,13 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${
-                        icon.name
-                      } } from '@airqo-icons-min/react';
+                      code={`import { ${icon.name} } from '@airqo-icons-min/react';
 
 export default function MyComponent() {
   return (
     <${icon.name}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth.toFixed(1)}}
     />
   );
 }`}
@@ -652,7 +630,6 @@ export default function MyComponent() {
       icon={${icon.name}}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth.toFixed(1)}}
       onClick={() => {/* handle click */}}
     />
   );
@@ -679,7 +656,6 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
   <${icon.name}
     :size="${size}"
     color="${color}"
-    :stroke-width="${strokeWidth.toFixed(1)}"
   />
 </template>`}
                     />
@@ -696,16 +672,13 @@ import { ${icon.name} } from '@airqo-icons-min/vue';
                     </div>
                     <CodeBlock
                       language="tsx"
-                      code={`import { ${
-                        icon.name
-                      } } from '@airqo-icons-min/react-native';
+                      code={`import { ${icon.name} } from '@airqo-icons-min/react-native';
 
 export default function MyComponent() {
   return (
     <${icon.name}
       color="${color}"
       size={${size}}
-      strokeWidth={${strokeWidth.toFixed(1)}}
     />
   );
 }`}
@@ -824,16 +797,13 @@ function MyComponent() {
                         </h4>
                         <CodeBlock
                           language="tsx"
-                          code={`import { ${
-                            icon.name
-                          } } from '@airqo-icons-min/react';
+                          code={`import { ${icon.name} } from '@airqo-icons-min/react';
 
 function MyComponent() {
   return (
     <${icon.name} 
       size={${size}} 
       color="${color}" 
-      strokeWidth={${strokeWidth.toFixed(1)}}
       className="my-icon"
       onClick={() => console.log('Icon clicked!')}
     />

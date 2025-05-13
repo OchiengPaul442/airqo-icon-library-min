@@ -5,9 +5,9 @@ import { motion } from 'framer-motion';
 import { useIconCategories } from '@/hooks/use-icon-categories';
 import { useState, useEffect, useRef } from 'react';
 import { IconMeta } from '@airqo-icons-min/core';
-import { ClientIcon } from '@airqo-icons-min/react/client';
 import * as lucideIcons from 'lucide-react';
 import { IconRenderer } from '@/components/icon-renderer';
+import { ClientIcon } from '@/components/client-icon';
 
 // Animation variants
 const fadeIn = {

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ClientThemeToggle } from '@/components/client-theme-toggle';
-import { ClientIcon } from '@airqo-icons-min/react/client';
 import { Github } from 'lucide-react';
 import { Toaster } from 'sonner';
 import './globals.css';
@@ -65,14 +64,14 @@ export default function RootLayout({
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <ClientThemeToggle />
+                  <ClientThemeToggle />{' '}
                   <a
                     href="https://github.com/OchiengPaul442/airqo-icon-library-min"
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
-                    <ClientIcon icon={Github} className="h-5 w-5" />
+                    <Github className="h-5 w-5" />
                     <span className="sr-only">GitHub</span>
                   </a>
                 </div>

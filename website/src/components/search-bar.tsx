@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Search, X, Filter } from 'lucide-react';
 import { useDebounce } from 'use-debounce';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ClientIcon } from '@airqo-icons-min/react/client';
+import { ClientIcon } from '@/components/client-icon';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;

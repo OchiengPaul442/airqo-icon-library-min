@@ -75,13 +75,12 @@ export function IconRenderer({
 
     return Component;
   }, [icon?.name, className, color, onClick, size, strokeWidth]);
-
   // Primary SVG props that will be applied directly
   const svgProps: Omit<SVGProps<SVGSVGElement> & SVGRProps, 'ref'> = {
     width: size,
     height: size,
     stroke: color,
-    strokeWidth: strokeWidth,
+    strokeWidth: Number(strokeWidth), // Ensure strokeWidth is a number
     fill: 'none',
     className: cn(className),
     onClick,
@@ -91,6 +90,8 @@ export function IconRenderer({
       color, // Sets the CSS color property for SVG elements that use currentColor
       minWidth: size,
       minHeight: size,
+      // Force stroke width in style as well to ensure it's applied
+      strokeWidth: `${strokeWidth}px`,
     },
     'aria-label': icon?.name,
   };

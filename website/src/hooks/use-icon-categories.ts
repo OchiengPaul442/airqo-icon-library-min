@@ -1,6 +1,23 @@
 import { useMemo } from 'react';
 import { IconMeta } from '@airqo-icons-min/core';
-import { icons } from '@airqo-icons-min/core';
+
+// Try to import icons from the package, but fall back to our local manifest if needed
+let icons: IconMeta[] = [];
+try {
+  // First try to import from the core package
+  const coreModule = require('@airqo-icons-min/core');
+  if (coreModule && coreModule.icons) {
+    icons = coreModule.icons;
+  } else {
+    // Fall back to our local manifest
+    const localManifest = require('../libs/icon-manifest');
+    icons = localManifest.icons || [];
+  }
+} catch (error) {
+  // Use our local fallback if package import fails
+  const localManifest = require('../libs/icon-manifest');
+  icons = localManifest.icons || [];
+}
 
 type IconsGroupedByCategory = Record<
   string,
