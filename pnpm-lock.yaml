@@ -187,10 +187,10 @@ importers:
   website:
     dependencies:
       '@airqo-icons-min/core':
-        specifier: ^1.1.1
+        specifier: workspace:*
         version: link:../packages/core
       '@airqo-icons-min/react':
-        specifier: ^1.1.1
+        specifier: workspace:*
         version: link:../packages/react
       '@radix-ui/react-dialog':
         specifier: ^1.1.11

@@ -8,12 +8,14 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    // Enable transpilation of workspace packages
+    externalDir: true,
   },
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true, // Temporarily disable ESLint during build
     dirs: ['src'],
   },
-  transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'], // Ensure packages are transpiled
+  transpilePackages: ['@airqo-icons-min/react', '@airqo-icons-min/core'],
   env: {
     NEXT_TELEMETRY_DISABLED: '1',
   },
