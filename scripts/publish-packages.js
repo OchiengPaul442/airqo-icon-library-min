@@ -36,13 +36,11 @@ function runCommand(command, cwd = process.cwd()) {
 
     return execSync(command, {
       cwd,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: 'inherit', // Show output to help with debugging
       encoding: 'utf-8',
     });
   } catch (error) {
     console.error(`Error running "${command}": ${error.message}`);
-    if (error.stdout) console.log('STDOUT:', error.stdout);
-    if (error.stderr) console.log('STDERR:', error.stderr);
     throw error;
   }
 }
@@ -65,8 +63,8 @@ function getPackageVersion(packagePath) {
   }
 }
 
-// Update version in package.json
-function updatePackageVersion(packagePath, releaseType) {
+// Update version in package.json and update dependencies
+function updatePackageVersion(packagePath, releaseType, newVersion = null) {
   const packageJsonPath = path.join(packagePath, 'package.json');
   if (!fs.existsSync(packageJsonPath)) {
     throw new Error(`Package.json not found at ${packageJsonPath}`);
@@ -88,35 +86,57 @@ function updatePackageVersion(packagePath, releaseType) {
     throw new Error(`No version field in package.json at ${packageJsonPath}`);
   }
 
-  // Parse current version
-  const currentVersion = packageJson.version;
-  const versionParts = currentVersion
-    .split('.')
-    .map((part) => parseInt(part, 10));
+  // Calculate new version if not provided
+  if (!newVersion) {
+    // Parse current version
+    const currentVersion = packageJson.version;
+    const versionParts = currentVersion
+      .split('.')
+      .map((part) => parseInt(part, 10));
 
-  if (versionParts.length !== 3) {
-    throw new Error(
-      `Invalid version format in ${packageJsonPath}: ${currentVersion}`,
-    );
+    if (versionParts.length !== 3) {
+      throw new Error(
+        `Invalid version format in ${packageJsonPath}: ${currentVersion}`,
+      );
+    }
+
+    // Update version based on release type
+    let [major, minor, patch] = versionParts;
+
+    if (releaseType === 'major') {
+      major++;
+      minor = 0;
+      patch = 0;
+    } else if (releaseType === 'minor') {
+      minor++;
+      patch = 0;
+    } else {
+      // patch
+      patch++;
+    }
+    newVersion = `${major}.${minor}.${patch}`;
   }
 
-  // Update version based on release type
-  let [major, minor, patch] = versionParts;
-
-  if (releaseType === 'major') {
-    major++;
-    minor = 0;
-    patch = 0;
-  } else if (releaseType === 'minor') {
-    minor++;
-    patch = 0;
-  } else {
-    // patch
-    patch++;
-  }
-
-  const newVersion = `${major}.${minor}.${patch}`;
+  // Set the new version
   packageJson.version = newVersion;
+
+  // Update any internal dependencies
+  if (packageJson.dependencies) {
+    Object.keys(packageJson.dependencies).forEach((dep) => {
+      if (dep.startsWith('@airqo-icons-min/')) {
+        packageJson.dependencies[dep] = newVersion;
+      }
+    });
+  }
+
+  // Update peerDependencies if they reference our packages
+  if (packageJson.peerDependencies) {
+    Object.keys(packageJson.peerDependencies).forEach((dep) => {
+      if (dep.startsWith('@airqo-icons-min/')) {
+        packageJson.peerDependencies[dep] = newVersion;
+      }
+    });
+  }
 
   // Write back to package.json
   fs.writeFileSync(

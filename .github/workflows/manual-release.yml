@@ -22,11 +22,15 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  packages: write
+  id-token: write
 
 jobs:
   release:
     name: Release Process
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -40,6 +44,7 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
+          scope: '@airqo-icons-min'
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v2
@@ -73,6 +78,12 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
 
+      - name: Setup .npmrc for publishing
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+
       - name: Generate Icons
         run: pnpm generate
 
@@ -91,14 +102,14 @@ jobs:
           # Determine release type from input
           RELEASE_TYPE="${{ github.event.inputs.version_type }}"
           echo "Release type: $RELEASE_TYPE"
-          
+
           # Determine if this is a dry run
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             echo "Running in DRY RUN mode - no actual publishing will occur"
-            pnpm release:dry -- --$RELEASE_TYPE
+            pnpm release:manual:dry -- --$RELEASE_TYPE
           else
             echo "Running in PRODUCTION mode - changes will be published"
-            pnpm release -- --$RELEASE_TYPE
+            NODE_AUTH_TOKEN=${{ secrets.NPM_TOKEN }} pnpm release:manual -- --$RELEASE_TYPE
           fi
 
       - name: Build packages
@@ -107,21 +118,24 @@ jobs:
       # Use GitHub's built-in token to push changes and tags
       - name: Push tags and changes
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tags: true
+        run: |
+          # Ensure we have proper authentication
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
+          # Push changes and tags
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
+          git push --tags
 
       # Add release summary
       - name: Release Summary
         run: |
           echo "### Release Summary âœ…" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "í´¬ **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
+            echo "ï¿½ï¿½ï¿½ **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
-            echo "í³¦ Successfully published packages" >> $GITHUB_STEP_SUMMARY
+            echo "ï¿½ï¿½ï¿½ Successfully published packages" >> $GITHUB_STEP_SUMMARY
           fi
-          
-          echo "í³… Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "í´¢ Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+
+          echo "ï¿½ï¿½ï¿½ Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "ï¿½ï¿½ï¿½ Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY

@@ -1,7 +1,7 @@
 {
   "name": "@airqo-icons-min/icons",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "workspaces": [
     "packages/*",
     "website"
@@ -28,7 +28,9 @@
     "prepare": "husky install",
     "release": "node scripts/publish-packages.js",
     "release:dry": "node scripts/publish-packages.js --dry-run",
+    "release:manual": "node scripts/manual-release.js",
     "release:manual:dry": "node scripts/manual-release.js --dry-run",
+    "verify": "node scripts/verify-packages.js",
     "version:update": "node scripts/update-versions.js",
     "changelog": "node scripts/generate-changelog.js",
     "untrack-generated": "node scripts/untrack-generated-files.js"
