@@ -1,3 +1,4 @@
+// filepath: c:\projects\airqo-icon-library-min\.github\workflows\manual-release.yml
 name: Manual Release and Publish
 
 on:
@@ -133,13 +134,13 @@ jobs:
           echo "" >> $TEMP_FILE
 
           if [ "${{ github.event.inputs.version_type }}" = "major" ]; then
-            echo "### ��� Breaking Changes" >> $TEMP_FILE
+            echo "### 💥 Breaking Changes" >> $TEMP_FILE
             echo "" >> $TEMP_FILE
             echo "- Major version upgrade" >> $TEMP_FILE
             echo "" >> $TEMP_FILE
           fi
 
-          echo "### ��� Features and Improvements" >> $TEMP_FILE
+          echo "### 🚀 Features and Improvements" >> $TEMP_FILE
           echo "" >> $TEMP_FILE
           echo "- New release of $NEW_VERSION" >> $TEMP_FILE
           echo "" >> $TEMP_FILE
@@ -181,14 +182,14 @@ jobs:
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
 
-          echo "��� Verifying NPM token..."
+          echo "🔑 Verifying NPM token..."
 
           # Verify npm token works by checking authentication status
           if npm whoami; then
             NPM_USER=$(npm whoami)
             echo "✅ NPM token is valid. Authenticated as: $NPM_USER"
               # Check if the user has permission to publish to airqo-icons-min scope
-            echo "��� Checking permissions for @airqo-icons-min scope..."
+            echo "🔍 Checking permissions for @airqo-icons-min scope..."
             if npm org ls @airqo-icons-min 2>/dev/null | grep -q "$NPM_USER"; then
               echo "✅ User $NPM_USER has access to @airqo-icons-min organization"
             else
@@ -224,7 +225,7 @@ jobs:
           FINAL_VERSION="$NEW_VERSION"
           # Flag to track if we had to increment the version due to existing versions
           VERSION_INCREMENTED=false
-
+          
           # Function to check if a version exists on npm
           check_version_exists() {
             local pkg_name="$1"
@@ -237,7 +238,7 @@ jobs:
               return 1 # Version doesn't exist
             fi
           }
-
+          
           # Function to increment version
           increment_version() {
             local version="$1"
@@ -298,7 +299,7 @@ jobs:
             if [ -f "${PKG_DIR}/package.json" ]; then
               PACKAGE_NAME=$(node -p "require('./${PKG_DIR}/package.json').name")
               
-              echo "��� Processing ${PACKAGE_NAME} in ${PKG_DIR}"
+              echo "📦 Processing ${PACKAGE_NAME} in ${PKG_DIR}"
               
               # Process any workspace: references before publishing
               process_references "${PKG_DIR}" "${FINAL_VERSION}"
@@ -334,7 +335,7 @@ jobs:
                 process_references "${PKG_DIR}" "${FINAL_VERSION}"
               fi
               
-              echo "�� Publishing ${PACKAGE_NAME}@${FINAL_VERSION}"
+              echo "🚀 Publishing ${PACKAGE_NAME}@${FINAL_VERSION}"
               
               # Try to publish
               if (cd "${PKG_DIR}" && npm publish --access public); then
@@ -381,12 +382,12 @@ jobs:
         run: |
           # Get the final version from the publish step
           FINAL_VERSION="${{ steps.publish.outputs.new_version }}"
-
+          
           # If the final version was not set, use the original version
           if [ -z "$FINAL_VERSION" ]; then
             FINAL_VERSION="${{ steps.version.outputs.new_version }}"
           fi
-
+          
           echo "Using version for tags: $FINAL_VERSION"
 
           if git ls-remote --tags origin | grep -q "refs/tags/v$FINAL_VERSION"; then
@@ -459,7 +460,7 @@ jobs:
           echo "### Release Summary ✅" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            echo "��� **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
+            echo "🧪 **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
             # Use the final version (which may have been auto-incremented)
             FINAL_VERSION="${{ steps.version.outputs.new_version }}"
@@ -467,12 +468,12 @@ jobs:
               FINAL_VERSION="${{ steps.delete_release.outputs.final_version }}"
             fi
             
-            echo "��� Successfully published packages to npm" >> $GITHUB_STEP_SUMMARY
-            echo "��� Published version: v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
-            echo "��� NPM package: https://www.npmjs.com/package/@airqo-icons-min/core" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 Successfully published packages to npm" >> $GITHUB_STEP_SUMMARY
+            echo "📦 Published version: v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "🔗 NPM package: https://www.npmjs.com/package/@airqo-icons-min/core" >> $GITHUB_STEP_SUMMARY
             REPO_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
-            echo "���️ GitHub release: ${REPO_URL}/releases/tag/v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
+            echo "🏷️ GitHub release: ${REPO_URL}/releases/tag/v$FINAL_VERSION" >> $GITHUB_STEP_SUMMARY
           fi
 
-          echo "��� Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
-          echo "��� Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "📅 Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "📊 Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
