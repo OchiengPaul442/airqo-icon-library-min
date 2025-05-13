@@ -288,7 +288,7 @@ jobs:
               fi
             fi
           done
-          
+
           # If we auto-incremented any package version, we need to update all packages to match
           if [ "$AUTO_INCREMENTED" = true ]; then
             echo "🔄 Auto-incremented version to ${NEW_VERSION}. Updating all packages to match..."
@@ -323,13 +323,13 @@ jobs:
         run: |
           # Delete remote tag if it exists
           NEW_VERSION=${{ steps.version.outputs.new_version }}
-          
+
           # If we auto-incremented the version, use that instead
           if [ -n "${{ steps.publish.outputs.new_version }}" ]; then
             NEW_VERSION="${{ steps.publish.outputs.new_version }}"
             echo "Using auto-incremented version for tags: $NEW_VERSION" 
           fi
-          
+
           if git ls-remote --tags origin | grep -q "refs/tags/v$NEW_VERSION"; then
             echo "Tag v$NEW_VERSION already exists remotely, deleting it"
             git push --delete origin "v$NEW_VERSION" || echo "Could not delete remote tag (it may not exist)"
@@ -351,20 +351,20 @@ jobs:
           else
             NEW_VERSION="${{ steps.version.outputs.new_version }}"
           fi
-          
+
           echo "final_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          
+
           # Ensure jq is installed
           if ! command -v jq &> /dev/null; then
             echo "Installing jq for JSON processing"
             sudo apt-get update && sudo apt-get install -y jq
           fi
-          
+
           # Check if release exists and delete it using GitHub API
           RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$NEW_VERSION" | \
             jq -r '.id // empty')
-          
+
           if [ ! -z "$RELEASE_ID" ]; then
             echo "Deleting existing release with ID $RELEASE_ID"
             curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
