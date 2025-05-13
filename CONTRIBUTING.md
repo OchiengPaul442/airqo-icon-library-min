@@ -136,13 +136,60 @@ For consistent icons, please follow these guidelines:
 
 ## Release Process
 
-The release process is automated using semantic-release:
+The release process is manually triggered by authorized repository maintainers:
 
-1. Commits are analyzed based on conventional commit messages
-2. Version is bumped according to semantic versioning rules
-3. CHANGELOG.md is updated
-4. Packages are built and published to npm
-5. GitHub release is created with generated notes
+1. Only users with write permissions to the repository can trigger releases
+2. Releases are initiated through the GitHub Actions workflow "Manual Release"
+3. The process involves:
+   - Selecting a version increment type (patch, minor, or major)
+   - Optionally running a dry-run to validate the process
+   - Generating a changelog based on conventional commit messages
+   - Building and publishing packages to npm
+   - Creating a Git tag and GitHub release
+   - Updating documentation
+
+### Triggering a Release
+
+To trigger a release (requires repository administrator permissions):
+
+1. Go to the GitHub repository's "Actions" tab
+2. Select the "Manual Release" workflow
+3. Click "Run workflow"
+4. Configure your release:
+
+   - **Release type**: Select patch (0.0.X), minor (0.X.0), or major (X.0.0)
+   - **Reset version**: Option to reset to version 1.0.0 (rarely used)
+   - **Dry run**: Option to test the release process without publishing
+
+5. Click "Run workflow" to start the release process
+6. The workflow will require approval from a repository administrator
+7. Once approved, the workflow will run and you can monitor progress in the Actions tab
+
+**Note**: Only repository administrators can trigger and approve releases. This is enforced through protected environments in GitHub.
+
+## Website Deployment
+
+The documentation website deployment is also manually triggered:
+
+1. Only repository administrators can deploy the website
+2. All website deployments require explicit approval through protected environments
+2. The deployment is initiated through the GitHub Actions workflow "Deploy Documentation Website"
+3. The process involves:
+   - Building the icon library packages
+   - Generating required file types and components
+   - Building the Next.js website
+   - Deploying to GitHub Pages
+
+### Triggering a Website Deployment
+
+To deploy the documentation website (requires repository write permissions):
+
+1. Go to the GitHub repository's "Actions" tab
+2. Select the "Deploy Documentation Website" workflow
+3. Click "Run workflow"
+4. Optionally add a deployment note
+5. Click "Run workflow" to start the deployment process
+6. Monitor the progress in the Actions tab
 
 ## Getting Help
 

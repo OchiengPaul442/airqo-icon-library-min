@@ -22,6 +22,7 @@ jobs:
   build:
     name: Build website
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,6 +89,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
+    environment: production
     needs: build
     steps:
       - name: Deploy to GitHub Pages

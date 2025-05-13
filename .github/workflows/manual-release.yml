@@ -32,6 +32,7 @@ jobs:
   release:
     name: Manual Release Process
     runs-on: ubuntu-latest
+    environment: npm-publish
 
     steps:
       - name: Checkout code
