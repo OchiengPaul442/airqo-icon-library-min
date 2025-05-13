@@ -174,11 +174,53 @@ async function manualRelease() {
   for (const pkg of PACKAGES) {
     const pkgPath = path.resolve(__dirname, '..', pkg);
     const pkgName = path.basename(pkg);
-
     try {
+      // First, create a temporary package.json with resolved workspace dependencies
+      log(`🔧 Pre-processing package.json to resolve workspace references...`);
+
+      // Read the package.json
+      const pkgJsonPath = path.join(pkgPath, 'package.json');
+      const pkgJsonContent = fs.readFileSync(pkgJsonPath, 'utf-8');
+      const pkgJson = JSON.parse(pkgJsonContent);
+
+      // Check and fix any remaining workspace references in dependencies
+      let hasWorkspaceRefs = false;
+      if (pkgJson.dependencies) {
+        Object.keys(pkgJson.dependencies).forEach((dep) => {
+          if (
+            typeof pkgJson.dependencies[dep] === 'string' &&
+            pkgJson.dependencies[dep].startsWith('workspace:')
+          ) {
+            log(`🔄 Replacing workspace reference for dependency ${dep}`);
+            pkgJson.dependencies[dep] = newVersion;
+            hasWorkspaceRefs = true;
+          }
+        });
+      }
+
+      // Check and fix any remaining workspace references in peerDependencies
+      if (pkgJson.peerDependencies) {
+        Object.keys(pkgJson.peerDependencies).forEach((dep) => {
+          if (
+            typeof pkgJson.peerDependencies[dep] === 'string' &&
+            pkgJson.peerDependencies[dep].startsWith('workspace:')
+          ) {
+            log(`🔄 Replacing workspace reference for peerDependency ${dep}`);
+            pkgJson.peerDependencies[dep] = newVersion;
+            hasWorkspaceRefs = true;
+          }
+        });
+      }
+
+      // Write back to package.json if any changes were made
+      if (hasWorkspaceRefs) {
+        log(`📝 Writing updated package.json without workspace references`);
+        fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+      }
+
       const publishCommand = isDryRun
-        ? 'pnpm publish --access public --no-git-checks --dry-run'
-        : 'pnpm publish --access public --no-git-checks';
+        ? 'npm publish --access public --dry-run'
+        : 'npm publish --access public';
 
       runCommand(publishCommand, pkgPath);
       log(

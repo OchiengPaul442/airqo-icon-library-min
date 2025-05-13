@@ -6,13 +6,14 @@
     "dev": "next dev",
     "prebuild": "cd ../packages/react && npm run build",
     "build": "next build",
+    "vercel-build": "cd .. && npm run build && cd website && next build",
     "start": "next start",
     "lint": "next lint",
     "clean": "rimraf .next out"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "workspace:*",
-    "@airqo-icons-min/react": "workspace:*",
+    "@airqo-icons-min/core": "^1.0.1",
+    "@airqo-icons-min/react": "^1.0.1",
     "@radix-ui/react-dialog": "^1.1.11",
     "@radix-ui/react-tabs": "^1.1.9",
     "@types/react-syntax-highlighter": "^15.5.13",
