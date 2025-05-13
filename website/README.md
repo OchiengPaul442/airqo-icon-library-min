@@ -109,7 +109,7 @@ The website is automatically deployed to [Vercel](https://vercel.com) when chang
 
 ## Contributing
 
-See the [CONTRIBUTING.md](../CONTRIBUTING.md) file in the root of the repository for information on contributing to the website.
+See the [CONTRIBUTING.md](../docs/CONTRIBUTING.md) file for information on contributing to the website.
 
 ## License
 

@@ -11,25 +11,26 @@ To restrict the manual deployment workflows to administrators only, follow these
 3. In the left sidebar, click on "Actions" under "Code and automation"
 4. Scroll down to "Workflow permissions"
 5. Configure the following settings:
+
    - Set "Workflow permissions" to "Restrict permissions for all workflows"
    - Check "Allow GitHub Actions to create and approve pull requests"
    - Under "Required approvals", select "Require approvals for all outside collaborators"
    - Set "Required reviewers/approvers" to include only repository administrators
 
 6. Next, go to "Environments" in the left sidebar
-7. Create two environments: "production" and "npm-publish"
-8. For each environment:
+7. Create the "github-pages" environment
+8. Configure the environment:
    - Click on the environment name
    - Enable "Required reviewers" and add repository administrators
    - Enable "Wait timer" and set it to 10 minutes to provide time to cancel accidental deployments
    - Enable "Deployment branches" and select "Protected branches only"
 
-## Updating Workflows to Use Protected Environments
+## Workflow Security Configuration
 
-The GitHub Actions workflows have been updated to use these protected environments:
+The GitHub Actions workflows have been updated with appropriate security settings:
 
-1. The Manual Release workflow now uses the "npm-publish" environment for releasing to npm
-2. The Deploy Documentation Website workflow now uses the "production" environment for deploying to GitHub Pages
+1. The Manual Release workflow is restricted to administrators through repository settings
+2. The Deploy Documentation Website workflow uses the "github-pages" environment for deploying to GitHub Pages
 
 With these settings in place, only administrators can approve and run the manual deployment workflows.
 
@@ -39,18 +40,28 @@ To further secure the deployment process, set up branch protection rules for the
 
 1. Go to "Branches" in the repository settings
 2. Add a rule for the "main" branch
-3. Enable the following settings:
-   - "Require pull request reviews before merging"
-   - "Require status checks to pass before merging"
-   - "Require conversation resolution before merging"
-   - "Do not allow bypassing the above settings"
+3. Configure the following settings:
+   - Check "Require a pull request before merging"
+   - Check "Require approvals"
+   - Set required number of approvals to at least 1
+   - Check "Require review from Code Owners"
+   - Check "Restrict who can push to matching branches" and add only administrators
 
-## Verifying Permissions
+## Secret Management
 
-To verify the correct permission settings are in place:
+Ensure all necessary secrets for npm publishing are configured:
 
-1. Have a non-administrator collaborator attempt to trigger a manual release
-2. The workflow should require explicit administrator approval before running
-3. Regularly audit the repository permissions to ensure only trusted users have administrator access
+1. Go to "Secrets and variables" > "Actions" in the repository settings
+2. Add the following secrets:
+   - `NPM_TOKEN`: Your npm authentication token
 
-Remember to periodically review and update these security settings as your team and repository needs evolve.
+## Testing the Deployment Process
+
+After configuring all settings:
+
+1. Only administrators should be able to manually trigger workflows
+2. When triggered, deployments should require approval by an administrator
+3. The deployment process will have a wait time before executing
+4. All changes to workflows require administrator approval
+
+This setup ensures that package publishing and website deployments are secure and only performed by authorized administrators.

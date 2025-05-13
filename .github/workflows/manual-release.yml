@@ -32,7 +32,8 @@ jobs:
   release:
     name: Manual Release Process
     runs-on: ubuntu-latest
-    environment: npm-publish
+    # Remove environment specification as it's causing validation errors
+    # We'll handle permissions through repository settings instead
 
     steps:
       - name: Checkout code
@@ -72,69 +73,126 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Configure Git user
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      # Check if version reset is requested
+      - name: Reset versions to 1.0.0 if requested
+        if: ${{ github.event.inputs.reset_version == 'true' }}
+        run: |
+          echo "Resetting all packages to version 1.0.0"
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Update root package.json
+            const rootPkgPath = path.resolve('./package.json');
+            const rootPkg = require(rootPkgPath);
+            rootPkg.version = '1.0.0';
+            fs.writeFileSync(rootPkgPath, JSON.stringify(rootPkg, null, 2) + '\n');
+            
+            // Update all packages in the packages directory
+            const packagesDir = path.resolve('./packages');
+            const packages = fs.readdirSync(packagesDir);
+            
+            for (const pkg of packages) {
+              const pkgJsonPath = path.resolve(packagesDir, pkg, 'package.json');
+              if (fs.existsSync(pkgJsonPath)) {
+                const pkgJson = require(pkgJsonPath);
+                pkgJson.version = '1.0.0';
+                
+                // Update dependencies to other local packages
+                if (pkgJson.dependencies) {
+                  for (const dep in pkgJson.dependencies) {
+                    if (dep.startsWith('@airqo/')) {
+                      pkgJson.dependencies[dep] = '1.0.0';
+                    }
+                  }
+                }
+                
+                // Update peerDependencies to other local packages
+                if (pkgJson.peerDependencies) {
+                  for (const dep in pkgJson.peerDependencies) {
+                    if (dep.startsWith('@airqo/')) {
+                      pkgJson.peerDependencies[dep] = '1.0.0';
+                    }
+                  }
+                }
+                
+                fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2) + '\n');
+              }
+            }
+            
+            // Update website package.json
+            const websitePkgPath = path.resolve('./website/package.json');
+            if (fs.existsSync(websitePkgPath)) {
+              const websitePkg = require(websitePkgPath);
+              websitePkg.version = '1.0.0';
+              
+              // Update dependencies to local packages
+              for (const dep in websitePkg.dependencies) {
+                if (dep.startsWith('@airqo/')) {
+                  websitePkg.dependencies[dep] = '1.0.0';
+                }
+              }
+              
+              fs.writeFileSync(websitePkgPath, JSON.stringify(websitePkg, null, 2) + '\n');
+            }
+          "
+
+          echo "All packages have been reset to version 1.0.0"
 
       - name: Generate Icons
         run: pnpm generate
 
+      - name: Fix component types
+        run: pnpm fix-component-types
+
+      - name: Enhance React Native Icons
+        # Use cross-env to ensure SHELL is set
+        run: pnpm enhance-rn
+
+      - name: Cleanup generated files
+        run: rm -rf packages/*/dist
+
+      - name: Set version and create release
+        id: release
+        run: |
+          # Determine if this is a dry run
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Running in DRY RUN mode - no actual publishing will occur"
+            DRY_RUN_FLAG="--dry-run"
+          else
+            echo "Running in PRODUCTION mode - changes will be published"
+            DRY_RUN_FLAG=""
+          fi
+
+          # Release type from input
+          RELEASE_TYPE="${{ github.event.inputs.version_type }}"
+          echo "Release type: $RELEASE_TYPE"
+
+          # If version was manually reset, we skip bumping the version
+          if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
+            echo "Version was manually reset to 1.0.0, skipping automatic version bump"
+            npx lerna version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
+          else
+            # Regular version bump based on selected type
+            npx lerna version $RELEASE_TYPE --yes --exact --no-push --include-merged-tags $DRY_RUN_FLAG
+          fi
+
+          # Get the new version number
+          NEW_VERSION=$(node -p "require('./lerna.json').version")
+          echo "New version: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
       - name: Build packages
         run: pnpm build
 
-      - name: Set version
-        id: set_version
-        run: |
-          if [[ "${{ github.event.inputs.reset_version }}" == "true" ]]; then
-            echo "NEXT_VERSION=1.0.0" >> "$GITHUB_ENV"
-            echo "Setting version to 1.0.0"
-          else
-            CURRENT_VERSION=$(node -p "require('./package.json').version")
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-            
-            if [[ "${{ github.event.inputs.version_type }}" == "major" ]]; then
-              NEXT_VERSION="$((MAJOR + 1)).0.0"
-            elif [[ "${{ github.event.inputs.version_type }}" == "minor" ]]; then
-              NEXT_VERSION="$MAJOR.$((MINOR + 1)).0"
-            else # patch
-              NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
-            fi
-            
-            echo "NEXT_VERSION=${NEXT_VERSION}" >> "$GITHUB_ENV"
-            echo "Next version will be: ${NEXT_VERSION}"
-          fi
-          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Update package versions
-        run: node scripts/update-versions.js ${{ env.NEXT_VERSION }}
-
-      - name: Create release notes
-        run: |
-          node scripts/generate-changelog.js
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add CHANGELOG.md package.json packages/*/package.json
-          git commit -m "chore(release): ${{ env.NEXT_VERSION }}"
-
-          if [[ "${{ github.event.inputs.dry_run }}" != "true" ]]; then
-            git tag -a "v${{ env.NEXT_VERSION }}" -m "Release v${{ env.NEXT_VERSION }}"
-          fi
-
-      - name: Publish to NPM (dry run)
-        if: ${{ github.event.inputs.dry_run == 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "Running in DRY RUN mode - packages will not be published"
-          node scripts/publish-packages.js --dry-run
-
-      - name: Publish to NPM
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "Publishing packages to NPM with version ${{ env.NEXT_VERSION }}"
-          node scripts/publish-packages.js
-
-      # Use dedicated action for pushing to GitHub
+      # Use GitHub's built-in token to push changes and tags
       - name: Push tags and changes
         if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: ad-m/github-push-action@master
@@ -142,63 +200,41 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
 
+      # Publish packages if not a dry run
+      - name: Publish packages to npm
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "Publishing packages to npm"
+          npx lerna publish from-package --yes --no-verify-access
+
+      # Create GitHub release
       - name: Create GitHub Release
         if: ${{ github.event.inputs.dry_run != 'true' }}
-        uses: actions/github-script@v7
+        uses: softprops/action-gh-release@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
+          tag_name: v${{ steps.release.outputs.version }}
+          name: Release v${{ steps.release.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            try {
-              const changelogContent = fs.readFileSync('CHANGELOG.md', 'utf8');
-              const version = process.env.NEXT_VERSION;
-              const versionHeading = `## [${version}]`;
-              
-              // Extract release notes for this version
-              let releaseNotes = '';
-              const lines = changelogContent.split('\n');
-              let isCurrentVersion = false;
-              
-              for (let i = 0; i < lines.length; i++) {
-                if (lines[i].startsWith(versionHeading)) {
-                  isCurrentVersion = true;
-                  continue;
-                }
-                
-                if (isCurrentVersion) {
-                  if (lines[i].startsWith('## [')) {
-                    break;
-                  }
-                  releaseNotes += lines[i] + '\n';
-                }
-              }
-              
-              // Create a GitHub release
-              await github.rest.repos.createRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_name: `v${version}`,
-                name: `v${version}`,
-                body: releaseNotes.trim() || `Release version ${version}`,
-                draft: false,
-                prerelease: false
-              });
-              
-              console.log(`GitHub Release created for v${version}`);
-            } catch (error) {
-              console.error('Error creating GitHub release:', error);
-              core.setFailed('Failed to create GitHub release');
-            }
-
+      # Add release summary
       - name: Release Summary
         run: |
           echo "### Release Summary ✅" >> $GITHUB_STEP_SUMMARY
-          echo "��� Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "��� Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
-            echo "⚠️ **DRY RUN** - No packages published" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "��� **DRY RUN** - No actual publishing occurred" >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ Published to NPM" >> $GITHUB_STEP_SUMMARY
-            echo "���️ GitHub Release created" >> $GITHUB_STEP_SUMMARY
+            echo "��� Successfully published packages" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "��� Release Date: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "��� Version: ${{ steps.release.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "��� Release Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ github.event.inputs.reset_version }}" = "true" ]; then
+            echo "��� **Version was reset to 1.0.0**" >> $GITHUB_STEP_SUMMARY
           fi

@@ -5,6 +5,13 @@ A comprehensive, optimized SVG icon library for AirQo projects with support for 
 [![Manual Release](https://github.com/OchiengPaul442/airqo-icon-library-min/actions/workflows/manual-release.yml/badge.svg)](https://github.com/OchiengPaul442/airqo-icon-library-min/actions/workflows/manual-release.yml)
 [![CI Build Validation](https://github.com/OchiengPaul442/airqo-icon-library-min/actions/workflows/ci.yml/badge.svg)](https://github.com/OchiengPaul442/airqo-icon-library-min/actions/workflows/ci.yml)
 
+## 📖 Documentation
+
+- [Contributing Guidelines](./docs/CONTRIBUTING.md)
+- [Security Policy](./docs/SECURITY.md)
+- [Release Process](./docs/RELEASE_PROCESS.md)
+- [Administrator Deployments](./docs/ADMIN_DEPLOYMENTS.md)
+
 ## Features
 
 - **Multi-framework support**: Use the same icons across React, React Native, Vue, and Flutter projects
@@ -101,6 +108,7 @@ pnpm build
 
 ```
 airqo-icon-library-min/
+├── docs/                # Documentation files
 ├── svgs/                # Original SVG files organized by category
 ├── packages/
 │   ├── core/            # Shared utilities and types
@@ -124,7 +132,7 @@ Package releases are manually triggered by repository maintainers through GitHub
 - Releases are managed via the "Manual Release" GitHub Action
 - Versioning follows semantic versioning (major.minor.patch)
 
-For more details on the release process, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+For more details on the release process, see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md).
 
 ### Website Deployment
 
@@ -139,7 +147,11 @@ For more information on secure deployment practices, see [docs/ADMIN_DEPLOYMENTS
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to contribute.
+See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for details on how to contribute.
+
+## Security
+
+For information about security practices and policies, see [SECURITY.md](./docs/SECURITY.md).
 
 ## License
 
