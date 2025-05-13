@@ -158,6 +158,14 @@ jobs:
           NEW_VERSION=${{ steps.version.outputs.new_version }}
           git add package.json packages/*/package.json CHANGELOG.md
           git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
+
+          # Check if tag exists and delete it locally
+          if git tag -l "v$NEW_VERSION" | grep -q "v$NEW_VERSION"; then
+            echo "Tag v$NEW_VERSION already exists locally, deleting it"
+            git tag -d "v$NEW_VERSION"
+          fi
+
+          # Create the new tag
           git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
 
       - name: Validate NPM Token
@@ -165,13 +173,34 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          # Clear any existing npmrc files to avoid conflicts
+          rm -f ~/.npmrc
+
+          # Create a fresh npmrc file with the token
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
 
+          echo "🔑 Verifying NPM token..."
+
           # Verify npm token works by checking authentication status
-          npm whoami || { echo "NPM token is invalid or missing. Please check your NPM_TOKEN secret."; exit 1; }
-          echo "✅ NPM token is valid"
+          if npm whoami; then
+            NPM_USER=$(npm whoami)
+            echo "✅ NPM token is valid. Authenticated as: $NPM_USER"
+            
+            # Check if the user has permission to publish to airqo-icons-min scope
+            echo "🔍 Checking permissions for @airqo-icons-min scope..."
+            if npm org ls @airqo-icons-min 2>/dev/null | grep -q "$NPM_USER"; then
+              echo "✅ User $NPM_USER has access to @airqo-icons-min organization"
+            else
+              echo "⚠️ Warning: Could not verify if $NPM_USER has access to @airqo-icons-min organization"
+              echo "This may be due to permissions or the organization setup"
+            fi
+          else 
+            echo "❌ NPM token is invalid or expired. Please check your NPM_TOKEN secret."
+            echo "Make sure the token has publish access to the @airqo-icons-min scope."
+            exit 1
+          fi
 
       - name: Publish Packages to NPM
         if: ${{ github.event.inputs.dry_run != 'true' }}
@@ -183,20 +212,80 @@ jobs:
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "always-auth=true" >> ~/.npmrc
 
-          # Show npm config for debugging
-          npm config list
+          # Show npm config for debugging (hide secrets)
+          npm config list | grep -v _authToken
+
+          # Track if all packages published successfully
+          PUBLISH_SUCCESS=true
 
           for PKG_DIR in packages/core packages/react packages/react-native packages/vue; do
             if [ -f "${PKG_DIR}/package.json" ]; then
               PACKAGE_NAME=$(node -p "require('./${PKG_DIR}/package.json').name")
-              echo "Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
+              echo "📦 Publishing ${PKG_DIR} - ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
               
               # Publish with verbose output for debugging
-              (cd "${PKG_DIR}" && npm publish --access public)
-              
-              echo "✅ Published ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
+              if (cd "${PKG_DIR}" && npm publish --access public); then
+                echo "✅ Successfully published ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }}"
+                
+                # Verify the package was published by checking npm registry
+                echo "🔍 Verifying package was published to npm..."
+                if npm view ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }} version --json; then
+                  echo "✅ Verified ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }} is available in npm registry"
+                else
+                  echo "⚠️ Warning: Could not verify ${PACKAGE_NAME}@${{ steps.version.outputs.new_version }} in npm registry"
+                  echo "This may be due to npm registry propagation delay and not necessarily an error"
+                fi
+              else
+                echo "❌ Failed to publish ${PACKAGE_NAME}"
+                PUBLISH_SUCCESS=false
+              fi
             fi
           done
+
+          # If any package failed to publish, mark the step as failed
+          if [ "$PUBLISH_SUCCESS" = false ]; then
+            echo "❌ At least one package failed to publish"
+            exit 1
+          fi
+
+      - name: Push changes to GitHub
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          # Delete remote tag if it exists
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          if git ls-remote --tags origin | grep -q "refs/tags/v$NEW_VERSION"; then
+            echo "Tag v$NEW_VERSION already exists remotely, deleting it"
+            git push --delete origin "v$NEW_VERSION" || echo "Could not delete remote tag (it may not exist)"
+          fi
+
+          # Push the commits
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
+
+          # Push new tags
+          git push --tags
+
+      - name: Delete existing GitHub Release
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          NEW_VERSION=${{ steps.version.outputs.new_version }}
+          # Ensure jq is installed
+          if ! command -v jq &> /dev/null; then
+            echo "Installing jq for JSON processing"
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
+
+          # Check if release exists and delete it using GitHub API
+          RELEASE_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/v$NEW_VERSION" | \
+            jq -r '.id // empty')
+
+          if [ ! -z "$RELEASE_ID" ]; then
+            echo "Deleting existing release with ID $RELEASE_ID"
+            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID"
+          else
+            echo "No existing release found for tag v$NEW_VERSION"
+          fi
 
       - name: Create GitHub Release
         if: ${{ github.event.inputs.dry_run != 'true' }}
@@ -206,12 +295,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.new_version }}
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Push changes to GitHub
-        if: ${{ github.event.inputs.dry_run != 'true' }}
-        run: |
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
-          git push --tags
 
       - name: Run in Dry Run Mode
         if: ${{ github.event.inputs.dry_run == 'true' }}
