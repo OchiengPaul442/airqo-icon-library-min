@@ -193,11 +193,11 @@ jobs:
       - name: Release Summary
         run: |
           echo "### Release Summary âœ…" >> $GITHUB_STEP_SUMMARY
-          echo "í³¦ Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
-          echo "í´„ Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "ï¿½ï¿½ï¿½ Version: ${{ env.NEXT_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "ï¿½ï¿½ï¿½ Type: ${{ github.event.inputs.version_type }}" >> $GITHUB_STEP_SUMMARY
           if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
             echo "âš ï¸ **DRY RUN** - No packages published" >> $GITHUB_STEP_SUMMARY
           else
             echo "âœ… Published to NPM" >> $GITHUB_STEP_SUMMARY
-            echo "í¿·ï¸ GitHub Release created" >> $GITHUB_STEP_SUMMARY
+            echo "ï¿½ï¿½ï¿½ï¸ GitHub Release created" >> $GITHUB_STEP_SUMMARY
           fi
