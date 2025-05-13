@@ -126,15 +126,22 @@ export function useIconCategories() {
    * @param query The search query
    * @param category Optional category to filter within
    * @returns Array of matching IconMeta objects
-   */
-  const searchIcons = (query: string, category?: string): IconMeta[] => {
+   */ const searchIcons = (query: string, category?: string): IconMeta[] => {
     const searchString = query.toLowerCase();
     const iconsToSearch =
       category && category !== 'all' ? getIconsForCategory(category) : allIcons;
 
-    return iconsToSearch.filter((icon: IconMeta) =>
-      icon.name.toLowerCase().includes(searchString),
-    );
+    return iconsToSearch.filter((icon: IconMeta) => {
+      const nameMatch = icon.name.toLowerCase().includes(searchString);
+      const categoryMatch = formatCategoryName(icon.category)
+        .toLowerCase()
+        .includes(searchString);
+      const rawCategoryMatch = icon.category
+        .toLowerCase()
+        .includes(searchString);
+
+      return nameMatch || categoryMatch || rawCategoryMatch;
+    });
   };
 
   return {
