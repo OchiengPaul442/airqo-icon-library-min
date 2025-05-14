@@ -5,15 +5,15 @@
     "rootDir": "src",
     "composite": true,
     "declaration": true,
-    "declarationDir": "dist",
+    "declarationDir": "./dist",
     "declarationMap": true,
     "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "module": "ESNext",
-    "target": "es6",
+    "module": "commonjs",
+    "target": "es2018",
     "lib": ["DOM", "ESNext"],
     "jsx": "react",
     "allowSyntheticDefaultImports": true,
@@ -21,8 +21,7 @@
     "noEmit": false,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "emitDeclarationOnly": false,
-    "incremental": true
+    "emitDeclarationOnly": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

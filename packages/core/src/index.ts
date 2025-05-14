@@ -1,15 +1,16 @@
 import { icons as iconManifest } from './icon-manifest';
-import type { IconMeta } from './icon-manifest';
-import type { IconProps, IconBaseProps } from './types';
-
-// Export types
-export type { IconProps, IconBaseProps, IconMeta };
+import type { IconBaseProps, IconProps, IconMeta } from './types';
 
 // Create the icons object with type assertion
-const icons = iconManifest.reduce<Record<string, IconMeta>>((acc, icon) => {
-  acc[icon.name] = icon;
-  return acc;
-}, {});
+const icons: Record<string, IconMeta> = iconManifest.reduce(
+  (acc: Record<string, IconMeta>, icon) => {
+    acc[icon.name] = icon;
+    return acc;
+  },
+  {} as Record<string, IconMeta>,
+);
 
+// Export everything
+export type { IconBaseProps, IconProps, IconMeta };
 export { icons };
 export default icons;
