@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import type { ThemeProviderProps } from 'next-themes';
+import { useIsClient } from '@/hooks/use-is-client';
 
 interface ExtendedThemeProviderProps extends ThemeProviderProps {
   children: React.ReactNode;
@@ -19,8 +20,13 @@ export function ThemeProvider({
   suppressHydrationWarning,
   ...props
 }: ExtendedThemeProviderProps) {
+  const isClient = useIsClient();
+
   // Theme availability check and view transitions setup
   React.useEffect(() => {
+    // Only run on client side
+    if (!isClient) return;
+
     // Check for OS dark mode preference
     const isDarkOS = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.classList.toggle('dark-theme-available', true);
@@ -32,15 +38,18 @@ export function ThemeProvider({
     if (hasViewTransitions) {
       document.documentElement.classList.add('has-view-transitions');
     }
-  }, []);
-
+  }, [isClient]);
   return (
     <NextThemesProvider
       attribute="class"
       defaultTheme="system"
       enableSystem
       // Only disable transitions if view transitions API is not supported
-      disableTransitionOnChange={!('startViewTransition' in document)}
+      // During SSR, always disable transitions
+      disableTransitionOnChange={
+        !isClient ||
+        !(typeof document !== 'undefined' && 'startViewTransition' in document)
+      }
       {...props}
     >
       {suppressHydrationWarning ? (

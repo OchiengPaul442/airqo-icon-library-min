@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ClientIcon } from '@/components/client-icon';
+import { useIsClient } from '@/hooks/use-is-client';
 import {
   Download,
   X,
@@ -49,6 +50,7 @@ const presetColors = [
 ];
 
 export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
+  const isClient = useIsClient();
   const [color, setColor] = React.useState('#0174DF'); // Default to AirQo blue
   const [size, setSize] = React.useState(24);
   const [activeTab, setActiveTab] = React.useState<TabType>('preview');
@@ -75,15 +77,14 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       generateAndUpdateSvgCode(); // Update SVG code for the 'Code' tab
     }
   }, [size, color, icon, activeTab]); // Dependencies that trigger preview/code update
-
   // Get the actual icon component to extract SVG path data
   const IconComponent = icon
-    ? AirQoIcons[icon.name as keyof typeof AirQoIcons]
-    : null;
-
-  // Improve the SVG generation mechanism for more reliable downloads and copies
+    ? (AirQoIcons[icon.name as keyof typeof AirQoIcons] as React.ComponentType<
+        React.SVGProps<SVGSVGElement>
+      >)
+    : null; // Improve the SVG generation mechanism for more reliable downloads and copies
   const renderIconToCanvas = React.useCallback(() => {
-    if (!icon || !IconComponent) return null;
+    if (!icon || !IconComponent || !isClient) return null;
 
     // Create a temporary div to render the icon
     const tempDiv = document.createElement('div');
@@ -91,20 +92,20 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
     tempDiv.style.top = '-9999px';
     tempDiv.style.left = '-9999px';
     document.body.appendChild(tempDiv);
-
     try {
       // Use React DOM to render the icon to our temporary div
       const root = ReactDOM.createRoot(tempDiv);
 
+      // Use createElement instead of JSX to avoid type issues
       root.render(
-        <IconComponent
-          width={size}
-          height={size}
-          stroke={color}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />,
+        React.createElement(IconComponent as React.ComponentType<any>, {
+          width: size,
+          height: size,
+          stroke: color,
+          fill: 'none',
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+        }),
       );
 
       // Wait for the component to render
@@ -159,11 +160,10 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       document.body.removeChild(tempDiv);
       return null;
     }
-  }, [icon?.name, IconComponent, size, color]);
-
+  }, [icon?.name, IconComponent, size, color, isClient]);
   // Helper function to generate SVG code and update state
   const generateAndUpdateSvgCode = async () => {
-    if (icon) {
+    if (icon && isClient) {
       try {
         const svgCode = await generateSvgString();
         setGeneratedSvgCode(svgCode);
@@ -239,10 +239,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
 
     return svgString;
   };
-
   // Improved download SVG function
   const downloadSVG = async () => {
-    if (!icon) return;
+    if (!icon || !isClient) return;
 
     try {
       // Generate SVG code right before download to ensure it's up to date
@@ -274,10 +273,9 @@ export function IconSheet({ icon, isOpen, onClose }: IconSheetProps) {
       toast.error('Failed to download icon');
     }
   };
-
   // Improved copy SVG function
   const copySVG = async () => {
-    if (!icon) return;
+    if (!icon || !isClient) return;
 
     try {
       // Generate SVG code right before copying to ensure it's up to date

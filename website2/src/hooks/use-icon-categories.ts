@@ -10,16 +10,21 @@ const importIcons = async () => {
     // First try to import from the core package
     const coreModule = await import('@airqo-icons-min/core');
     if (coreModule && coreModule.icons) {
-      icons = Array.from(coreModule.icons);
+      // Convert IconsMap to array of IconMeta
+      icons = Object.values(coreModule.icons);
     } else {
       // Fall back to our local manifest
       const localManifest = await import('../libs/icon-manifest');
-      icons = Array.from(localManifest.icons || []);
+      icons = Array.isArray(localManifest.icons)
+        ? localManifest.icons
+        : Object.values(localManifest.icons || {});
     }
   } catch (error) {
     // Use our local fallback if package import fails
     const localManifest = await import('../libs/icon-manifest');
-    icons = Array.from(localManifest.icons || []);
+    icons = Array.isArray(localManifest.icons)
+      ? localManifest.icons
+      : Object.values(localManifest.icons || {});
   }
 };
 

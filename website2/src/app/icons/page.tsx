@@ -6,6 +6,7 @@ import { IconGrid } from '@/components/icon-grid';
 import { SearchBar } from '@/components/search-bar';
 import { CategoryTabs } from '@/components/category-tabs';
 import { useIconCategories } from '@/hooks/use-icon-categories';
+import { useIsClient } from '@/hooks/use-is-client';
 import { IconMeta } from '@airqo-icons-min/core';
 
 const container = {
@@ -24,6 +25,7 @@ const item = {
 };
 
 export default function IconsPage() {
+  const isClient = useIsClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +46,30 @@ export default function IconsPage() {
   const filteredIcons: IconMeta[] = searchQuery.trim()
     ? searchIcons(searchQuery, selectedCategory)
     : getIconsByCategoryName(selectedCategory);
+  // During server-side rendering, show a simplified placeholder or loading state
+  if (!isClient) {
+    return (
+      <div className="container py-8 md:py-12">
+        <div className="flex flex-col gap-10 md:gap-12">
+          <div className="flex flex-col gap-4">
+            <div className="space-y-1">
+              <h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+                Icons
+              </h1>
+              <p className="text-xl text-muted-foreground">
+                Loading AirQo Icons...
+              </p>
+            </div>
+          </div>
+          <div className="min-h-[600px] flex items-center justify-center">
+            <div className="animate-pulse text-muted-foreground">
+              Loading icons...
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

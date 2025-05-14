@@ -37,7 +37,9 @@ export function IconRenderer({
       return null;
     }
 
-    const Component = AirQoIcons[icon.name as keyof typeof AirQoIcons];
+    const Component = AirQoIcons[
+      icon.name as keyof typeof AirQoIcons
+    ] as React.ComponentType<SVGProps<SVGSVGElement> & SVGRProps>;
 
     if (!Component) {
       console.error(`Icon ${icon.name} not found in @airqo-icons-min/react`);
@@ -95,10 +97,13 @@ export function IconRenderer({
     },
     'aria-label': icon?.name,
   };
-
   if (!IconComponent) {
     return null;
   }
 
-  return <IconComponent {...svgProps} />;
+  // Use type assertion to ensure TypeScript knows IconComponent is a valid React component
+  return React.createElement(
+    IconComponent as React.ComponentType<any>,
+    svgProps,
+  );
 }

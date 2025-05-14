@@ -1,15 +1,18 @@
 import React from 'react';
-
 import { LucideProps } from 'lucide-react';
+import type { IconProps as AirQoIconProps } from '@airqo-icons-min/react/client';
 
 type IconComponentProps = Omit<LucideProps, 'ref'>;
 
+// Union type for icon components from different libraries
 interface ClientIconProps {
   icon:
     | React.FC<IconComponentProps>
     | React.ForwardRefExoticComponent<
         IconComponentProps & React.RefAttributes<SVGSVGElement>
-      >;
+      >
+    | React.ComponentType<AirQoIconProps>
+    | React.ComponentType<React.SVGProps<SVGSVGElement>>;
   className?: string;
   size?: number;
   color?: string;

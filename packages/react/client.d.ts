@@ -1,22 +1,23 @@
 import React from 'react';
-
-// Import IconProps from the local definition
-interface IconBaseProps {
-  size?: string | number;
-  color?: string;
-  stroke?: string;
-  fill?: string;
-  strokeWidth?: string | number;
-}
-
-// Props for SVG icon components with proper TypeScript support
-export type IconProps = IconBaseProps & React.SVGProps<SVGSVGElement>;
+import type { IconProps } from './dist/withIconProps';
 
 // Export the ClientIcon component
-export declare const ClientIcon: React.FC<{
-  icon: React.ComponentType<IconProps>;
-  [key: string]: any;
-}>;
+export declare const ClientIcon: React.FC<
+  {
+    icon: React.ComponentType<IconProps>;
+  } & IconProps
+>;
 
 // Re-export all icons
 export * from './dist/index';
+
+// Export enhanced icons with proper props support
+export declare const icons: Record<string, React.ComponentType<IconProps>>;
+
+// Export the HOC and types
+export { withIconProps } from './dist/withIconProps';
+export type { IconProps };
+
+// Export a default object with all enhanced icons
+declare const enhancedIcons: Record<string, React.ComponentType<IconProps>>;
+export default enhancedIcons;

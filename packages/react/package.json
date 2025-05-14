@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/react",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -22,6 +22,7 @@
     },
     "./client": {
       "types": "./client.d.ts",
+      "import": "./client.js",
       "require": "./client.js"
     },
     "./package.json": "./package.json"
@@ -40,12 +41,14 @@
     "prebuild": "rimraf dist && node scripts/ensure-dist.js",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
+    "build:client": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=client.js --external:react --sourcemap",
+    "build:client:dev": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=client.development.js --define:process.env.NODE_ENV=\\\"development\\\" --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist && node scripts/ensure-types.js",
-    "build": "pnpm run prebuild && pnpm run build:cjs && pnpm run build:esm && pnpm run build:types && node -e \"require('fs').copyFileSync('src/client.tsx', 'dist/client.src.tsx')\"",
+    "build": "pnpm run prebuild && pnpm run build:cjs && pnpm run build:esm && pnpm run build:types && pnpm run build:client && pnpm run build:client:dev",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "1.2.4"
+    "@airqo-icons-min/core": "1.2.5"
   },
   "peerDependencies": {
     "react": "^17 || ^18 || ^19"

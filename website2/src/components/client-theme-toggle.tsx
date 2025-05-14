@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useTheme } from 'next-themes';
 import { Moon, Sun, Laptop, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useIsClient } from '@/hooks/use-is-client';
 
 type ThemeOption = 'light' | 'dark' | 'system';
 
@@ -49,13 +50,9 @@ const ThemeOption = ({ value, current, onSelect }: ThemeOptionProps) => {
 
 export function ClientThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
+  const isClient = useIsClient();
   const [isOpen, setIsOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -79,11 +76,14 @@ export function ClientThemeToggle() {
   const handleToggleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsOpen(!isOpen);
-  };
-  // Set theme and close dropdown
+  }; // Set theme and close dropdown
   const handleThemeSelect = (selectedTheme: ThemeOption) => {
-    // Attempt to use View Transitions API if available
-    if ('startViewTransition' in document) {
+    // Only run transitions on client side
+    if (
+      isClient &&
+      typeof document !== 'undefined' &&
+      'startViewTransition' in document
+    ) {
       const viewTransition = (document as any).startViewTransition(() => {
         setTheme(selectedTheme);
         setIsOpen(false);
@@ -94,8 +94,7 @@ export function ClientThemeToggle() {
       setIsOpen(false);
     }
   };
-
-  if (!mounted) {
+  if (!isClient) {
     return (
       <div className="rounded-md p-2 h-10 w-10 flex items-center justify-center">
         <div className="h-5 w-5" />
