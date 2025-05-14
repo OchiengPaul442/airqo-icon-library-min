@@ -119,7 +119,7 @@ importers:
   packages/react:
     dependencies:
       '@airqo-icons-min/core':
-        specifier: 1.1.1
+        specifier: 1.2.1
         version: link:../core
       react:
         specifier: ^17 || ^18 || ^19
@@ -141,7 +141,7 @@ importers:
   packages/react-native:
     dependencies:
       '@airqo-icons-min/core':
-        specifier: 1.1.1
+        specifier: 1.2.1
         version: link:../core
     devDependencies:
       '@types/react':
@@ -172,7 +172,7 @@ importers:
   packages/vue:
     dependencies:
       '@airqo-icons-min/core':
-        specifier: 1.1.1
+        specifier: 1.2.1
         version: link:../core
     devDependencies:
       '@vitejs/plugin-vue':

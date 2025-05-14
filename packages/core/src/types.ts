@@ -1,7 +1,7 @@
 import * as CSS from 'csstype';
 
 /**
- * Common icon properties that extend the standard SVG props
+ * Common icon properties
  */
 export interface IconBaseProps {
   /**
@@ -48,7 +48,7 @@ export interface IconBaseProps {
 }
 
 /**
- * Type for React Native icons
+ * Extended icon properties with width and height
  */
 export interface IconProps extends IconBaseProps {
   /**
@@ -62,7 +62,20 @@ export interface IconProps extends IconBaseProps {
   height?: string | number;
 }
 
-// Export types explicitly
-export type IconComponent = React.FC<IconProps>;
-export type IconName = string;
-export type IconCategory = string;
+/**
+ * Icon manifest entry type
+ */
+export interface IconManifestEntry {
+  path: string;
+  category: string;
+  componentName: string;
+}
+
+/**
+ * Icon manifest type
+ */
+export interface IconManifest {
+  [key: string]: IconManifestEntry;
+}
+
+export type { CSS };

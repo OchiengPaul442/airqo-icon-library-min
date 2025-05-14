@@ -40,7 +40,7 @@
     "prebuild": "rimraf dist && node scripts/ensure-dist.js",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
-    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist && node scripts/ensure-types.js",
     "build": "pnpm run prebuild && pnpm run build:cjs && pnpm run build:esm && pnpm run build:types && node -e \"require('fs').copyFileSync('src/client.tsx', 'dist/client.src.tsx')\"",
     "clean": "rimraf dist"
   },
