@@ -4,7 +4,8 @@
   "private": false,
   "workspaces": [
     "packages/*",
-    "website"
+    "website",
+    "website2"
   ],
   "scripts": {
     "clean": "pnpm -r run clean",
@@ -29,6 +30,9 @@
     "version:update": "node scripts/update-versions.js",
     "changelog": "node scripts/generate-changelog.js",
     "untrack-generated": "node scripts/untrack-generated-files.js"
+  },
+  "dependencies": {
+    "next": "15.3.1"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
