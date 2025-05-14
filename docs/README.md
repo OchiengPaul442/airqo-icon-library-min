@@ -7,13 +7,12 @@ This directory contains comprehensive documentation for the AirQo Icon Library.
 - [Administrator Deployments](./ADMIN_DEPLOYMENTS.md) - Instructions for setting up secure administrator-only deployments
 - [Contributing Guidelines](./CONTRIBUTING.md) - Guidelines for contributing to the project
 - [Security Policy](./SECURITY.md) - Security practices and vulnerability reporting procedures
-- [Release and Deployment Guide](./RELEASE_AND_DEPLOYMENT.md) - Comprehensive guide for releases and deployments (includes website deployment)
+- [Release and Deployment Guide](./RELEASE_AND_DEPLOYMENT.md) - Comprehensive guide for releases and deployments
 
 ## Quick Links
 
 - [Main README](../README.md) - Overview of the entire project
 - [Package Documentation](../packages/) - Documentation for individual framework implementations
-- [Website Source Code](../website/) - Documentation website source code
 
 ## Directory Structure
 
@@ -29,8 +28,7 @@ airqo-icon-library-min/
 │   ├── react-native/    # React Native components
 │   ├── vue/             # Vue components
 │   └── flutter/         # Flutter assets and code
-├── scripts/             # Build and generation scripts
-└── website/             # Documentation website
+└── scripts/             # Build and generation scripts
 ```
 
 ## Getting Started

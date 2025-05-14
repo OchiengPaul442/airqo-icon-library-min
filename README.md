@@ -7,13 +7,11 @@ A comprehensive, optimized SVG icon library for AirQo projects with support for 
 
 ## 📖 Documentation
 
-Visit our [Documentation Website](https://ochiengpaul442.github.io/airqo-icon-library-min) to browse all available icons and get detailed usage instructions.
-
 ### Project Docs
 
 - [Contributing Guidelines](./docs/CONTRIBUTING.md)
 - [Security Policy](./docs/SECURITY.md)
-- [Release and Deployment Guide](./docs/RELEASE_AND_DEPLOYMENT.md) (includes website deployment)
+- [Release and Deployment Guide](./docs/RELEASE_AND_DEPLOYMENT.md)
 - [Administrator Deployments](./docs/ADMIN_DEPLOYMENTS.md)
 
 ## Features
@@ -120,8 +118,7 @@ airqo-icon-library-min/
 │   ├── react-native/    # React Native components
 │   ├── vue/             # Vue components
 │   └── flutter/         # Flutter assets and code
-├── scripts/             # Build and generation scripts
-└── website/             # Documentation website
+└── scripts/             # Build and generation scripts
 ```
 
 ## Deployment and Release Process

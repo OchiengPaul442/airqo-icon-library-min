@@ -3,22 +3,19 @@
   "version": "1.2.5",
   "private": false,
   "workspaces": [
-    "packages/*",
-    "website2"
+    "packages/*"
   ],
   "scripts": {
     "clean": "pnpm -r run clean",
     "generate": "node scripts/generate-icons.js",
     "enhance-rn": "node scripts/enhance-rn-icons.js",
-    "enhance-rn:safe": "node -e \"console.log('Skipping enhance-rn in CI environment')\"",
     "optimize": "node scripts/optimize-svgs.js",
     "setup": "node scripts/setup-missing-files.js",
-    "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn:safe && pnpm setup",
+    "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn && pnpm setup",
     "build": "pnpm build:core && pnpm build:packages-no-vue",
     "build:core": "cd packages/core && npm run build",
     "build:packages-no-vue": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"{./packages/core}...\" build",
     "build:packages": "pnpm --filter \"./packages/react\" --filter=\"./packages/react-native\" --filter=\"./packages/vue\" --filter=\"{./packages/core}...\" build",
-    "build:website2": "pnpm build && cd website2 && pnpm install --no-frozen-lockfile && pnpm build",
     "fix-component-types": "node scripts/fix-component-types.js",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "pnpm build && tsc --noEmit",
