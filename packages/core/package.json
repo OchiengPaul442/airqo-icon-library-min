@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/core",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -29,7 +29,8 @@
   "scripts": {
     "ensure-dist": "node scripts/ensure-dist.js",
     "prebuild": "rimraf dist && pnpm run generate-icons && npm run ensure-dist",
-    "build": "tsc --emitDeclarationOnly --declaration --declarationDir dist && pnpm run build:esm && pnpm run build:cjs",
+    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
     "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "clean": "rimraf dist",

@@ -63,12 +63,38 @@ export interface IconProps extends IconBaseProps {
 }
 
 /**
+ * Icon metadata
+ */
+export interface IconMeta {
+  /**
+   * Icon name
+   */
+  name: string;
+
+  /**
+   * Icon category
+   */
+  category: string;
+
+  /**
+   * Component name
+   */
+  componentName?: string;
+
+  /**
+   * Original SVG markup
+   */
+  svg?: string;
+}
+
+/**
  * Icon manifest entry type
  */
-export interface IconManifestEntry {
+export interface IconManifestEntry extends IconMeta {
+  /**
+   * Path to the icon file
+   */
   path: string;
-  category: string;
-  componentName: string;
 }
 
 /**
