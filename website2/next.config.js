@@ -1,15 +1,5 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  /* config options here */
-  reactStrictMode: true,
-  webpack(config) {
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    });
-    return config;
-  },
-  transpilePackages: ['@airqo-icons-min/core', '@airqo-icons-min/react'],
-};
+// Import the TypeScript config
+const config = require('./next.config.ts');
 
-module.exports = nextConfig;
+// This file is only needed for compatibility with tools that don't support TypeScript configs yet
+module.exports = config.default;

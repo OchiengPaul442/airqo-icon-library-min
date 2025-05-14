@@ -1,0 +1,13 @@
+{
+  "buildCommand": "bash ./build-website.sh",
+  "outputDirectory": "website2/.next",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "rewrites": [{ "source": "/(.*)", "destination": "/$1" }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
+    }
+  ]
+}
