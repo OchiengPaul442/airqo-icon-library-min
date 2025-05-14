@@ -50,7 +50,7 @@ export interface IconBaseProps {
 /**
  * Type for React Native icons
  */
-export interface IconNativeProps extends IconBaseProps {
+export interface IconProps extends IconBaseProps {
   /**
    * Additional width property (overrides size)
    */
@@ -61,3 +61,8 @@ export interface IconNativeProps extends IconBaseProps {
    */
   height?: string | number;
 }
+
+// Export types explicitly
+export type IconComponent = React.FC<IconProps>;
+export type IconName = string;
+export type IconCategory = string;

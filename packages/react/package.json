@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/react",
-  "version": "1.2.0",
+  "version": "1.1.2",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -37,20 +37,15 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "prebuild": "node scripts/ensure-dist.js",
+    "prebuild": "rimraf dist && node scripts/ensure-dist.js",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
     "build:esm": "esbuild src/index.ts --bundle --platform=neutral --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
-    "build:main:cjs": "esbuild src/main.ts --bundle --platform=node --format=cjs --outfile=dist/main.js --external:react --sourcemap",
-    "build:main:esm": "esbuild src/main.ts --bundle --platform=neutral --format=esm --outfile=dist/main.esm.js --external:react --sourcemap",
-    "build:client:cjs": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=client.js --external:react --sourcemap",
-    "build:client:dev": "esbuild src/client.tsx --bundle --platform=node --format=cjs --outfile=client.development.js --external:react --sourcemap",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
-    "build": "npm run prebuild && npm run build:cjs && npm run build:esm && npm run build:main:cjs && npm run build:main:esm && npm run build:client:cjs && npm run build:client:dev && npm run build:types && npm run verify-types && node -e \"require('fs').copyFileSync('src/client.tsx', 'dist/client.src.tsx')\"",
-    "verify-types": "node scripts/verify-types.js",
+    "build": "pnpm run prebuild && pnpm run build:cjs && pnpm run build:esm && pnpm run build:types && node -e \"require('fs').copyFileSync('src/client.tsx', 'dist/client.src.tsx')\"",
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "1.2.0"
+    "@airqo-icons-min/core": "1.1.1"
   },
   "peerDependencies": {
     "react": "^17 || ^18 || ^19"
@@ -58,7 +53,6 @@
   "devDependencies": {
     "@types/react": "^18.3.20",
     "esbuild": "^0.19.0",
-    "react": "^18.2.0",
     "rimraf": "^5.0.10",
     "typescript": "^5.2.2"
   }
