@@ -11,6 +11,11 @@ const nextConfig = {
     // Resolve aliases for modules
     config.resolve.alias = {
       ...config.resolve.alias,
+      '@airqo-icons-min/react/client': require.resolve(
+        '@airqo-icons-min/react/client',
+      ),
+      'framer-motion': require.resolve('framer-motion'),
+      'lucide-react': require.resolve('lucide-react'),
     };
 
     return config;
