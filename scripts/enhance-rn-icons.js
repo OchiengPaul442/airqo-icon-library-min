@@ -4,7 +4,7 @@
  *
  * This script wraps all React Native icon components with the withIconProps HOC
  * to add size prop support and converts file imports to use the IconComponent type.
- * Enhanced to work in any shell environment.
+ * Enhanced to work in any environment including CI platforms.
  */
 const fs = require('fs');
 const path = require('path');

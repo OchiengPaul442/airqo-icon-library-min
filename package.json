@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "pnpm -r run clean",
     "generate": "node scripts/generate-icons.js",
-    "enhance-rn": "cross-env SHELL=/bin/bash node scripts/enhance-rn-icons.js",
+    "enhance-rn": "node scripts/enhance-rn-icons.js",
     "optimize": "node scripts/optimize-svgs.js",
     "setup": "node scripts/setup-missing-files.js",
     "prebuild": "pnpm clean && pnpm generate && pnpm fix-component-types && pnpm enhance-rn && pnpm setup",

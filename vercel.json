@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bash ./build-website.sh",
+  "buildCommand": "node build.js",
   "outputDirectory": "website2/.next",
   "installCommand": "pnpm install",
   "framework": "nextjs",
