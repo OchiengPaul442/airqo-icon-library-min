@@ -30,10 +30,12 @@
   "scripts": {
     "ensure-dist": "node scripts/ensure-dist.js",
     "prebuild": "rimraf dist && pnpm run generate-icons && npm run ensure-dist",
-    "build": "pnpm run build:types && pnpm run build:esm && pnpm run build:cjs",
-    "build:types": "tsc -p tsconfig.build.json",
-    "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap && tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir dist",
+    "build": "pnpm run build:js && pnpm run build:types && pnpm run ensure-types",
+    "build:js": "pnpm run build:esm && pnpm run build:cjs",
+    "build:types": "tsc --declaration --declarationMap --emitDeclarationOnly --outDir dist",
+    "build:esm": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.esm.js --external:react --sourcemap",
     "build:cjs": "esbuild src/index.ts --bundle --platform=node --format=cjs --outfile=dist/index.js --external:react --sourcemap",
+    "ensure-types": "node -e \"const fs=require('fs');const path=require('path');if(!fs.existsSync(path.join(__dirname,'dist','index.d.ts'))){console.log('Types not found, copying template...');fs.copyFileSync(path.join(__dirname,'index.d.ts.template'),path.join(__dirname,'dist','index.d.ts'));console.log('Types copied from template!');}else{console.log('Types file exists!');}\"",
     "clean": "rimraf dist",
     "generate-icons": "cd ../.. && node scripts/generate-icons.js"
   },

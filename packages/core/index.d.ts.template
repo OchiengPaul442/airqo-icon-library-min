@@ -1,3 +1,7 @@
+// Type definitions for @airqo-icons-min/core
+// This declaration file ensures TypeScript compatibility when importing from @airqo-icons-min/core
+// Generated or used as fallback when automatic type generation fails
+
 import * as CSS from 'csstype';
 
 /**
@@ -9,38 +13,38 @@ export interface IconBaseProps {
    * @default "1em"
    */
   size?: string | number;
-
+  
   /**
    * Icon color
    * @default "currentColor"
    */
   color?: string;
-
+  
   /**
    * Line/stroke color
    */
   stroke?: string;
-
+  
   /**
    * Fill color
    */
   fill?: string;
-
+  
   /**
    * Stroke width
    */
   strokeWidth?: string | number;
-
+  
   /**
    * CSS style object
    */
   style?: CSS.Properties;
-
+  
   /**
    * CSS class name
    */
   className?: string;
-
+  
   /**
    * Title for accessibility
    */
@@ -55,7 +59,7 @@ export interface IconProps extends IconBaseProps {
    * Icon width (overrides size)
    */
   width?: string | number;
-
+  
   /**
    * Icon height (overrides size)
    */
@@ -70,17 +74,17 @@ export interface IconMeta {
    * Icon name
    */
   name: string;
-
+  
   /**
-   * Icon category
+   * Icon category (e.g., "alerts_feedback", "arrows", "charts")
    */
   category: string;
-
+  
   /**
    * Raw SVG content
    */
   svg?: string;
-
+  
   /**
    * Component name in PascalCase
    */
@@ -91,3 +95,14 @@ export interface IconMeta {
  * Map of icon names to their metadata
  */
 export type IconsMap = Record<string, IconMeta>;
+
+/**
+ * Object containing all available icons with their metadata
+ */
+export declare const icons: IconsMap;
+
+/**
+ * Default export of all icons
+ */
+declare const _default: IconsMap;
+export default _default;
