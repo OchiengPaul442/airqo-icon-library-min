@@ -3,7 +3,8 @@
   "version": "1.2.4",
   "private": false,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "website2"
   ],
   "scripts": {
     "clean": "pnpm -r run clean",
