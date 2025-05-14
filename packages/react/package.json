@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/react",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -45,7 +45,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@airqo-icons-min/core": "1.2.1"
+    "@airqo-icons-min/core": "1.2.2"
   },
   "peerDependencies": {
     "react": "^17 || ^18 || ^19"

@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.2 (2025-05-14)
+
+### ��� Features and Improvements
+
+- New release of 1.2.2
+
 ## v1.2.1 (2025-05-14)
 
 ### ��� Features and Improvements
