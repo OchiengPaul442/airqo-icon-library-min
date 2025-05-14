@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      next:
+        specifier: 15.3.1
+        version: 15.3.1(@babel/core@7.27.1)(react-dom@18.3.1)(react@18.3.1)
     devDependencies:
       '@semantic-release/changelog':
         specifier: ^6.0.3
