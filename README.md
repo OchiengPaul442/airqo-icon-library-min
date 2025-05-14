@@ -136,7 +136,7 @@ Package releases are manually triggered by repository maintainers through GitHub
 - Releases are managed via the "Manual Release" GitHub Action
 - Versioning follows semantic versioning (major.minor.patch)
 
-For more details on the release process, see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md).
+For more details on the release process, see [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 
 For more information on secure deployment practices, see [docs/ADMIN_DEPLOYMENTS.md](./docs/ADMIN_DEPLOYMENTS.md)
 
