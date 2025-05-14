@@ -1,6 +1,6 @@
 {
   "name": "@airqo-icons-min/icons",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": false,
   "workspaces": [
     "packages/*",
